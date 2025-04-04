@@ -6,8 +6,15 @@ use JayDream\Lib;
 
 class Model {
     private $connect;
-    private $schema;
+    public $schema;
     private $table;
+
+    private $sql = "";
+    private $sql_order_by = "";
+    private $where_group = false;
+    private $where_group_index = 0;
+
+    private $joins = array();
 
     public  $primary;
     public $autoincrement;
@@ -35,7 +42,7 @@ class Model {
             "join_columns" => array()
         );
 
-        if(!$object["table"]) Lib::error("JlModel construct() : 테이블을 지정해주세요.");
+        if(!$object["table"]) Lib::error("Model construct() : 테이블을 지정해주세요.");
         $this->table =$object["table"];
 
         // 테이블 확인
@@ -47,7 +54,7 @@ class Model {
             array_push($this->schema['tables'], $row['TABLE_NAME']);
         }
 
-        if(!$this->isTable()) Lib::error("JlModel construct() : 테이블을 찾을수 없습니다.");
+        if(!$this->isTable()) Lib::error("Model construct() : 테이블을 찾을수 없습니다.");
 
         // Primary Key 확인
         $primary = $this->getPrimary($this->table);
@@ -59,9 +66,269 @@ class Model {
         if($primary_type == "int" && !$this->autoincrement) Lib::error("Primary 타입이 int인데 autoincrement가 설정되어있지않습니다..");
 
         // 테이블 스키마 정보 조회
-        $this->schema['columns'] = $this->getColumns($this->table);
-        $this->schema['columns_info'] = $this->getColumnsInfo($this->table);
+        $this->schema[$this->table]['columns'] = $this->getColumns($this->table);
+        $this->schema[$this->table]['columns_info'] = $this->getColumnsInfo($this->table);
 
+    }
+
+    function setFilter($obj,$parent = null) {
+        if(isset($obj['where'])) {
+            foreach($obj['where'] as $item) {
+                if($item['column'] == 'primary') $item['column'] = $this->primary;
+
+                if (strpos($item['value'], '$parent.') === 0 && $parent) {
+                    $parts = explode('.', $item['value']);
+                    $this->where($item['column'],$parent[$parts[1]],$item['logical'],$item['operator']);
+                }else {
+                    $this->where($item['column'],$item['value'],$item['logical'],$item['operator']);
+                }
+            }
+        }
+
+        if(isset($obj['between'])) {
+            foreach($obj['between'] as $item) {
+                $this->between($item['column'],$item['start'],$item['end'],$item['logical']);
+            }
+        }
+
+        if(isset($obj['in'])) {
+            foreach($obj['in'] as $item) {
+                $this->in($item['column'],$item['value'],$item['logical']);
+            }
+        }
+
+        if(isset($obj['joins'])) {
+            foreach($obj['joins'] as $item) {
+                $this->join($item);
+            }
+        }
+
+        if(isset($obj['order_by'])) {
+            foreach ($obj['order_by'] as $item) {
+                $this->orderBy($item['column'], $item['value']);
+            }
+        }
+
+        return $this;
+    }
+
+    function count(){
+        $sql = $this->getSql(array("count" => true));
+        $result = mysqli_query($this->connect, $sql);
+        if(!$result) $this->jl->error(mysqli_error($this->connect)."\n $sql");
+
+        $total_count = mysqli_num_rows($result);
+
+        return $total_count ? $total_count : 0;
+    }
+
+    function get($_param = array()) {
+        $page = $_param['page'] ? $_param['page'] : 0;
+        $limit = $_param['limit'] ? $_param['limit'] : 0;
+        $skip  = ($page - 1) * $limit;
+
+        $sql = $this->getSql($_param);
+        if($limit) $sql .= " LIMIT $skip, $limit";
+
+        $object["data"] = array();
+        $object["count"] = $this->count();
+        $object['total_page'] = $limit ? ceil($object["count"] / $limit) : 0;
+        $object["sql"] = $sql;
+
+        $index = 1;
+        $result = mysqli_query($this->connect, $sql);
+        if(!$result) $this->jl->error(mysqli_error($this->connect)."\n $sql");
+
+        while($row = mysqli_fetch_assoc($result)){
+            $row["__no__"] = ($page -1) * $limit + $index;
+            $row["__no_desc__"] = $object['count'] - $index + 1 - (($page -1) * $limit);
+
+            if (isset($_param['add_object']) && is_array($_param['add_object'])) {
+                foreach ($_param['add_object'] as $add_object) {
+                    $row[$add_object['name']] = $add_object['value'];
+                }
+            }
+
+            $row['primary'] = $row[$this->primary];
+            foreach ($row as $key => $value) {
+                if($this->primary == $key) continue;
+                // JSON인지 확인하고 디코딩 시도
+                $decoded_value = json_decode($value, true);
+
+                // JSON 디코딩이 성공했다면 값을 디코딩된 데이터로 변경
+                if (!is_null($decoded_value)) {
+                    $row[$key] = $decoded_value;
+                }
+            }
+            array_push($object["data"], $row);
+            $index++;
+        }
+
+        return $object;
+    }
+
+    function getSql($_param = array()) {
+        $select_field = "$this->table.*";
+        $join_sql = "";
+
+        foreach ($this->joins as $join) {
+            $columns = $this->schema[$join['table']]['columns'];
+            foreach ($join['select_column'] as $column) {
+                if(in_array($column, $columns)) {
+                    $select_field .= ", {$join['table']}.{$column} as {$join['table']}__{$column}";
+                }else {
+                    Lib::error("Model getSql() : {$join['table']}에  {$column}컬럼이 존재하지않습니다.");
+                }
+            }
+
+            $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$join['table']} ON ";
+            $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
+
+            foreach ($join['on'] as $on) {
+                $join_sql .= "{$on['logical']} {$join['table']}.{$on['column']} {$on['operator']} '{$on['value']}' ";
+            }
+        }
+
+        if($_param['count']) $select_field = "{$this->table}.{$this->primary}";
+
+        $sql = "SELECT $select_field FROM {$this->table} AS {$this->table} ";
+        $sql .= $join_sql;
+        $sql .= "WHERE 1 {$this->sql} ";
+        $sql .= isset($this->sql_order_by) && $this->sql_order_by ? " ORDER BY $this->sql_order_by" : " ORDER BY $this->primary DESC";
+
+        return $sql;
+    }
+
+    function join($object) {
+        if(!in_array($object['table'], $this->schema['tables'])) Lib::error("JlModel setJoins() : {$object['table']} 테이블을 찾을수 없습니다.");
+
+        $this->schema[$object['table']]['columns'] = $this->getColumns($object['table']);
+        array_push($this->joins,$object);
+    }
+
+    function orderBy($column,$value) {
+        if (strpos($column, '.') !== false) {
+            list($table, $column) = explode('.', $column);
+        } else {
+            $table = $this->table;
+        }
+        $columns = $this->schema[$table]['columns'];
+
+        if(!in_array($column, $columns)) Lib::error("Model orderBy() : {$table}에  {$column}컬럼이 존재하지않습니다.");
+        if(!in_array($value,array("DESC","ASC"))) Lib::error("Model orderBy() : DESC , ASC 둘중 하나만 선택가능합니다.");
+
+        if($this->sql_order_by) $this->sql_order_by .= ",";
+        $this->sql_order_by .= " {$table}.{$column} {$value}";
+
+        return $this;
+    }
+
+    function where($column,$value,$logical = "AND",$operator = "=") {
+        if (strpos($column, '.') !== false) {
+            list($table, $column) = explode('.', $column);
+        } else {
+            $table = $this->table;
+        }
+        $columns = $this->schema[$table]['columns'];
+
+        if(in_array($column, $columns)){
+            if($value == "") return $this;
+            if($value == "__null__") $value = "";
+
+            if($this->where_group) {
+                if(!$this->where_group_index) $this->where_group_index = 1;
+                else $this->sql .= " $logical ";
+            }else {
+                $this->sql .= " $logical ";
+            }
+
+            if($value == "CURDATE()") $this->sql .= "$table.`{$column}` {$operator} {$value}";
+            else $this->sql .= "$table.`{$column}` {$operator} '{$value}'";
+        }else {
+            Lib::error("Model where() : {$table}에  {$column}컬럼이 존재하지않습니다.");
+        }
+
+        return $this;
+    }
+
+    function between($column,$start,$end,$logical = "AND") {
+        if (strpos($column, '.') !== false) {
+            list($table, $column) = explode('.', $column);
+        } else {
+            $table = $this->table;
+        }
+        $columns = $this->schema[$table]['columns'];
+
+        if(strtolower($column) == "curdate()" || strtolower($column) == "now()" || strtotime($column) !== false) {
+            if(!in_array($start, $columns)) Lib::error("Model between() : start 컬럼이 존재하지않습니다.");
+            if(!in_array($end, $columns)) Lib::error("Model between() : end 컬럼이 존재하지않습니다.");
+            if($this->where_group) {
+                if(!$this->where_group_index) $this->where_group_index = 1;
+                else $this->sql .= " {$logical} ";
+            }else {
+                $this->sql .= " {$logical} ";
+            }
+
+            if(strtotime($column) !== false) $this->sql .= "'$column' ";
+            else $this->sql .= "$column ";
+            $this->sql .= "BETWEEN $table.{$start} AND $table.{$end} ";
+        }else {
+            if(in_array($column, $columns)){
+                if(strpos($start,":") === false) $start .= " 00:00:00";
+                if(strpos($end,":") === false) $end .= " 23:59:59";
+
+                if($this->where_group) {
+                    if(!$this->where_group_index) $this->where_group_index = 1;
+                    else $this->sql .= " {$logical} ";
+                }else {
+                    $this->sql .= " {$logical} ";
+                }
+
+                $this->sql .= "$table.{$column} BETWEEN '{$start}' AND '{$end}' ";
+            }else {
+                Lib::error("Model between() : {$table}에  {$column}컬럼이 존재하지않습니다.");
+            }
+        }
+
+        return $this;
+    }
+
+    function in($column,$value,$logical = "AND") {
+        if (strpos($column, '.') !== false) {
+            list($table, $column) = explode('.', $column);
+        } else {
+            $table = $this->table;
+        }
+        $columns = $this->schema[$table]['columns'];
+
+        if(!is_array($value)) Lib::error("JlModel in() : 비교값이 배열이 아닙니다.");
+
+        if(in_array($column, $columns) && count($value)){
+            if($this->where_group) {
+                if(!$this->where_group_index) $this->where_group_index = 1;
+                else $this->sql .= " $logical ";
+            }else {
+                $this->sql .= " $logical ";
+            }
+
+            $this->sql .= "$table.`{$column}` IN (";
+
+            $bool = false;
+            foreach($value as $v) {
+                if($bool) $this->sql .= ", ";
+                else $bool = true;
+
+                if(is_numeric($v)) $this->sql .= "$v";
+                else $this->sql .= "'$v'";
+
+            }
+
+            $this->sql .= ")";
+        }else {
+            Lib::error("Model in() : {$table}에  {$column}컬럼이 존재하지않습니다.");
+        }
+
+        return $this;
     }
 
     function insert($_param){
@@ -72,11 +339,11 @@ class Model {
             $param[$this->primary] = empty($param[$this->primary]) ? '' : $param[$this->primary];
 
         }else {
-            $param[$this->primary] = empty($param[$this->primary]) ? $this->generatePrimaryKey() : $param[$this->primary];
+            $param[$this->primary] = empty($param[$this->primary]) ? Lib::generateUniqueId() : $param[$this->primary];
         }
 
-        foreach($this->schema['columns'] as $column) {
-            $info = $this->schema['columns_info'][$column];
+        foreach($this->schema[$this->table]['columns'] as $column) {
+            $info = $this->schema[$this->table]['columns_info'][$column];
             $value = $param[$column];
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 
@@ -131,14 +398,14 @@ class Model {
 
         if($param['primary']) $param[$this->primary] = $param['primary'];
 
-        if(!isset($param[$this->primary])) Lib::error("JlModel update() : 고유 키 값이 존재하지 않습니다.");
+        if(!isset($param[$this->primary])) Lib::error("Model update() : 고유 키 값이 존재하지 않습니다.");
 
         $search_sql = " AND $this->primary='{$param[$this->primary]}' ";
 
         foreach($param as $key => $value){
             if($key == "update_date") continue;
-            if(in_array($key, $this->schema['columns'])){
-                $column = $this->schema['columns_info'][$key];
+            if(in_array($key, $this->schema[$this->table]['columns'])){
+                $column = $this->schema[$this->table]['columns_info'][$key];
                 if(!empty($update_sql)) $update_sql .= ", ";
 
                 if($value == "now()") $update_sql .= "`{$key}`={$value}";
@@ -148,7 +415,7 @@ class Model {
             }
         }
 
-        if(in_array("update_date", $this->schema['columns'])){
+        if(in_array("update_date", $this->schema[$this->table]['columns'])){
             $update_sql .= ", `update_date` = now() ";
         }
 
@@ -166,7 +433,7 @@ class Model {
 
         if($param['primary']) $param[$this->primary] = $param['primary'];
 
-        if(!isset($param[$this->primary])) Lib::error("JlModel delete() : 고유 키 값이 존재하지 않습니다.");
+        if(!isset($param[$this->primary])) Lib::error("Model delete() : 고유 키 값이 존재하지 않습니다.");
 
         $search_sql = " AND $this->primary='{$param[$this->primary]}' ";
 
@@ -187,7 +454,7 @@ class Model {
         $result = @mysqli_query($this->connect, $sql);
         if(!$result) Lib::error(mysqli_error($this->connect));
 
-        if(!$row = mysqli_fetch_assoc($result)) Lib::error("JlModel getPrimary($table) : Primary 값이 존재하지않습니다 Primary설정을 확인해주세요.");
+        if(!$row = mysqli_fetch_assoc($result)) Lib::error("Model getPrimary($table) : Primary 값이 존재하지않습니다 Primary설정을 확인해주세요.");
 
         return $row;
     }
@@ -219,10 +486,6 @@ class Model {
         }
 
         return $array;
-    }
-
-    function generatePrimaryKey() {
-        return 'P-' . uniqid() . str_pad(rand(0, 99), 2, "0", STR_PAD_LEFT);
     }
 
     function escape($_param) {

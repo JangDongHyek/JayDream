@@ -16,6 +16,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
             data: function () {
                 return {
                     load : false,
+                    component_name : "<?=$componentName?>",
                     component_idx: "",
 
                     row: {},
@@ -29,12 +30,22 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         class_1 : "",
                         class_2 : "",
                     },
+
+                    filter : {
+                        table : "user",
+
+                        page : 1,
+                        limit : 1,
+                        count : 0,
+                    },
                 };
             },
             async created() {
-                //this.component_idx = this.jl.generateUniqueId();
+                this.component_idx = this.$jd.lib.generateUniqueId();
             },
             async mounted() {
+                //await this.row = this.$getData(this.filter);
+                //await this.$getsData(this.filter,this.rows);
                 this.load = true;
 
                 this.$nextTick(() => {

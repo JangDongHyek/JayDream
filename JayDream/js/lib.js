@@ -154,7 +154,7 @@ class JayDreamLib {
             xhr.responseType = "download" in options ? 'blob' : "json";
 
             let res = null
-            let jl = this;
+            let _this = this;
 
             xhr.onload = function () {
                 res = xhr.response;
@@ -194,7 +194,7 @@ class JayDreamLib {
                         if (!res.success) {
                             let message = res.message + "\n";
 
-                            if(this.jd.dev) {
+                            if(_this.jd.dev) {
                                 if(res.file_0) {
                                     message += `${res.file_0} : ${res.line_0} Line\n`;
                                 }
@@ -208,7 +208,7 @@ class JayDreamLib {
                             reject(new Error(message));
                         }
                     }
-                    console.error(res,method);
+                    _this.log(res,options.component_name,method);
                     resolve(res);
 
                 } else {
@@ -224,5 +224,17 @@ class JayDreamLib {
             xhr.send(form);
 
         });
+    }
+
+    log(obj,name,method,background = "#35495e",color = "white") {
+        if(!this.jd.dev) return false;
+
+        console.group(
+            `%c${name} %c(${method})`,
+            `background: ${background}; color: ${color}; font-weight: bold; font-size: 12px; padding: 5px; border-radius: 1px; margin-left : 10px;`,
+            'color: gray; font-size: 12px; margin-left: 5px;'
+        );
+        console.log(obj);
+        console.groupEnd();
     }
 }

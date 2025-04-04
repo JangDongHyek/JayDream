@@ -134,4 +134,8 @@ class Lib {
 
         return $result;
     }
+
+    public static function generateUniqueId() {
+        return 'P-' . uniqid() . str_pad(rand(0, 99), 2, "0", STR_PAD_LEFT);
+    }
 }
