@@ -109,7 +109,7 @@ class Lib {
      *
      * @param string  $dir_name   탐색할 디렉토리 경로 (상대 또는 절대)
      * @param bool    $dirs       true일 경우 모든 항목을 포함, false일 경우 .php 파일만 포함
-     * @param bool    $root_path  true일 경우 $this->ROOT 경로를 앞에 자동으로 붙임
+     * @param bool    $root_path  true일 경우 Config::$ROOT 경로를 앞에 자동으로 붙임
      * @return array|null         경로 문자열 배열 (파일/디렉토리), 항목이 없으면 null 반환
      */
     public static function getDir($dir_name, $dirs = false, $root_path = true)
@@ -133,6 +133,36 @@ class Lib {
         }
 
         return $result;
+    }
+
+    public static function deleteDir($path) {
+        if($path == "") {
+            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 빈값입니다.");
+        }
+        if($path == Config::$ROOT) {
+            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 루트 디렉토리입니다.");
+        }
+        if(strpos($path,Config::$ROOT) !== false) $dir = $path;
+        else $dir = Config::$ROOT.$path;
+
+
+        if (!file_exists($dir)) {
+            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 존재하지 않습니다.");
+        }
+
+        $files = array_diff(scandir($dir), array('.', '..'));
+
+        foreach ($files as $file) {
+            $filePath = $dir."/".$file;
+
+            if (is_dir($filePath)) {
+                //$this->deleteDir($filePath); // 해당부분은 너무 위험해서 주석처리
+                Lib::error("Jl deleteDir() : 삭제 할려는 폴더안에 폴더가 또 있습니다 폴더부터 지운후 진행해주세요.");
+            } else {
+                unlink($filePath);
+            }
+        }
+        rmdir($dir);
     }
 
     public static function generateUniqueId() {

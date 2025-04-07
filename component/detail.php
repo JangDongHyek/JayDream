@@ -15,6 +15,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
             },
             data: function () {
                 return {
+                    row: {},
+                    rows : [],
+
                     filter : {
                         table : "user",
 
@@ -55,7 +58,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                 foreign : "user_idx",       // payment 테이블의 user_idx
                                 type : "INNER",             // INNER, LEFT, RIGHT
                                 select_column : ["column"], // 조회할 컬럼 payment__column 식으로 as되서 들어간다
-                                on : [
+                                on : [ // 안할거면 삭제해줘야함
                                     {
                                         column : "",        // 해당하는 테이블의 컬럼만 사용해야함
                                         value : "",
@@ -83,14 +86,58 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         relations : [
                             {} // filter 형식으로 똑같이 넣어주면 하위로 들어간다
                         ]
-                    }
+                    },
+
+                    post_options : {
+                        table : "",
+
+                        required : [
+                            {name : "",message : ``}, //simple
+                            {//String
+                                name : "",
+                                message : ``,
+                                min : {length : 10, message : ""},
+                                max : {length : 30, message : ""}
+                            },
+                            {//Array
+                                name : "",
+                                min : {length : 1, message : ""}
+                                max : {length : 10, message : ""}
+                            },
+                        ],
+
+                        href : "",
+
+                        confirm : {
+                            message : '',
+                            callback : async () => { // false 시 실행되는 callback
+
+                            },
+                        },
+
+                        exists : [
+                            {// filter 형식으로 똑같이 넣어주면 하위로 들어간다
+                                message : "",
+                            }
+                        ],
+                    },
+
+                    modal : {
+                        status : false,
+                        load : false,
+                        primary : "",
+                        data : {},
+                        class_1 : "",
+                        class_2 : "",
+                    },
                 };
             },
             async created() {
 
             },
             async mounted() {
-
+                //await this.row = this.$getData(this.filter);
+                //await this.$getsData(this.filter,this.rows);
             },
             updated() {
 
@@ -102,7 +149,14 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             watch: {
-
+                async "modal.status"(value,old_value) {
+                    if(value) {
+                        this.modal.load = true;
+                    }else {
+                        this.modal.load = false;
+                        this.modal.data = {};
+                    }
+                }
             }
         }});
 

@@ -71,6 +71,15 @@ class Model {
 
     }
 
+    function init() {
+        $this->sql = "";
+        $this->sql_order_by = "";
+        $this->where_group = false;
+        $this->where_group_index = 0;
+
+        $this->joins = array();
+    }
+
     function setFilter($obj,$parent = null) {
         if(isset($obj['where'])) {
             foreach($obj['where'] as $item) {
@@ -164,6 +173,8 @@ class Model {
             $index++;
         }
 
+        $this->init();
+
         return $object;
     }
 
@@ -175,7 +186,7 @@ class Model {
             $columns = $this->schema[$join['table']]['columns'];
             foreach ($join['select_column'] as $column) {
                 if(in_array($column, $columns)) {
-                    $select_field .= ", {$join['table']}.{$column} as {$join['table']}__{$column}";
+                    $select_field .= ", {$join['table']}.{$column} as ".'`$'."{$join['table']}__{$column}`";
                 }else {
                     Lib::error("Model getSql() : {$join['table']}에  {$column}컬럼이 존재하지않습니다.");
                 }

@@ -10,15 +10,8 @@ class Service {
         $model = new Model($obj['table']);
 
         $object = $model->setFilter($obj)->get($obj);
-
-        if(isset($obj['relations'])) {
-            foreach ($object["data"] as $index =>$data) {
-                foreach ($obj['relations'] as $filter) {
-                    $sub_model = new Model($filter['table']);
-                    $object["data"][$index]["$".$filter['table']] = $sub_model->setFilter($filter,$data)->get($filter);
-                }
-            }
-        }
+        $ref = &$object;
+        self::resolveRelations($obj,$ref);
 
         return array(
             "data" => $object["data"],
@@ -27,5 +20,23 @@ class Service {
             "sql" => $object["sql"],
             "success" => true
         );
+    }
+
+    private static function resolveRelations($obj,&$object) {
+        if(isset($obj['relations'])) {
+            foreach ($obj['relations'] as $filter) {
+                $model = new Model($filter['table']);
+
+                foreach ($object["data"] as $index =>$data) {
+                    $object["data"][$index]["$".$filter['table']] = $model->setFilter($filter,$data)->get($filter);
+                    $ref = &$object["data"][$index]["$".$filter['table']];
+                    self::resolveRelations($filter,$ref);
+                }
+            }
+        }
+    }
+
+    public static function insert($obj) {
+
     }
 }
