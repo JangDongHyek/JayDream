@@ -127,6 +127,10 @@ class JayDreamLib {
                 }
             }
 
+            if("table" in options) {
+                object['table'] = options['table'];
+            }
+
             let objects = {_method : method};
             objects = this.processObject(objects,object);
 

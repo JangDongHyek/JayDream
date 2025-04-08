@@ -11,7 +11,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
     JayDream_components.push({name : "<?=$componentName?>",object : {
             template: "#<?=$componentName?>-template",
             props: {
-
+                primary : {type : String, default : ""}
             },
             data: function () {
                 return {
@@ -69,6 +69,17 @@ $componentName = str_replace(".php","",basename(__FILE__));
                             }
                         ],
 
+                        groups : {
+                            by : ['idx'],
+                            selects : [
+                                {
+                                    type : "SUM", // 집계함수
+                                    column : "idx",
+                                    as : "total_sum", // 필수값
+                                }
+                            ],
+                        },
+
                         order_by : [
                             {
                                 column : "idx" ,
@@ -81,11 +92,13 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                 name : "",
                                 value : ""
                             },
-                        ]
+                        ],
 
-                        relations : [
-                            {} // filter 형식으로 똑같이 넣어주면 하위로 들어간다
-                        ]
+                        relations : [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
+                            {
+                                table : "",
+                            }
+                        ],
                     },
 
                     post_options : {
@@ -136,8 +149,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             async mounted() {
-                //await this.row = this.$getData(this.filter);
-                //await this.$getsData(this.filter,this.rows);
+                this.row = await this.$getData(this.filter);
+                await this.$getsData(this.filter,this.rows);
             },
             updated() {
 

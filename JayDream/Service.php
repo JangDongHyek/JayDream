@@ -39,4 +39,16 @@ class Service {
     public static function insert($obj) {
 
     }
+
+    public static function delete($obj) {
+        $model = new Model($obj['table']);
+
+        $response = $model->delete($obj);
+
+        return array(
+            "sql" => $response["sql"],
+            "primary" => $response['primary'],
+            "success" => true
+        );
+    }
 }
