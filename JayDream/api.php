@@ -16,6 +16,8 @@ if(!$obj['table']) Lib::error("obj에 테이블이 없습니다.");
 
 if($method == "get") {
     $response = Service::get($obj);
+}else if($method == "insert") {
+    $response = Service::insert($obj);
 }else if($method == "delete" || $method == "remove") {
     $response = Service::delete($obj);
 }

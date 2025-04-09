@@ -20,10 +20,12 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                     filter : {
                         table : "user",
+                        file_db : false,
 
                         page : 1,
                         limit : 1,
                         count : 0,
+
 
                         where : [
                             {
@@ -57,7 +59,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                 base : "idx",               // user 테이블의 idx
                                 foreign : "user_idx",       // payment 테이블의 user_idx
                                 type : "INNER",             // INNER, LEFT, RIGHT
-                                select_column : ["column"], // 조회할 컬럼 payment__column 식으로 as되서 들어간다
+                                select_column : ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다
                                 on : [ // 안할거면 삭제해줘야함
                                     {
                                         column : "",        // 해당하는 테이블의 컬럼만 사용해야함
@@ -69,15 +71,23 @@ $componentName = str_replace(".php","",basename(__FILE__));
                             }
                         ],
 
-                        groups : {
+                        group_bys : {
                             by : ['idx'],
                             selects : [
                                 {
                                     type : "SUM", // 집계함수
-                                    column : "idx",
+                                    column : "idx", // 그룹화 할 컬럼
                                     as : "total_sum", // 필수값
                                 }
                             ],
+                            having : [ // 안할거면 삭제해줘야함
+                                {
+                                    column : "",//as 사용가능, 컬럼으로 사용시 앞에 테이블명시 필수
+                                    value : "",
+                                    logical : "AND",
+                                    operator : "=",
+                                }
+                            ]
                         },
 
                         order_by : [

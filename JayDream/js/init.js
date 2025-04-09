@@ -32,6 +32,7 @@ function vueLoad(app_name) {
     JayDream.alert = JayDream_alert;
     JayDream.lib = new JayDreamLib(JayDream);
     JayDream.plugin = new JayDreamPlugin(JayDream);
+    JayDream.vue = new JayDreamVue();
 
     // Vue 내부에서만 접근 가능하게 설정
     app.config.globalProperties.$jd = JayDream;

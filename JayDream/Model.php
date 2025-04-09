@@ -5,7 +5,6 @@ use JayDream\Config;
 use JayDream\Lib;
 
 class Model {
-    private $connect;
     public $schema;
     private $table;
 
@@ -14,7 +13,8 @@ class Model {
     private $where_group = false;
     private $where_group_index = 0;
 
-    private $joins = array();
+    public $joins = array();
+    public $group_bys = array();
 
     public  $primary;
     public $autoincrement;
@@ -25,16 +25,8 @@ class Model {
             $object = array("table" =>$object);
         }
 
-        //connect전 필수 정보확인
-        if(!Config::HOSTNAME) Lib::error("Model construct() : hostname를 입력해주세요.");
-        if(!Config::USERNAME || Config::USERNAME == "exam") Lib::error("Model construct() : username를 입력해주세요.");
-        if(!Config::PASSWORD || Config::PASSWORD == "pass") Lib::error("Model construct() : password를 입력해주세요.");
-        if(!Config::DATABASE || Config::DATABASE == "exam") Lib::error("Model construct(): database를 입력해주세요.");
+        if(Config::$connect == null) Lib::error("Config init 함수를 실행시켜주세요.");
 
-        $connect = new \mysqli(Config::HOSTNAME, Config::USERNAME, Config::PASSWORD, Config::DATABASE);
-        if ($connect->connect_errno) Lib::error(mysqli_error($this->connect));
-
-        $this->connect = $connect;
 
         $this->schema = array(
             "columns" => array(),
@@ -47,8 +39,8 @@ class Model {
 
         // 테이블 확인
         $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".Config::DATABASE."'";
-        $result = @mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect));
+        $result = @mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect));
 
         while($row = mysqli_fetch_assoc($result)){
             array_push($this->schema['tables'], $row['TABLE_NAME']);
@@ -87,6 +79,7 @@ class Model {
 
                 if (strpos($item['value'], '$parent.') === 0 && $parent) {
                     $parts = explode('.', $item['value']);
+                    if($parent[$parts[1]] == "") Lib::error("setFilter() : 부모에게 $parts[1] 값이 없습니다");
                     $this->where($item['column'],$parent[$parts[1]],$item['logical'],$item['operator']);
                 }else {
                     $this->where($item['column'],$item['value'],$item['logical'],$item['operator']);
@@ -112,6 +105,10 @@ class Model {
             }
         }
 
+        if(isset($obj['group_bys'])) {
+            $this->groupBy($obj['group_bys']);
+        }
+
         if(isset($obj['order_by'])) {
             foreach ($obj['order_by'] as $item) {
                 $this->orderBy($item['column'], $item['value']);
@@ -123,8 +120,8 @@ class Model {
 
     function count(){
         $sql = $this->getSql(array("count" => true));
-        $result = mysqli_query($this->connect, $sql);
-        if(!$result) $this->jl->error(mysqli_error($this->connect)."\n $sql");
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) $this->jl->error(mysqli_error(Config::$connect)."\n $sql");
 
         $total_count = mysqli_num_rows($result);
 
@@ -145,8 +142,8 @@ class Model {
         $object["sql"] = $sql;
 
         $index = 1;
-        $result = mysqli_query($this->connect, $sql);
-        if(!$result) $this->jl->error(mysqli_error($this->connect)."\n $sql");
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) $this->jl->error(mysqli_error(Config::$connect)."\n $sql");
 
         while($row = mysqli_fetch_assoc($result)){
             $row["__no__"] = ($page -1) * $limit + $index;
@@ -202,9 +199,36 @@ class Model {
 
         if($_param['count']) $select_field = "{$this->table}.{$this->primary}";
 
+        $having_sql = "";
+        $group_sql = "";
+        if(!empty($this->group_bys)) {
+            foreach ($this->group_bys['by'] as $by) {
+                if (strpos($by, '.') === false) {
+                    $by = "{$this->table}.{$by}";
+                }
+                if($group_sql == "") $group_sql .= "GROUP BY $by";
+                else $group_sql .= ", $by";
+            }
+
+            foreach ($this->group_bys['selects'] as $select) {
+                if (strpos($select['column'], '.') === false) {
+                    $select['column'] = "{$this->table}.{$select['column']}";
+                }
+                $select_field .= ", {$select['type']}({$select['column']}) AS {$select['as']}";
+            }
+
+            foreach ($this->group_bys['having'] as $having) {
+                $having_sql .= "{$having['logical']} {$having['column']} {$having['operator']} ";
+                if(is_numeric($having['value'])) $having_sql .= $having['value'];
+                else $having_sql .= "'{$having['value']}'";
+            }
+        }
+
         $sql = "SELECT $select_field FROM {$this->table} AS {$this->table} ";
         $sql .= $join_sql;
         $sql .= "WHERE 1 {$this->sql} ";
+        $sql .= $group_sql;
+        if($having_sql) $sql .= " HAVING 1=1 {$having_sql} ";
         $sql .= isset($this->sql_order_by) && $this->sql_order_by ? " ORDER BY $this->sql_order_by" : " ORDER BY $this->primary DESC";
 
         return $sql;
@@ -215,6 +239,10 @@ class Model {
 
         $this->schema[$object['table']]['columns'] = $this->getColumns($object['table']);
         array_push($this->joins,$object);
+    }
+
+    function groupBy($object) {
+        $this->group_bys = $object;
     }
 
     function orderBy($column,$value) {
@@ -392,13 +420,13 @@ class Model {
 
         $sql = "INSERT INTO {$this->table} ($columns) VALUES ($values)";
 
-        $result = mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect)."\n $sql");
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
 
         if($param[$this->primary]) {
             $response = array("sql" => $sql,"primary" => $param[$this->primary]);
         }else {
-            $response = array("sql" => $sql,"primary" => mysqli_insert_id($this->connect));
+            $response = array("sql" => $sql,"primary" => mysqli_insert_id(Config::$connect));
         }
 
         return $response;
@@ -432,8 +460,8 @@ class Model {
 
         $sql = "UPDATE {$this->table} SET $update_sql WHERE 1 $search_sql";
 
-        $result = mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect)."\n $sql");
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
@@ -450,8 +478,8 @@ class Model {
 
         $sql = "DELETE FROM {$this->table} WHERE 1 $search_sql ";
 
-        $result = mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect)."\n $sql");
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
@@ -462,8 +490,8 @@ class Model {
 
     function getPrimary($table) {
         $sql = "SELECT COLUMN_NAME, EXTRA,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".Config::DATABASE."' AND TABLE_NAME = '{$table}' AND COLUMN_KEY = 'PRI';";
-        $result = @mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect));
+        $result = @mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect));
 
         if(!$row = mysqli_fetch_assoc($result)) Lib::error("Model getPrimary($table) : Primary 값이 존재하지않습니다 Primary설정을 확인해주세요.");
 
@@ -474,8 +502,8 @@ class Model {
         $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::DATABASE."' ";
         $array = array();
 
-        $result = @mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect));
+        $result = @mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect));
 
         while($row = mysqli_fetch_assoc($result)){
             $array[$row['COLUMN_NAME']] = $row;
@@ -489,8 +517,8 @@ class Model {
         $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::DATABASE."' ";
         $array = array();
 
-        $result = @mysqli_query($this->connect, $sql);
-        if(!$result) Lib::error(mysqli_error($this->connect));
+        $result = @mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect));
 
         while($row = mysqli_fetch_assoc($result)){
             array_push($array, $row['COLUMN_NAME']);
@@ -506,7 +534,7 @@ class Model {
             if (is_object($value)) $value = Lib::jsonEncode($value);
             if (is_bool($value)) $value = $value ? "true" : "false";
 
-            $param[$key] = mysqli_real_escape_string($this->connect, $value);
+            $param[$key] = mysqli_real_escape_string(Config::$connect, $value);
         }
         return $param;
     }

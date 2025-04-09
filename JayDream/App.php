@@ -49,6 +49,7 @@ class App {
             echo "<script src='".Config::$URL."/JayDream/js/prototypes.js'></script>";
             echo "<script src='".Config::$URL."/JayDream/js/lib.js'></script>";
             echo "<script src='".Config::$URL."/JayDream/js/plugin.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/vue.js'></script>";
             self::$JS_LOAD = true;
             echo "<script>";
             echo "</script>";

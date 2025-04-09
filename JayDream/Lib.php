@@ -168,4 +168,20 @@ class Lib {
     public static function generateUniqueId() {
         return 'P-' . uniqid() . str_pad(rand(0, 99), 2, "0", STR_PAD_LEFT);
     }
+
+    public static function getPermission($path) {
+        if (strpos($path, Config::$ROOT) === false) {
+            $path = Config::$ROOT . $path;
+        }
+
+        $permissions = fileperms($path);
+
+        if ($permissions === false) {
+            Lib::error("getPermission() : 권한을 확인할 수 없습니다. 경로가 올바른지 확인하세요.");
+        }
+
+        // 권한 비트를 추출하여 8진수 문자열로 변환
+        return substr(sprintf('%o', $permissions & 0777), -4); // 4자리 8진수 문자열 반환
+    }
+
 }
