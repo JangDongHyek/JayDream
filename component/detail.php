@@ -1,157 +1,65 @@
 <?php
-$componentName = str_replace(".php","",basename(__FILE__));
+$componentName = str_replace(".php", "", basename(__FILE__));
 ?>
-<script type="text/x-template" id="<?=$componentName?>-template">
+<script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
-
+        <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')">
     </div>
 </script>
 
 <script>
-    JayDream_components.push({name : "<?=$componentName?>",object : {
+    JayDream_components.push({
+        name: "<?=$componentName?>", object: {
             template: "#<?=$componentName?>-template",
             props: {
-                primary : {type : String, default : ""}
+                primary: {type: String, default: ""}
             },
             data: function () {
                 return {
                     row: {},
-                    rows : [],
+                    rows: [],
 
-                    filter : {
-                        table : "user",
-                        file_db : false,
+                    post_options: {
+                        table: "",
 
-                        page : 1,
-                        limit : 1,
-                        count : 0,
-
-
-                        where : [
-                            {
-                                column : "",            // join 조건시 user.idx
-                                value : "",             // LIKE일시 %% 필수 || relations일시  $parent.idx
-                                logical : "AND",        // AND,OR,AND NOT
-                                operator : "=",         // = ,!= >= <=, LIKE,
-                            }
-                        ],
-
-                        between : [
-                            {
-                                column : "CURDATE()",   // 컬럼 || 함수
-                                start : "column",       // 시간 || 컬럼
-                                end: "column",          // 시간 || 컬럼
-                                logical : "AND",
-                            }
-                        ],
-
-                        in : [
-                            {
-                                column : "",
-                                value : [],
-                                logical : "AND"
-                            }
-                        ],
-
-                        joins : [
-                            {
-                                table : "payment",
-                                base : "idx",               // user 테이블의 idx
-                                foreign : "user_idx",       // payment 테이블의 user_idx
-                                type : "INNER",             // INNER, LEFT, RIGHT
-                                select_column : ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다
-                                on : [ // 안할거면 삭제해줘야함
-                                    {
-                                        column : "",        // 해당하는 테이블의 컬럼만 사용해야함
-                                        value : "",
-                                        logical : "AND",
-                                        operator : "=",
-                                    }
-                                ]
-                            }
-                        ],
-
-                        group_bys : {
-                            by : ['idx'],
-                            selects : [
-                                {
-                                    type : "SUM", // 집계함수
-                                    column : "idx", // 그룹화 할 컬럼
-                                    as : "total_sum", // 필수값
-                                }
-                            ],
-                            having : [ // 안할거면 삭제해줘야함
-                                {
-                                    column : "",//as 사용가능, 컬럼으로 사용시 앞에 테이블명시 필수
-                                    value : "",
-                                    logical : "AND",
-                                    operator : "=",
-                                }
-                            ]
-                        },
-
-                        order_by : [
-                            {
-                                column : "idx" ,
-                                value : "DESC"
-                            },
-                        ],
-
-                        add_object : [
-                            {
-                                name : "",
-                                value : ""
-                            },
-                        ],
-
-                        relations : [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
-                            {
-                                table : "",
-                            }
-                        ],
-                    },
-
-                    post_options : {
-                        table : "",
-
-                        required : [
-                            {name : "",message : ``}, //simple
+                        required: [
+                            {name: "", message: ``}, //simple
                             {//String
-                                name : "",
-                                message : ``,
-                                min : {length : 10, message : ""},
-                                max : {length : 30, message : ""}
+                                name: "",
+                                message: ``,
+                                min: {length: 10, message: ""},
+                                max: {length: 30, message: ""}
                             },
                             {//Array
-                                name : "",
-                                min : {length : 1, message : ""}
-                                max : {length : 10, message : ""}
+                                name: "",
+                                min: {length: 1, message: ""}
+                                max: {length: 10, message: ""}
                             },
                         ],
 
-                        href : "",
+                        href: "",
 
-                        confirm : {
-                            message : '',
-                            callback : async () => { // false 시 실행되는 callback
+                        confirm: {
+                            message: '',
+                            callback: async () => { // false 시 실행되는 callback
 
                             },
                         },
 
-                        exists : [
+                        exists: [
                             {// filter 형식으로 똑같이 넣어주면 하위로 들어간다
-                                message : "",
+                                message: "",
                             }
                         ],
                     },
 
-                    modal : {
-                        status : false,
-                        load : false,
-                        primary : "",
-                        data : {},
-                        class_1 : "",
-                        class_2 : "",
+                    modal: {
+                        status: false,
+                        load: false,
+                        primary: "",
+                        data: {},
+                        class_1: "",
+                        class_2: "",
                     },
                 };
             },
@@ -160,28 +68,121 @@ $componentName = str_replace(".php","",basename(__FILE__));
             },
             async mounted() {
                 this.row = await this.$getData(this.filter);
-                await this.$getsData(this.filter,this.rows);
+                await this.$getsData(this.filter, this.rows);
             },
             updated() {
 
             },
-            methods: {
-
-            },
+            methods: {},
             computed: {
+                filter() {
+                    let filter = {
+                        table: "user",
+                        file_db: true, // 연관된 파일들 불러옴
 
+                        page: 1,
+                        limit: 1,
+                        count: 0,
+
+
+                        where: [
+                            {
+                                column: "",            // join 조건시 user.idx
+                                value: "",             // LIKE일시 %% 필수 || relations일시  $parent.idx
+                                logical: "AND",        // AND,OR,AND NOT
+                                operator: "=",         // = ,!= >= <=, LIKE,
+                            }
+                        ],
+
+                        between: [
+                            {
+                                column: "CURDATE()",   // 컬럼 || 함수
+                                start: "column",       // 시간 || 컬럼
+                                end: "column",          // 시간 || 컬럼
+                                logical: "AND",
+                            }
+                        ],
+
+                        in: [
+                            {
+                                column: "",
+                                value: [],
+                                logical: "AND"
+                            }
+                        ],
+
+                        joins: [
+                            {
+                                table: "payment",
+                                base: "idx",               // 갑 테이블의 연결 key
+                                foreign: "idx",            // 을 테이블의 연결 key
+                                type: "INNER",             // INNER, LEFT, RIGHT
+                                select_column: ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다
+                                on: [ // 안할거면 삭제해줘야함
+                                    {
+                                        column: "",        // 해당하는 테이블의 컬럼만 사용해야함
+                                        value: "",
+                                        logical: "AND",
+                                        operator: "=",
+                                    }
+                                ]
+                            }
+                        ],
+
+                        group_bys: {
+                            by: ['idx'],
+                            selects: [
+                                {
+                                    type: "SUM", // 집계함수
+                                    column: "idx", // 그룹화 할 컬럼
+                                    as: "total_sum", // 필수값
+                                }
+                            ],
+                            having: [ // 안할거면 삭제해줘야함
+                                {
+                                    column: "",//as 사용가능, 컬럼으로 사용시 앞에 테이블명시 필수
+                                    value: "",
+                                    logical: "AND",
+                                    operator: "=",
+                                }
+                            ]
+                        },
+
+                        order_by: [
+                            {
+                                column: "idx",
+                                value: "DESC"
+                            },
+                        ],
+
+                        add_object: [
+                            {
+                                name: "",
+                                value: ""
+                            },
+                        ],
+
+                        relations: [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
+                            {
+                                table: "",
+                            }
+                        ],
+                    };
+                    return filter
+                }
             },
             watch: {
-                async "modal.status"(value,old_value) {
-                    if(value) {
+                async "modal.status"(value, old_value) {
+                    if (value) {
                         this.modal.load = true;
-                    }else {
+                    } else {
                         this.modal.load = false;
                         this.modal.data = {};
                     }
                 }
             }
-        }});
+        }
+    });
 
 </script>
 

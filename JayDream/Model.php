@@ -73,6 +73,12 @@ class Model {
     }
 
     function setFilter($obj,$parent = null) {
+        if(isset($obj['joins'])) {
+            foreach($obj['joins'] as $item) {
+                $this->join($item);
+            }
+        }
+
         if(isset($obj['where'])) {
             foreach($obj['where'] as $item) {
                 if($item['column'] == 'primary') $item['column'] = $this->primary;
@@ -96,12 +102,6 @@ class Model {
         if(isset($obj['in'])) {
             foreach($obj['in'] as $item) {
                 $this->in($item['column'],$item['value'],$item['logical']);
-            }
-        }
-
-        if(isset($obj['joins'])) {
-            foreach($obj['joins'] as $item) {
-                $this->join($item);
             }
         }
 
@@ -181,13 +181,20 @@ class Model {
 
         foreach ($this->joins as $join) {
             $columns = $this->schema[$join['table']]['columns'];
-            foreach ($join['select_column'] as $column) {
-                if(in_array($column, $columns)) {
+            if($join['select_column'] == "*") {
+                foreach ($columns as $column) {
                     $select_field .= ", {$join['table']}.{$column} as ".'`$'."{$join['table']}__{$column}`";
-                }else {
-                    Lib::error("Model getSql() : {$join['table']}에  {$column}컬럼이 존재하지않습니다.");
+                }
+            }else {
+                foreach ($join['select_column'] as $column) {
+                    if(in_array($column, $columns)) {
+                        $select_field .= ", {$join['table']}.{$column} as ".'`$'."{$join['table']}__{$column}`";
+                    }else {
+                        Lib::error("Model getSql() : {$join['table']}에  {$column}컬럼이 존재하지않습니다.");
+                    }
                 }
             }
+
 
             $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$join['table']} ON ";
             $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
