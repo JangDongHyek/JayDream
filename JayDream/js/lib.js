@@ -13,7 +13,7 @@ class JayDreamLib {
         return timestamp + randomPart; // 15자 (동일한 밀리세컨드안에 주문이 들어갈경우 중복될 확률 1퍼)
     }
 
-    processObject(objs,obj) {
+    processObject(objs,obj,name) {
         objs = this.copyObject(objs);
         obj = this.copyObject(obj);
 
@@ -39,7 +39,7 @@ class JayDreamLib {
             }
         }
 
-        objs.obj = JSON.stringify(obj);
+        objs[name] = JSON.stringify(obj);
         return objs;
     }
 
@@ -120,21 +120,11 @@ class JayDreamLib {
                 }
             }
 
-            if("updated" in options) {
-                for (let i = 0; i < options.updated.length; i++) {
-                    let updated = options.updated[i];
-                    object[updated.key] = updated.value;
-                }
-            }
-
-            if("table" in options) {
-                object['table'] = options['table'];
-            }
-
             let objects = {_method : method};
-            objects = this.processObject(objects,object);
+            objects = this.processObject(objects,object,'obj');
+            objects = this.processObject(objects,options,'options');
 
-
+            console.log(objects)
 
             //form 으로 데이터가공
             let form = new FormData();
@@ -150,6 +140,8 @@ class JayDreamLib {
 
                 }
             }
+
+            console.log(form);
 
             // 통신부분
             var xhr = new XMLHttpRequest();

@@ -4,31 +4,26 @@ namespace JayDream;
 
 use JayDream\Lib;
 use JayDream\Model;
+use Firebase\JWT\JWT;
 
 class Config
 {
     public static $DEV = false;
-    private static $DEV_IPS = ["121.140.204.65", "112.160.220.208"];
     public static $ROOT = "";
     public static $URL = "";
     public static $connect = null;
 
+    private static $DEV_IPS = ["121.140.204.65", "112.160.220.208"];
 
     const HOSTNAME = "localhost";
     const DATABASE = "exam";
     const USERNAME = "exam";
-    const PASSWORD = "password";
+    const PASSWORD = "pass";
+
+    const COOKIE_TIME = 7200;
 
     const ALERT = "origin"; // origin , swal
-    const ENCRYPT = "mb_5";
-
-    const CAPTCHA_PATTERN = "number";
-    const FONT = "GowunBatang-Bold.ttf";
-    const FONTSIZE = "24";
-
-    const KAKAO_CLIENT_ID = "";
-    const NAVER_CLIENT_ID = "";
-    const NAVER_CLIENT_SECRET = "";
+    const ENCRYPT = "mb_5"; // mb_5,sha256,sha512,hmac;
 
     public static function init()
     {
@@ -47,6 +42,7 @@ class Config
             $host = preg_replace('/:[0-9]+$/', '', $host);
         self::$URL = $http . $host . $user;
 
+        //폴더 권한체크
         if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");
 
         // 파일관련 테이블 생성

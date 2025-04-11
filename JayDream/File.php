@@ -49,5 +49,28 @@ class File {
             'rename'        => $savedName
         ];
     }
+
+    public static function delete($data) {
+        // 파일이 존재하면 삭제
+        if (file_exists($data['path'])) {
+            unlink($data['path']); // 파일 삭제
+        } else {
+            Lib::error("File > delete() : 파일이 존재하지않습니다.");
+        }
+
+        $parentDir = dirname($data['path']);
+
+        // 디렉토리가 비어있는지 확인 후 삭제
+        if (is_dir($parentDir)) {
+            $files = scandir($parentDir);
+            $files = array_diff($files, array('.', '..')); // 현재/상위 디렉토리 제외
+
+            if (empty($files)) {
+                rmdir($parentDir); // 디렉토리 비어있으면 삭제
+            } else {
+                Lib::error("File > delete() : 디렉토리안에 파일이 존재해 폴더 삭제를 중단합니다.");
+            }
+        }
+    }
 }
 ?>

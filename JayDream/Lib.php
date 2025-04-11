@@ -2,6 +2,10 @@
 namespace JayDream;
 
 use JayDream\Config;
+use Firebase\JWT\JWT;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
+use Firebase\JWT\BeforeValidException;
 
 class Lib {
     public static function error($msg) {
@@ -69,6 +73,26 @@ class Lib {
 
         return $obj;
     }
+
+    public static function jwtDecode($token) {
+        try {
+            $jwt = JWT::decode($token, Config::PASSWORD, array('HS256'));
+            if ($jwt->iss !== Config::$URL) {
+                Lib::error("JWT 발급자가 동일하지않습니다.");
+            }
+            return $jwt;
+        }catch (ExpiredException $e) {
+            Lib::error("JWT 만료됨");
+        } catch (SignatureInvalidException $e) {
+            Lib::error("JWT 서명 오류");
+        } catch (BeforeValidException $e) {
+            Lib::error("JWT 사용 가능 시간 전");
+        } catch (\Exception $e) {
+            Lib::error("JWT 디코딩 오류: " . $e->getMessage());
+        }
+    }
+
+
 
     public static function getClientIP() {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -182,6 +206,20 @@ class Lib {
 
         // 권한 비트를 추출하여 8진수 문자열로 변환
         return substr(sprintf('%o', $permissions & 0777), -4); // 4자리 8진수 문자열 반환
+    }
+
+    public static function encrypt($value) {
+        switch (Config::ENCRYPT) {
+            case 'sha256':
+                return hash('sha256', $value);
+            case 'sha512':
+                return hash('sha512', $value);
+            case 'hmac':
+                $secret = Config::PASSWORD;
+                return hash_hmac('sha256', $value, $secret);
+            default:
+                return md5($value);
+        }
     }
 
 }

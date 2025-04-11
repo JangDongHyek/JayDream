@@ -4,6 +4,9 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
         <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')">
+
+        <button @click="$postData(row,options)">테스트</button>
+        <button @click="$deleteData(row,options)">삭제</button>
     </div>
 </script>
 
@@ -18,40 +21,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 return {
                     row: {},
                     rows: [],
-
-                    post_options: {
-                        table: "",
-
-                        required: [
-                            {name: "", message: ``}, //simple
-                            {//String
-                                name: "",
-                                message: ``,
-                                min: {length: 10, message: ""},
-                                max: {length: 30, message: ""}
-                            },
-                            {//Array
-                                name: "",
-                                min: {length: 1, message: ""}
-                                max: {length: 10, message: ""}
-                            },
-                        ],
-
-                        href: "",
-
-                        confirm: {
-                            message: '',
-                            callback: async () => { // false 시 실행되는 callback
-
-                            },
-                        },
-
-                        exists: [
-                            {// filter 형식으로 똑같이 넣어주면 하위로 들어간다
-                                message: "",
-                            }
-                        ],
-                    },
 
                     modal: {
                         status: false,
@@ -75,6 +44,45 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             },
             methods: {},
             computed: {
+                options() {
+                    let options = {
+                        table: "", // post || delete
+
+                        required: [ // post
+                            {name: "", message: ``}, //simple
+                            {//String
+                                name: "",
+                                message: ``,
+                                min: {length: 10, message: ""},
+                                max: {length: 30, message: ""}
+                            },
+                            {//Array
+                                name: "",
+                                min: {length: 1, message: ""}
+                                max: {length: 10, message: ""}
+                            },
+                        ],
+
+                        href: "", // post || delete
+                        message : "", // delete
+
+                        confirm: { // post
+                            message: '',
+                            callback: async () => { // false 시 실행되는 callback
+
+                            },
+                        },
+
+                        exists: [ // post * 필터방식
+                            {
+                                table : "",
+                                message: "",
+                            }
+                        ],
+                    }
+
+                    return options
+                },
                 filter() {
                     let filter = {
                         table: "user",
@@ -83,7 +91,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         page: 1,
                         limit: 1,
                         count: 0,
-
 
                         where: [
                             {
@@ -169,7 +176,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         ],
                     };
                     return filter
-                }
+                },
             },
             watch: {
                 async "modal.status"(value, old_value) {

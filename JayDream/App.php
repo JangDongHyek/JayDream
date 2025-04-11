@@ -3,11 +3,27 @@ namespace JayDream;
 
 use JayDream\Config;
 use JayDream\Lib;
+use Firebase\JWT\JWT;
 
 class App {
     public static $JS_LOAD = false;
     public static $VUE_LOAD = false;
     public static $PLUGINS = array();
+
+    function __construct() {
+        // JWT 쿠키 생성
+        if(empty($_COOKIE['jd_jwt_token'])) {
+            $payload = array(
+                "iss" => Config::$URL,
+                "sub" => "api:access",
+                "iat" => time(),
+                "exp" => time() + Config::COOKIE_TIME,
+            );
+
+            $jwt = JWT::encode($payload, Config::PASSWORD);
+            setcookie("jd_jwt_token",$jwt,time() + Config::COOKIE_TIME,"/","",false,true);
+        }
+    }
 
     function vueLoad($app_name = "app",$plugin = array()) {
         if(!self::$VUE_LOAD) {

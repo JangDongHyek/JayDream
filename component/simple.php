@@ -43,14 +43,16 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             computed: {
-                filter() {
-                    let filter = {
+                options() {
+                    return {
                         table : "",
-
                     }
-
-                    return filter;
-                }
+                },
+                filter() {
+                    return {
+                        table : "",
+                    }
+                },
             },
             watch: {
 

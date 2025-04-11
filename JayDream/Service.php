@@ -6,22 +6,20 @@ use JayDream\Lib;
 use JayDream\Model;
 
 class Service {
-    public static function get($obj) {
-        $model = new Model($obj['table']);
-
-        if($obj['file_db'] == "true") self::injectFileRelation($obj);
+    public static function get($filter) {
+        $model = new Model($filter['table']);
 
         //연관된 파일 가져오는
+        if($filter['file_db'] == "true") self::injectFileRelation($filter);
 
-
-        $object = $model->setFilter($obj)->get($obj);
+        $object = $model->setFilter($filter)->get($filter);
         $ref = &$object;
-        self::resolveRelations($obj,$ref);
+        self::resolveRelations($filter,$ref);
 
         return array(
             "data" => $object["data"],
             "count" => $object["count"],
-            "filter" => $obj,
+            "filter" => $filter,
             "sql" => $object["sql"],
             "success" => true
         );
@@ -69,13 +67,13 @@ class Service {
         }
     }
 
-    public static function insert($obj) {
-        $model = new Model($obj['table']);
+    public static function insert($obj,$options) {
+        $model = new Model($options['table']);
         $file_model = new Model("jd_file");
         $response = $model->insert($obj);
 
         foreach ($_FILES as $key => $file) {
-            $file_response = File::save($file,$obj['table'],$response['primary']);
+            $file_response = File::save($file,$options['table'],$response['primary']);
             $file_response['keyword'] = $key;
             $file_model->insert($file_response);
         }
@@ -86,12 +84,47 @@ class Service {
         return $response;
     }
 
-    public static function delete($obj) {
-        $model = new Model($obj['table']);
+    public static function update($obj,$options) {
+        $model = new Model($options['table']);
+        $file_model = new Model("jd_file");
+        $response = $model->update($obj);
+
+        foreach ($_FILES as $key => $file) {
+            $file_response = File::save($file,$options['table'],$response['primary']);
+            $file_response['keyword'] = $key;
+            $file_model->insert($file_response);
+        }
+
+        $response['success'] = true;
+        $response['trace'] = true;
+
+        return $response;
+    }
+
+    public static function delete($obj,$options) {
+        $model = new Model($options['table']);
+        $file_model = new Model("jd_file");
 
         $response = $model->delete($obj);
+
+        $file_data = $file_model->where("table_name",$options['table'])->where("table_primary",$response['primary'])->get()['data'];
+        foreach ($file_data as $d) {
+            File::delete($d);
+            $file_model->delete($d);
+        }
+
         $response['success'] = true;
 
         return $response;
+    }
+
+    public static function exists($filters) {
+        foreach ($filters as $filter) {
+            $model = new Model($filter['table']);
+
+            $count = $model->setFilter($filter)->get($filter)['count'];
+
+            if($count) Lib::error($filter['message']);
+        }
     }
 }
