@@ -7,6 +7,13 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
         <button @click="$postData(row,options)">테스트</button>
         <button @click="$deleteData(row,options)">삭제</button>
+
+        <!-- plugin -->
+        <plugin-innopay ref="innopay" :pay_core="pay_core">
+            <template v-slot:default>
+                <button @click="$refs.innopay.pay()">결제</button>
+            </template>
+        </plugin-innopay>
     </div>
 </script>
 
@@ -30,61 +37,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         class_1: "",
                         class_2: "",
                     },
-                };
-            },
-            async created() {
 
-            },
-            async mounted() {
-                this.row = await this.$getData(this.filter);
-                await this.$getsData(this.filter, this.rows);
-            },
-            updated() {
-
-            },
-            methods: {},
-            computed: {
-                options() {
-                    let options = {
-                        table: "", // post || delete
-
-                        required: [ // post
-                            {name: "", message: ``}, //simple
-                            {//String
-                                name: "",
-                                message: ``,
-                                min: {length: 10, message: ""},
-                                max: {length: 30, message: ""}
-                            },
-                            {//Array
-                                name: "",
-                                min: {length: 1, message: ""}
-                                max: {length: 10, message: ""}
-                            },
-                        ],
-
-                        href: "", // post || delete
-                        message : "", // delete
-
-                        confirm: { // post
-                            message: '',
-                            callback: async () => { // false 시 실행되는 callback
-
-                            },
-                        },
-
-                        exists: [ // post * 필터방식
-                            {
-                                table : "",
-                                message: "",
-                            }
-                        ],
-                    }
-
-                    return options
-                },
-                filter() {
-                    let filter = {
+                    filter : {
                         table: "user",
                         file_db: true, // 연관된 파일들 불러옴
 
@@ -174,7 +128,71 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 table: "",
                             }
                         ],
-                    };
+                    },
+
+                    options : {
+                        table: "", // post || delete
+
+                        required: [ // post
+                            {name: "", message: ``}, //simple
+                            {//String
+                                name: "",
+                                message: ``,
+                                min: {length: 10, message: ""},
+                                max: {length: 30, message: ""}
+                            },
+                            {//Array
+                                name: "",
+                                min: {length: 1, message: ""}
+                                max: {length: 10, message: ""}
+                            },
+                        ],
+
+                        href: "", // post || delete
+                        message : "", // delete
+
+                        confirm: { // post
+                            message: '',
+                            callback: async () => { // false 시 실행되는 callback
+
+                            },
+                        },
+
+                        hashes : [ // post * 대입방식 row[alias] 값이 암호화되서 row[column]에 대입된다
+                            {
+                                column : "",
+                                alias : "",
+                            }
+                        ],
+
+                        exists: [ // post * 필터방식
+                            {
+                                table : "",
+                                message: "",
+                            }
+                        ],
+                    },
+                };
+            },
+            async created() {
+
+            },
+            async mounted() {
+                this.row = await this.$getData(this.filter);
+                await this.$getsData(this.filter, this.rows);
+            },
+            updated() {
+
+            },
+            methods: {},
+            computed: {
+                options() {
+                    let options =
+
+                    return options
+                },
+                filter() {
+                    let filter =
                     return filter
                 },
             },

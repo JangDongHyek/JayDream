@@ -3,8 +3,6 @@
 namespace JayDream;
 
 use JayDream\Lib;
-use JayDream\Model;
-use Firebase\JWT\JWT;
 
 class Config
 {

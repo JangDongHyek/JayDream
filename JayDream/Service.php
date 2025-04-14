@@ -72,9 +72,9 @@ class Service {
         $file_model = new Model("jd_file");
         $response = $model->insert($obj);
 
-        foreach ($_FILES as $key => $file) {
+        foreach (File::normalize($_FILES) as  $file) {
             $file_response = File::save($file,$options['table'],$response['primary']);
-            $file_response['keyword'] = $key;
+            $file_response['keyword'] = $file['keyword'];
             $file_model->insert($file_response);
         }
 
@@ -89,9 +89,9 @@ class Service {
         $file_model = new Model("jd_file");
         $response = $model->update($obj);
 
-        foreach ($_FILES as $key => $file) {
+        foreach (File::normalize($_FILES) as  $file) {
             $file_response = File::save($file,$options['table'],$response['primary']);
-            $file_response['keyword'] = $key;
+            $file_response['keyword'] = $file['keyword'];
             $file_model->insert($file_response);
         }
 
@@ -116,6 +116,12 @@ class Service {
         $response['success'] = true;
 
         return $response;
+    }
+
+    public static function hashes($hashes,&$obj) {
+        foreach ($hashes as $hash) {
+            $obj[$hash['column']] = Lib::encrypt($obj[$hash['alias']]);
+        }
     }
 
     public static function exists($filters) {

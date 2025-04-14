@@ -1,5 +1,9 @@
 class JayDreamVue {
     commonFile(files,obj,key,permission) {
+        if (files.length > 1 && !Array.isArray(obj[key])) {
+            obj[key] = [];
+        }
+
         if(Array.isArray(obj[key])) {
             for (let i = 0; i < files.length; i++) {
                 var file = files[i];

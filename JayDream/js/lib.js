@@ -7,6 +7,10 @@ class JayDreamLib {
         return /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
+    async alert(message, options = {}) {
+        await this.jd.plugin.alert(message, options);
+    }
+
     generateUniqueId() {
         const timestamp = Date.now().toString(); // 현재 시간을 밀리초 단위로 문자열로 변환 * 13자
         const randomPart = Math.floor(Math.random() * 100).toString(); // 2자리 랜덤 숫자 생성
@@ -124,8 +128,6 @@ class JayDreamLib {
             objects = this.processObject(objects,object,'obj');
             objects = this.processObject(objects,options,'options');
 
-            console.log(objects)
-
             //form 으로 데이터가공
             let form = new FormData();
             for (let i in objects) {
@@ -140,8 +142,6 @@ class JayDreamLib {
 
                 }
             }
-
-            console.log(form);
 
             // 통신부분
             var xhr = new XMLHttpRequest();

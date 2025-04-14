@@ -27,7 +27,7 @@ class File {
         $filename = pathinfo($originalName, PATHINFO_FILENAME);
 
         // 저장 파일명 중복 방지로 고유값 사용
-        $savedName = $primary. '.' . $ext;
+        $savedName = Lib::generateUniqueId() . '.' . $ext;
 
         // 최종 저장 경로
         $targetPath = $basePath . '/' . $savedName;
@@ -67,10 +67,53 @@ class File {
 
             if (empty($files)) {
                 rmdir($parentDir); // 디렉토리 비어있으면 삭제
-            } else {
-                Lib::error("File > delete() : 디렉토리안에 파일이 존재해 폴더 삭제를 중단합니다.");
             }
         }
+    }
+
+    public static function normalize($files) {
+        $normalized = [];
+
+        foreach ($files as $field => $data) {
+            // 유효하지 않은 데이터 무시
+            if (
+                empty($data) ||
+                !isset($data['name']) ||
+                (is_array($data['name']) && count(array_filter($data['name'])) === 0) ||
+                (is_string($data['name']) && trim($data['name']) === '')
+            ) {
+                continue;
+            }
+
+            // 단일 파일일 경우
+            if (is_string($data['name'])) {
+                $normalized[] = [
+                    'name'     => $data['name'],
+                    'type'     => $data['type'],
+                    'tmp_name' => $data['tmp_name'],
+                    'error'    => $data['error'],
+                    'size'     => $data['size'],
+                    'keyword'    => $field, // 폼의 input name 추적용 (선택)
+                ];
+            }
+            // 복수 파일일 경우
+            else {
+                foreach ($data['name'] as $i => $name) {
+                    if (trim($name) === '') continue;
+
+                    $normalized[] = [
+                        'name'     => $data['name'][$i],
+                        'type'     => $data['type'][$i],
+                        'tmp_name' => $data['tmp_name'][$i],
+                        'error'    => $data['error'][$i],
+                        'size'     => $data['size'][$i],
+                        'keyword'    => $field, // 어떤 필드에서 왔는지 추적 가능
+                    ];
+                }
+            }
+        }
+
+        return $normalized;
     }
 }
 ?>
