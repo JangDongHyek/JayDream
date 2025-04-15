@@ -52,7 +52,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 value: "",             // LIKE일시 %% 필수 || relations일시  $parent.idx
                                 logical: "AND",        // AND,OR,AND NOT
                                 operator: "=",         // = ,!= >= <=, LIKE,
-                            }
+                            },
                         ],
 
                         between: [
@@ -61,7 +61,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 start: "column",       // 시간 || 컬럼
                                 end: "column",          // 시간 || 컬럼
                                 logical: "AND",
-                            }
+                            },
                         ],
 
                         in: [
@@ -69,7 +69,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 column: "",
                                 value: [],
                                 logical: "AND"
-                            }
+                            },
                         ],
 
                         joins: [
@@ -85,9 +85,9 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                         value: "",
                                         logical: "AND",
                                         operator: "=",
-                                    }
+                                    },
                                 ]
-                            }
+                            },
                         ],
 
                         group_bys: {
@@ -97,7 +97,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                     type: "SUM", // 집계함수
                                     column: "idx", // 그룹화 할 컬럼
                                     as: "total_sum", // 필수값
-                                }
+                                },
                             ],
                             having: [ // 안할거면 삭제해줘야함
                                 {
@@ -105,7 +105,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                     value: "",
                                     logical: "AND",
                                     operator: "=",
-                                }
+                                },
                             ]
                         },
 
