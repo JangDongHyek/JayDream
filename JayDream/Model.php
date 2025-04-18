@@ -210,9 +210,6 @@ class Model {
         $group_sql = "";
         if(!empty($this->group_bys)) {
             foreach ($this->group_bys['by'] as $by) {
-                if (strpos($by, '.') === false) {
-                    $by = "{$this->table}.{$by}";
-                }
                 if($group_sql == "") $group_sql .= "GROUP BY $by";
                 else $group_sql .= ", $by";
             }

@@ -92,7 +92,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         ],
 
                         group_bys: {
-                            by: ['idx'], // 그룹화 할 컬럼
+                            by: ['user.idx'], // 그룹화 할 컬럼 * 앞에 테이블명시는 필수
                             selects: [
                                 {
                                     type: "SUM", // 집계함수
