@@ -390,6 +390,14 @@ class Model {
 
         foreach($this->schema[$this->table]['columns'] as $column) {
             $info = $this->schema[$this->table]['columns_info'][$column];
+
+            //보낸 데이터에서 해당 값이없는데 null설정이 되어있다면 건너뛰게
+            if (!array_key_exists($column, $param)) {
+                if ($info['IS_NULLABLE'] == "YES") {
+                    continue;
+                }
+            }
+
             $value = $param[$column];
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 

@@ -1,4 +1,9 @@
 class JayDreamVue {
+    onNumber(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, ""); // 숫자 이외 제거
+        value.value = e.target.value;
+    }
+
     commonFile(files,obj,key,permission) {
         if (files.length > 1 && !Array.isArray(obj[key])) {
             obj[key] = [];

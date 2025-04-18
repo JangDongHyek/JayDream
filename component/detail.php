@@ -4,6 +4,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
         <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')">
+        <input type="text" @input="$jd.vue.onInput"> <!-- 숫자만 입력가능하게 -->
 
         <button @click="$postData(row,options)">테스트</button>
         <button @click="$deleteData(row,options)">삭제</button>
@@ -91,11 +92,11 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         ],
 
                         group_bys: {
-                            by: ['idx'],
+                            by: ['idx'], // 그룹화 할 컬럼
                             selects: [
                                 {
                                     type: "SUM", // 집계함수
-                                    column: "idx", // 그룹화 할 컬럼
+                                    column: "idx", // 집계함수 할 컬럼
                                     as: "total_sum", // 필수값
                                 },
                             ],

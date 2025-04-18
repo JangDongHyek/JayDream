@@ -21,6 +21,10 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                     row: {},
                     rows : [],
+
+                    filter : {
+                        table: "user",
+                    }
                 };
             },
             async created() {
