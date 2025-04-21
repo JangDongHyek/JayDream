@@ -136,6 +136,41 @@ function vueLoad(app_name) {
         }
     }
 
+    app.config.globalProperties.$whereUpdateData = async function(update_column,options = {}) {
+        let url = "/JayDream/api.php";
+        options.component_name = this.component_name;
+        try {
+            if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
+
+            if("confirm" in options) {
+                if(!await this.$jd.plugin.confirm(options.confirm.message)) {
+                    if(options.confirm.callback) {
+                        await options.confirm.callback()
+                    }else {
+                        return false;
+                    }
+                }
+            }
+
+            if(options.url) url = options.url;
+
+            let res = await this.$jd.lib.ajax("where_update", update_column, url,options);
+
+            if(options.return) return res
+
+            if(options.callback) {
+                await options.callback(res)
+            }else {
+                await this.$jd.plugin.alert("완료되었습니다.");
+
+                if(options.href) window.location.href = options.href;
+                else window.location.reload();
+            }
+        }catch (e) {
+            await this.$jd.plugin.alert(e.message)
+        }
+    }
+
 
     app.mount(`#${app_name}`); // 특정 DOM에 마운트
     JayDream_vue.push({ app_name, app }); // 배열에 앱 인스턴스 저장

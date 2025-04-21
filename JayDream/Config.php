@@ -75,7 +75,7 @@ class Config
         }
     }
 
-    private static function existsTable($tableName)
+    public static function existsTable($tableName)
     {
         $escapedTable = self::$connect->real_escape_string($tableName);
         $result = self::$connect->query("SHOW TABLES LIKE '{$escapedTable}'");
@@ -83,7 +83,7 @@ class Config
         return $result && $result->num_rows > 0;
     }
 
-    private static function createTableFromSchema($tableName, $schema)
+    public static function createTableFromSchema($tableName, $schema)
     {
         $columns = [];
         $primaryKey = '';

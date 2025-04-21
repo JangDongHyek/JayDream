@@ -13,7 +13,14 @@ $componentName = str_replace(".php","",basename(__FILE__));
             template: "#<?=$componentName?>-template",
             props: {
                 primary : {type : String, default : ""},
-                pay_core : {type : Object, default : {}},
+                pay_core : {type : Object, default : {
+                        payMethod : "",
+                        goodsName : "",
+                        amt : "",
+                        buyerName : "",
+                        buyerTel : "",
+                        buyerEmail : "",
+                    }},
             },
             data: function () {
                 return {
@@ -27,14 +34,14 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         // 지불수단 (간편결제,계좌간편,가상계좌,계좌이체,NONE,신용카드(일반),해외카드결제)
                         //         (EPAY   ,EBANK  ,VBANK  ,BANK   ,NONE,CARD         ,OPCARD)
                         payMethod : "",
-                        mid : "testpay01m", // 상점 아이디
+                        mid : "", // 상점 아이디
                         moid : this.$jd.lib.generateUniqueId(), // 주문 번호 6~40 소문자, 대문자, 숫자, -, _ 값 만으로 충분히 랜덤한 값을 만들어주세요.
                         goodsName : "", // 상품명
                         amt : "", // 거래금액 (과세금액) 면세금액은 taxFreeAmt에 넣어 주세요. ※ 총 결제금액 = amt + taxFreeAmt
                         buyerName : "", // 구매자 이름
                         buyerTel : "", // 구매자 연락처 * 숫자만 입력
                         buyerEmail : "", // 구매자 이메일
-                        returnUrl : `${this.$jd.url}/`, // 가맹점 인증 완료 페이지 주소
+                        returnUrl : window.location.href, // 가맹점 인증 완료 페이지 주소
                         currency : "KRW", // 결제 통화 (KRW,USD)
                         //선택//
                         taxFreeAmt : "", // 면세 금액
@@ -56,8 +63,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 this.component_idx = this.$jd.lib.generateUniqueId();
             },
             async mounted() {
-                //this.row = await this.$getData(this.filter);
-                //await this.$getsData(this.filter,this.rows);
+                this.init();
+
+
 
                 this.load = true;
 
@@ -69,6 +77,48 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             methods: {
+                async init() {
+                    try {
+                        // 설정값
+                        let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/api.php",{});
+                        this.row.mid = res.mid;
+
+                        const url = new URL(window.location.href)
+
+                        const paymentToken = url.searchParams.get("paymentToken")
+                        const tid = url.searchParams.get("tid")
+                        const mid = url.searchParams.get("mid")
+                        const amt = url.searchParams.get("amt")
+                        const taxFreeAmt = url.searchParams.get("taxFreeAmt")
+                        const moid = url.searchParams.get("moid")
+
+                        // 결제요청을 한 상태라면 결제승인요청보내기
+                        if(paymentToken) {
+                            const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/pay`, {
+                                method: "POST",
+                                headers: {
+                                    "Payment-Token": paymentToken,
+                                    "Merchant-Key": res.merchantKey,
+                                    "Content-Type": "application/json; charset=utf-8"
+                                },
+                                body: JSON.stringify({tid, mid, amt, taxFreeAmt, moid})
+                            })
+
+                            const result = await resp.json()
+                            if(result.success) {
+                                // 결과값 로그테이블에 저장
+                                await this.$postData(result.data,{table:'jd_plugin_innopay_log',return : true});
+
+                                //결제성공시 로직
+                                this.$emit('paySuccess');
+                            }else {
+                                await this.$jd.lib.alert(result.error.message)
+                            }
+                        }
+                    }catch (e) {
+                        await this.$jd.lib.alert(e.message)
+                    }
+                },
                 async pay() {
                     if(!this.pay_data.payMethod) {
                         await this.$jd.lib.alert("결제 타입이 없습니다.");

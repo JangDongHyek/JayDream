@@ -10,7 +10,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <button @click="$deleteData(row,options)">삭제</button>
 
         <!-- plugin -->
-        <plugin-innopay ref="innopay" :pay_core="pay_core">
+        <plugin-innopay ref="innopay" :pay_core="pay_core" @paySuccess="">
             <template v-slot:default>
                 <button @click="$refs.innopay.pay()">결제</button>
             </template>
@@ -185,7 +185,23 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             updated() {
 
             },
-            methods: {},
+            methods: {
+                async restApi() {
+                    let row = {};
+
+                    let options = {
+                        table : ""
+                    }
+
+                    try {
+                        let res = await this.$jd.lib.ajax("method",row,"/JayDream/api.php",options);
+
+
+                    }catch (e) {
+                        await this.$jd.lib.alert(e.message)
+                    }
+                }
+            },
             computed: {
                 options() {
                     let options =

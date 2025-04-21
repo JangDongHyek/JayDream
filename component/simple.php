@@ -2,8 +2,12 @@
 $componentName = str_replace(".php","",basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?=$componentName?>-template">
-    <div v-if="load">
+    <div>
+        <div v-if="load">
 
+        </div>
+
+        <div v-if="!load"></div>
     </div>
 </script>
 

@@ -478,6 +478,37 @@ class Model {
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
 
+    function whereUpdate($_param){
+        $param = $this->escape($_param);
+
+        if($param['primary']) $param[$this->primary] = $param['primary'];
+
+        foreach($param as $key => $value){
+            if($key == "update_date") continue;
+            if(in_array($key, $this->schema[$this->table]['columns'])){
+                $column = $this->schema[$this->table]['columns_info'][$key];
+                if(!empty($update_sql)) $update_sql .= ", ";
+
+                if($value == "now()") $update_sql .= "`{$key}`={$value}";
+                else if($column['DATA_TYPE'] == 'int' && $value == 'incr') $update_sql = "`{$key}`={$key}+1";
+                else if($column['DATA_TYPE'] == 'int' && $value == 'decr') $update_sql = "`{$key}`={$key}-1";
+                else $update_sql .= "`{$key}`='{$value}'";
+            }
+        }
+
+        if(in_array("update_date", $this->schema[$this->table]['columns'])){
+            $update_sql .= ", `update_date` = now() ";
+        }
+
+        $sql = "UPDATE {$this->table} SET $update_sql";
+        $sql .= "WHERE 1 {$this->sql} ";
+
+        $result = mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
+
+        return array("sql" => $sql,"primary" => $param[$this->primary]);
+    }
+
     function delete($_param){
 
         $param = $this->escape($_param);

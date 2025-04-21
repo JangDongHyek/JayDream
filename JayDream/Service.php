@@ -101,6 +101,17 @@ class Service {
         return $response;
     }
 
+    public static function whereUpdate($obj,$options) {
+        $model = new Model($options['table']);
+        $model->setFilter($options);
+        $response = $model->whereUpdate($obj);
+
+        $response['success'] = true;
+        $response['trace'] = true;
+
+        return $response;
+    }
+
     public static function delete($obj,$options) {
         $model = new Model($options['table']);
         $file_model = new Model("jd_file");

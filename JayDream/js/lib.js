@@ -237,4 +237,9 @@ class JayDreamLib {
         console.log(obj);
         console.groupEnd();
     }
+
+    href(url) {
+        url = url.substring(1);
+        window.location.href = `${this.jd.url}/${url}`;
+    }
 }
