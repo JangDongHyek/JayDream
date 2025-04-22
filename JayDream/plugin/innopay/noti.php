@@ -1,8 +1,12 @@
 <?php
 require_once __DIR__ . '/../../require.php';
-
 use JayDream\Config;
+use JayDream\Model;
 
+if (!Config::existsTable("jd_plugin_innopay_noti")) {
+    $schema = require __DIR__ . '/../../schema/jd_plugin_innopay_noti.php';
+    Config::createTableFromSchema("jd_plugin_innopay_noti",$schema);
+}
 /*******************************************************************************
  * FILE NAME : InnopayPgNoti_PHP.php
  * DATE : 2015.03.18
@@ -14,11 +18,7 @@ use JayDream\Config;
 
 /**********************************************************************************/
 //이부분에 로그파일 경로를 수정해주세요.
-$LogPath = Config::resourcePath()."/plugin/innopay/log";
-// 디렉토리 없으면 생성
-if (!is_dir($LogPath)) {
-    mkdir($LogPath, 0755, true);
-}
+$LogPath = __DIR__;
 /**********************************************************************************/
 
 
@@ -244,6 +244,11 @@ if($status == '85'){
 
 fwrite( $logfile,"************************************************");
 fclose( $logfile );
+
+//노티 테이블에 데이터 삽입
+$data = array_merge($_GET, $_POST);
+$model = new Model("jd_plugin_innopay_noti");
+$model->insert($data);
 
 //************************************************************************************
 

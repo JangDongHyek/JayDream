@@ -13,6 +13,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
             template: "#<?=$componentName?>-template",
             props: {
                 primary : {type : String, default : ""},
+                mb_no : {type : String, default : ""},
                 pay_core : {type : Object, default : {
                         payMethod : "",
                         goodsName : "",
@@ -94,6 +95,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                         // 결제요청을 한 상태라면 결제승인요청보내기
                         if(paymentToken) {
+                            this.load = false;
                             const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/pay`, {
                                 method: "POST",
                                 headers: {
@@ -105,12 +107,28 @@ $componentName = str_replace(".php","",basename(__FILE__));
                             })
 
                             const result = await resp.json()
+                            this.load = true;
                             if(result.success) {
                                 // 결과값 로그테이블에 저장
-                                await this.$postData(result.data,{table:'jd_plugin_innopay_log',return : true});
+                                await this.$postData(result.data,{table:'jd_plugin_innopay',return : true});
 
-                                //결제성공시 로직
-                                this.$emit('paySuccess');
+                                if(result.data.payMethod == "VBANK") {
+                                    await this.$jd.lib.alert(`
+                                    은행 : ${result.data.virtualAccount.bankName}\n
+                                    계좌 : ${result.data.virtualAccount.accountNumber}\n
+                                    금액 : ${item.$jd_plugin_innopay__amt.format()}원\n
+                                    입금시 자동으로 결제완료로 변경됩니다\n
+                                    월 명세서에서 다시 확인하실 수 있습니다.
+                                    `);
+
+                                    this.$jd.lib.href("/app/pay1.php");
+                                }else {
+                                    //결제성공시 로직
+                                    this.$emit('paySuccess');
+                                }
+
+
+
                             }else {
                                 await this.$jd.lib.alert(result.error.message)
                             }

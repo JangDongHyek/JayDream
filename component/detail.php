@@ -79,7 +79,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 base: "idx",               // 갑 테이블의 연결 key
                                 foreign: "idx",            // 을 테이블의 연결 key
                                 type: "INNER",             // INNER, LEFT, RIGHT
-                                select_column: ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다
+                                select_column: ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다 || "*"
                                 on: [ // 안할거면 삭제해줘야함
                                     {
                                         column: "",        // 해당하는 테이블의 컬럼만 사용해야함
