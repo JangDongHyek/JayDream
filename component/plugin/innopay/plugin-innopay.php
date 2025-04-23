@@ -14,6 +14,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
             props: {
                 primary : {type : String, default : ""},
                 mb_no : {type : String, default : ""},
+                redirect_url : {type : String, default : ""},
                 pay_core : {type : Object, default : {
                         payMethod : "",
                         goodsName : "",
@@ -29,6 +30,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     component_name : "<?=$componentName?>",
                     component_idx: "",
 
+                    merchantKey : "",
+
                     row: {
                         // JayDream/plugin/innopay/noti.php 파일 사이트에서 노티 설정해줘야함
                         //필수//
@@ -42,7 +45,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         buyerName : "", // 구매자 이름
                         buyerTel : "", // 구매자 연락처 * 숫자만 입력
                         buyerEmail : "", // 구매자 이메일
-                        returnUrl : window.location.href, // 가맹점 인증 완료 페이지 주소
+                        returnUrl : window.location.href, // 가맹점 인증 완료 페이지 주소 #jd 고정값
                         currency : "KRW", // 결제 통화 (KRW,USD)
                         //선택//
                         taxFreeAmt : "", // 면세 금액
@@ -78,61 +81,68 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             methods: {
+                async payRequest() {
+                    const url = new URL(window.location.href)
+
+                    const paymentToken = url.searchParams.get("paymentToken")
+                    const tid = url.searchParams.get("tid")
+                    const mid = url.searchParams.get("mid")
+                    const amt = url.searchParams.get("amt")
+                    const taxFreeAmt = url.searchParams.get("taxFreeAmt")
+                    const moid = url.searchParams.get("moid")
+
+                    // 결제요청을 한 상태라면 결제승인요청보내기
+                    if(paymentToken) {
+                        this.load = false;
+                        const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/pay`, {
+                            method: "POST",
+                            headers: {
+                                "Payment-Token": paymentToken,
+                                "Merchant-Key": this.merchantKey,
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: JSON.stringify({tid, mid, amt, taxFreeAmt, moid})
+                        })
+
+                        const result = await resp.json()
+                        this.load = true;
+                        if(result.success) {
+                            // 결과값 로그테이블에 저장
+                            await this.$postData(result.data,{table:'jd_plugin_innopay',return : true});
+
+                            await this.$postData({
+                                mb_no : this.mb_no,
+                                mb_name : this.pay_data.buyerName,
+                                tid : result.data.tid
+                            },{table:"g5_pay_list",return : true});
+
+                            if(result.data.payMethod == "VBANK") {
+                                await this.$jd.lib.alert(`
+                                    은행 : ${result.data.virtualAccount.bankName}\n
+                                    계좌 : ${result.data.virtualAccount.accountNumber}\n
+                                    금액 : ${item.$jd_plugin_innopay__amt.format()}원\n
+                                    입금시 자동으로 결제완료로 변경됩니다\n
+                                    `);
+
+                                this.$jd.lib.href("/app/pay1.php");
+                            }else {
+                                //결제성공시 로직
+                                this.$emit('paySuccess');
+                            }
+
+                        }else {
+                            await this.$jd.lib.alert(result.error.message)
+                        }
+                    }
+                },
                 async init() {
                     try {
                         // 설정값
                         let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/api.php",{});
                         this.row.mid = res.mid;
+                        this.merchantKey = res.merchantKey;
 
-                        const url = new URL(window.location.href)
-
-                        const paymentToken = url.searchParams.get("paymentToken")
-                        const tid = url.searchParams.get("tid")
-                        const mid = url.searchParams.get("mid")
-                        const amt = url.searchParams.get("amt")
-                        const taxFreeAmt = url.searchParams.get("taxFreeAmt")
-                        const moid = url.searchParams.get("moid")
-
-                        // 결제요청을 한 상태라면 결제승인요청보내기
-                        if(paymentToken) {
-                            this.load = false;
-                            const resp = await fetch(`https://api.innopay.co.kr/v1/transactions/pay`, {
-                                method: "POST",
-                                headers: {
-                                    "Payment-Token": paymentToken,
-                                    "Merchant-Key": res.merchantKey,
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify({tid, mid, amt, taxFreeAmt, moid})
-                            })
-
-                            const result = await resp.json()
-                            this.load = true;
-                            if(result.success) {
-                                // 결과값 로그테이블에 저장
-                                await this.$postData(result.data,{table:'jd_plugin_innopay',return : true});
-
-                                if(result.data.payMethod == "VBANK") {
-                                    await this.$jd.lib.alert(`
-                                    은행 : ${result.data.virtualAccount.bankName}\n
-                                    계좌 : ${result.data.virtualAccount.accountNumber}\n
-                                    금액 : ${item.$jd_plugin_innopay__amt.format()}원\n
-                                    입금시 자동으로 결제완료로 변경됩니다\n
-                                    월 명세서에서 다시 확인하실 수 있습니다.
-                                    `);
-
-                                    this.$jd.lib.href("/app/pay1.php");
-                                }else {
-                                    //결제성공시 로직
-                                    this.$emit('paySuccess');
-                                }
-
-
-
-                            }else {
-                                await this.$jd.lib.alert(result.error.message)
-                            }
-                        }
+                        await this.payRequest();
                     }catch (e) {
                         await this.$jd.lib.alert(e.message)
                     }

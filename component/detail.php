@@ -10,7 +10,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <button @click="$deleteData(row,options)">삭제</button>
 
         <!-- plugin -->
-        <plugin-innopay ref="innopay" :pay_core="pay_core" @paySuccess="">
+        <plugin-innopay ref="innopay" :pay_core="pay_core" @paySuccess="" redirect_url="/index.php">
             <template v-slot:default>
                 <button @click="$refs.innopay.pay()">결제</button>
             </template>
