@@ -138,7 +138,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 async init() {
                     try {
                         // 설정값
-                        let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/api.php",{});
+                        let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/plugin/innopay/api.php",{});
                         this.row.mid = res.mid;
                         this.merchantKey = res.merchantKey;
 

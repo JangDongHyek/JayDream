@@ -54,13 +54,6 @@ switch ($method) {
         $response = Service::delete($obj,$options);
         break;
 
-    case "innopay" :
-        if (!Config::existsTable("jd_plugin_innopay")) {
-            $schema = require __DIR__ . '/schema/jd_plugin_innopay.php';
-            Config::createTableFromSchema("jd_plugin_innopay",$schema);
-        }
-        $response = require __DIR__ . '/plugin/innopay/config.php';
-        break;
 }
 
 echo Lib::jsonEncode($response);
