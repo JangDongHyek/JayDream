@@ -10,11 +10,31 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <button @click="$deleteData(row,options)">삭제</button>
 
         <!-- plugin -->
-        <plugin-innopay ref="innopay" :pay_core="pay_core" @paySuccess="" redirect_url="/index.php">
+        <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="" redirect_url="/index.php">
             <template v-slot:default>
-                <button @click="$refs.innopay.pay()">결제</button>
+                <button @click="$refs.pluginInnopay.pay()">결제</button>
             </template>
         </plugin-innopay>
+
+        <!-- ref로 접근해 taxInvoice()함수 실행해야함 -->
+        <plugin-barobill-tax-invoice ref="pluginBarobillTaxInvocue"></plugin-barobill-tax-invoice>
+
+        <!-- external -->
+        <external-bs-modal v-model="modal">
+            <template v-slot:header>
+
+            </template>
+
+            <!-- body -->
+            <template v-slot:default>
+                <external-daum-postcode v-model="row" field1="Addr1" @close="modal.status = false;"></external-daum-postcode>
+            </template>
+
+
+            <template v-slot:footer>
+
+            </template>
+        </external-bs-modal>
     </div>
 </script>
 
@@ -214,7 +234,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 },
             },
             watch: {
-                async "modal.status"(value, old_value) {
+                async "object.key"(value, old_value) {
                     if (value) {
                         this.modal.load = true;
                     } else {

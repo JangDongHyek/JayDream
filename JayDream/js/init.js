@@ -66,7 +66,7 @@ function vueLoad(app_name) {
             }else {
                 await this.$jd.plugin.alert("완료되었습니다.");
 
-                if(options.href) window.location.href = options.href;
+                if(options.href) window.location.href = JayDream.url + options.href;
                 else window.location.reload();
             }
         }catch (e) {
@@ -128,7 +128,7 @@ function vueLoad(app_name) {
                 await options.callback(res)
             }else {
                 await this.$jd.plugin.alert("완료되었습니다.");
-                if(options.href) window.location.href = options.href;
+                if(options.href) window.location.href = JayDream.url + options.href;
                 else window.location.reload();
             }
         }catch (e) {
@@ -163,7 +163,7 @@ function vueLoad(app_name) {
             }else {
                 await this.$jd.plugin.alert("완료되었습니다.");
 
-                if(options.href) window.location.href = options.href;
+                if(options.href) window.location.href = JayDream.url + options.href;
                 else window.location.reload();
             }
         }catch (e) {
