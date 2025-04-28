@@ -102,8 +102,8 @@ class App {
 
         if(in_array('summernote',$plugins)) {
             if(!in_array("summernote",self::$PLUGINS)) {
-                echo '<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.css" rel="stylesheet">';
-                echo '<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.js"></script>';
+                echo '<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">';
+                echo '<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>';
                 array_push(self::$PLUGINS,"summernote");
             }
         }
