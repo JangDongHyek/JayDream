@@ -5,7 +5,7 @@ use JayDream\Lib;
 use JayDream\Config;
 
 class File {
-    public static function save($file, $table, $primary) {
+    public static function save($file, $table, $primary = "") {
         // 유효성 체크
         if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
             Lib::error("업로드된 파일이 유효하지 않습니다.");

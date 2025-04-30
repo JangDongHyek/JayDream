@@ -3,11 +3,9 @@ require_once __DIR__ . '/require.php';
 
 use JayDream\Lib;
 use JayDream\Service;
-use JayDream\Config;
 
 if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.");
 $jwt = Lib::jwtDecode($_COOKIE['jd_jwt_token']);
-
 
 $method = $_POST['_method'];
 
@@ -52,6 +50,10 @@ switch ($method) {
     case "remove" :
         if(!$options['table']) Lib::error("options에 테이블이 없습니다.");
         $response = Service::delete($obj,$options);
+        break;
+
+    case "file_save" :
+        $response = Service::fileSave($obj,$options);
         break;
 
 }

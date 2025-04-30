@@ -144,4 +144,17 @@ class Service {
             if($count) Lib::error($filter['message']);
         }
     }
+
+    public static function fileSave($obj,$options) {
+        $file_model = new Model("jd_file");
+        foreach (File::normalize($_FILES) as  $file) {
+            $file_response = File::save($file,$options['table']);
+            $file_response['keyword'] = $file['keyword'];
+            $file_model->insert($file_response);
+        }
+        $response['file'] = $file_response;
+        $response['success'] = true;
+
+        return $response;
+    }
 }

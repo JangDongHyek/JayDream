@@ -10,7 +10,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <button @click="$deleteData(row,options)">삭제</button>
 
         <!-- plugin -->
-        <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="" redirect_url="/index.php">
+        <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="paySuccess()" redirect_url="/index.php">
             <template v-slot:default>
                 <button @click="$refs.pluginInnopay.pay()">결제</button>
             </template>
@@ -35,6 +35,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             </template>
         </external-bs-modal>
+
+        <external-summernote :row="row" field="content"></external-summernote>
     </div>
 </script>
 
@@ -206,6 +208,21 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             },
             methods: {
+                async paySuccess() {
+                    let row = {};
+
+                    let options = {}
+
+                    try {
+                        let res = await this.$jd.lib.ajax("update",row,"/JayDream/api.php",options);
+
+                        await this.$jd.lib.alert("결제가 완료되었습니다.");
+                        this.$jd.lib.href()
+
+                    }catch (e) {
+                        await this.$jd.lib.alert(e.message)
+                    }
+                },
                 async restApi() {
                     let row = {};
 
@@ -232,6 +249,16 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     let filter =
                     return filter
                 },
+                pay_core() {
+                    return {
+                        payMethod : this.payMethod,
+                        goodsName : this.order.product_log.name,
+                        amt : this.order.price,
+                        buyerName : "테스트",
+                        buyerTel : this.member.mb_hp.formatOnlyNumber(),
+                        buyerEmail : this.member.mb_email,
+                    }
+                }
             },
             watch: {
                 async "object.key"(value, old_value) {

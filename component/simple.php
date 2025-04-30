@@ -25,18 +25,18 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                     row: {},
                     rows : [],
-
-                    filter : {
-                        table: "user",
-                    },
                 };
             },
             async created() {
                 this.component_idx = this.$jd.lib.generateUniqueId();
             },
             async mounted() {
-                //this.row = await this.$getData(this.filter);
-                //await this.$getsData(this.filter,this.rows);
+                this.row = await this.$getData({
+                    table : "",
+                });
+                await this.$getsData({
+                    table : "",
+                },this.rows);
 
                 this.load = true;
 

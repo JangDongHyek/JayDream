@@ -78,16 +78,21 @@ class Lib {
         try {
             $jwt = JWT::decode($token, Config::PASSWORD, array('HS256'));
             if ($jwt->iss !== Config::$URL) {
+                setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
                 Lib::error("JWT 발급자가 동일하지않습니다.");
             }
             return $jwt;
         }catch (ExpiredException $e) {
+            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
             Lib::error("JWT 만료됨");
         } catch (SignatureInvalidException $e) {
+            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
             Lib::error("JWT 서명 오류");
         } catch (BeforeValidException $e) {
+            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
             Lib::error("JWT 사용 가능 시간 전");
         } catch (\Exception $e) {
+            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
             Lib::error("JWT 디코딩 오류: " . $e->getMessage());
         }
     }

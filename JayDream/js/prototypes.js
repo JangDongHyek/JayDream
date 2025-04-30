@@ -73,3 +73,11 @@ String.prototype.formatDate = function(options = { time: false, type: '-', simpl
 
     return formattedDate;
 };
+
+/**
+ * 문자열에서 숫자만 추출하는 프로토타입
+ * 예: "010-1234-1234" → "01012341234"
+ */
+String.prototype.formatOnlyNumber = function () {
+    return this.replace(/\D/g, '');
+};

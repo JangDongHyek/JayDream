@@ -110,12 +110,6 @@ $componentName = str_replace(".php","",basename(__FILE__));
                             // 결과값 로그테이블에 저장
                             await this.$postData(result.data,{table:'jd_plugin_innopay',return : true});
 
-                            await this.$postData({
-                                mb_no : this.mb_no,
-                                mb_name : this.pay_data.buyerName,
-                                tid : result.data.tid
-                            },{table:"g5_pay_list",return : true});
-
                             if(result.data.payMethod == "VBANK") {
                                 await this.$jd.lib.alert(`
                                     은행 : ${result.data.virtualAccount.bankName}\n
@@ -124,7 +118,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                     입금시 자동으로 결제완료로 변경됩니다\n
                                     `);
 
-                                this.$jd.lib.href("/app/pay1.php");
+                                this.$jd.lib.href(this.redirect_url);
                             }else {
                                 //결제성공시 로직
                                 this.$emit('paySuccess');
