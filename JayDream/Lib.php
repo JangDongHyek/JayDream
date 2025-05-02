@@ -23,8 +23,7 @@ class Lib {
             }
         }
 
-        header('Content-Type: application/json');
-        echo self::jsonEncode($er);
+        echo self::jsonEncode(self::encryptAPI($er));
         die();
         //throw new \Exception($msg);
     }
@@ -225,6 +224,21 @@ class Lib {
             default:
                 return md5($value);
         }
+    }
+
+    public static function encryptAPI($value) {
+        $key = substr(hash('sha256', Config::USERNAME), 0, 32); // 32바이트 = AES-256 키
+        $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
+
+        return base64_encode(openssl_encrypt(Lib::jsonEncode($value), 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv));
+    }
+
+    public static function js_obfuscate($code) {
+        $encoded = '';
+        foreach (str_split($code) as $c) {
+            $encoded .= 'String.fromCharCode('.ord($c).')+';
+        }
+        return 'eval(' . rtrim($encoded, '+') . ');';
     }
 
 }

@@ -159,6 +159,7 @@ class JayDreamLib {
             xhr.onload = function () {
                 res = xhr.response;
                 if (xhr.status === 200) {
+                    res = JSON.parse(_this.decryptAES(res));
                     if("download" in options && options.download) {
                         const contentType = xhr.getResponseHeader('content-type');
 
@@ -241,5 +242,14 @@ class JayDreamLib {
     href(url) {
         url = url.substring(1);
         window.location.href = `${this.jd.url}/${url}`;
+    }
+
+    decryptAES(cipherText) {
+        let decrypted = CryptoJS.AES.decrypt(cipherText, this.jd.api_key, {
+            iv: this.jd.api_iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return decrypted.toString(CryptoJS.enc.Utf8);
     }
 }

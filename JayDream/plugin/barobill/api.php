@@ -51,4 +51,5 @@ switch ($method) {
         break;
 }
 
+$response = Lib::encryptAPI($response);
 echo Lib::jsonEncode($response);

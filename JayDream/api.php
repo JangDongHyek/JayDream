@@ -3,6 +3,7 @@ require_once __DIR__ . '/require.php';
 
 use JayDream\Lib;
 use JayDream\Service;
+use JayDream\Session;
 
 if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.");
 $jwt = Lib::jwtDecode($_COOKIE['jd_jwt_token']);
@@ -56,6 +57,22 @@ switch ($method) {
         $response = Service::fileSave($obj,$options);
         break;
 
-}
+    case "session_set" :
+        foreach ($obj as $key => $value) {
+            Session::set($key, $value);
+        }
+        $response['success'] = true;
+        break;
 
+    case "session_get" :
+        foreach ($obj as $key => $value) {
+            $obj[$key] = Session::get($key);
+        }
+        $response['sessions'] = $obj;
+        $response['success'] = true;
+        $response['message'] = "";
+        break;
+
+}
+$response = Lib::encryptAPI($response);
 echo Lib::jsonEncode($response);

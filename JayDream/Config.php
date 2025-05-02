@@ -10,6 +10,7 @@ class Config
     public static $ROOT = "";
     public static $URL = "";
     public static $connect = null;
+    public static $framework = "";
 
     private static $DEV_IPS = ["121.140.204.65", "112.160.220.208"];
 
@@ -48,6 +49,9 @@ class Config
             $schema = require __DIR__ . '/schema/jd_file.php';
             self::createTableFromSchema("jd_file",$schema);
         }
+
+        // 프레임워크 환경 체크
+        self::getFramework();
     }
 
     public static function resourcePath()
@@ -139,6 +143,41 @@ class Config
         if (!self::$connect->query($createSQL)) {
             Lib::error("{$tableName} 테이블 생성에 실패했습니다 : " . self::$connect->error);
         }
+    }
+
+    public static function getFramework()
+    {
+        if (self::$framework) return self::$framework;
+
+        // Laravel 감지
+        if (defined('LARAVEL_START') || class_exists('\Illuminate\Foundation\Application')) {
+            self::$framework = 'laravel';
+        }
+
+        // CodeIgniter 4 감지 (네임스페이스 기반)
+        elseif (class_exists('\CodeIgniter\CodeIgniter')) {
+            self::$framework = 'ci4';
+        }
+
+        // CodeIgniter 3 감지 (클래식 구조)
+        elseif (defined('BASEPATH') && class_exists('CI_Controller')) {
+            self::$framework = 'ci3';
+        }
+
+        // GNUBoard 감지 (common.php 없이도 구조만 보고 판단)
+        elseif (
+            file_exists(self::$ROOT . '/common.php') &&
+            file_exists(self::$ROOT . '/bbs/board.php')
+        ) {
+            self::$framework = 'gnuboard';
+        }
+
+        // 기본 레거시 환경
+        else {
+            self::$framework = 'legacy';
+        }
+
+        return self::$framework;
     }
 }
 

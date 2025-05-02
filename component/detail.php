@@ -195,6 +195,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             }
                         ],
                     },
+
+                    sessions : {},
                 };
             },
             async created() {
@@ -203,6 +205,17 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             async mounted() {
                 this.row = await this.$getData(this.filter);
                 await this.$getsData(this.filter, this.rows);
+
+                //session 등록하기
+                await this.$jd.lib.ajax("session_set",{
+                    name : "exam"
+                },"/JayDream/api.php");
+
+                //session 가져오기
+                this.sessions = (await this.$jd.lib.ajax("session_get",{
+                    example : "",
+                    ss_mb_id : "",
+                },"/JayDream/api.php")).sessions;
             },
             updated() {
 
@@ -224,7 +237,9 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     }
                 },
                 async restApi() {
-                    let row = {};
+                    let row = {
+
+                    };
 
                     let options = {
                         table : ""

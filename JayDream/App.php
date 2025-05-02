@@ -47,18 +47,24 @@ class App {
 
     function jsLoad($plugin = array()) {
         if(!self::$JS_LOAD) {
+            echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>';
             echo "<script>";
-            echo "const JayDream_url = '".Config::$URL."';";
-            echo "const JayDream_dev = ".json_encode(Config::$DEV).";";     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
-            echo "const JayDream_alert = '".Config::ALERT."';";
+            echo Lib::js_obfuscate("var JayDream_url = '".Config::$URL."';");
+            echo Lib::js_obfuscate("var JayDream_dev = ".json_encode(Config::$DEV).";");     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
+            echo Lib::js_obfuscate("var JayDream_alert = '".Config::ALERT."';");
             //Vue 데이터 연동을 위한 변수
-            echo "let JayDream_data = {};";
-            echo "let JayDream_methods = {};";
-            echo "let JayDream_watch = {};";
-            echo "let JayDream_computed = {};";
+            echo Lib::js_obfuscate("var JayDream_data = {};");
+            echo Lib::js_obfuscate("var JayDream_methods = {};");
+            echo Lib::js_obfuscate("var JayDream_watch = {};");
+            echo Lib::js_obfuscate("var JayDream_computed = {};");
             //Vue3 데이터 연동을 위한 변수
-            echo "let JayDream_vue = [];";
-            echo "let JayDream_components = [];";
+            echo Lib::js_obfuscate("var JayDream_vue = [];");
+            echo Lib::js_obfuscate("var JayDream_components = [];");
+            //통신 복호화 키
+            $key = substr(hash('sha256', Config::USERNAME), 0, 32); // 32바이트 = AES-256 키
+            $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
+            echo Lib::js_obfuscate("var JayDream_api_key = CryptoJS.enc.Utf8.parse('".$key."');");
+            echo Lib::js_obfuscate("var JayDream_api_iv = CryptoJS.enc.Utf8.parse('".$iv."');");
 
             echo "</script>";
             echo "<script src='".Config::$URL."/JayDream/js/init.js'></script>";
@@ -66,6 +72,7 @@ class App {
             echo "<script src='".Config::$URL."/JayDream/js/lib.js'></script>";
             echo "<script src='".Config::$URL."/JayDream/js/plugin.js'></script>";
             echo "<script src='".Config::$URL."/JayDream/js/vue.js'></script>";
+
             self::$JS_LOAD = true;
             echo "<script>";
             echo "</script>";
