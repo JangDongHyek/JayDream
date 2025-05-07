@@ -159,7 +159,7 @@ class JayDreamLib {
             xhr.onload = function () {
                 res = xhr.response;
                 if (xhr.status === 200) {
-                    res = JSON.parse(_this.decryptAES(res));
+                    if(!_this.jd.dev) res = JSON.parse(_this.decryptAES(res));
                     if("download" in options && options.download) {
                         const contentType = xhr.getResponseHeader('content-type');
 

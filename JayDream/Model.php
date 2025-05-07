@@ -83,6 +83,8 @@ class Model {
             foreach($obj['where'] as $item) {
                 if($item['column'] == 'primary') $item['column'] = $this->primary;
 
+                if($item['encrypt']) $item['value'] = Lib::encrypt($item['value']);
+
                 if (strpos($item['value'], '$parent.') === 0 && $parent) {
                     $parts = explode('.', $item['value']);
                     if($parent[$parts[1]] == "") Lib::error("setFilter() : 부모에게 $parts[1] 값이 없습니다");
@@ -399,7 +401,7 @@ class Model {
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 
             // 컬럼의 데이터타입이 datetime 인데 널값이 허용이면 넘기고 아니면 기본값을 넣어서 쿼리작성
-            if($info['DATA_TYPE'] == "int") {
+            if($info['DATA_TYPE'] == "int" || $info['DATA_TYPE'] == "tinyint") {
                 if($value == '') {
                     if($info['IS_NULLABLE'] == "NO") $value = '0';
                     else continue;

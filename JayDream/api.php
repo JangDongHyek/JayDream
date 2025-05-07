@@ -4,6 +4,7 @@ require_once __DIR__ . '/require.php';
 use JayDream\Lib;
 use JayDream\Service;
 use JayDream\Session;
+use JayDream\Config;
 
 if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.");
 $jwt = Lib::jwtDecode($_COOKIE['jd_jwt_token']);
@@ -74,5 +75,5 @@ switch ($method) {
         break;
 
 }
-$response = Lib::encryptAPI($response);
+if(!Config::$DEV) $response = Lib::encryptAPI($response);
 echo Lib::jsonEncode($response);

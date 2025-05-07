@@ -6,6 +6,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\BeforeValidException;
+use JayDream\Model;
+use JayDream\Session;
 
 class Lib {
     public static function error($msg) {
@@ -23,7 +25,8 @@ class Lib {
             }
         }
 
-        echo self::jsonEncode(self::encryptAPI($er));
+        if(Config::$DEV) echo self::jsonEncode($er);
+        else echo self::jsonEncode(self::encryptAPI($er));
         die();
         //throw new \Exception($msg);
     }
@@ -239,6 +242,121 @@ class Lib {
             $encoded .= 'String.fromCharCode('.ord($c).')+';
         }
         return 'eval(' . rtrim($encoded, '+') . ');';
+    }
+
+    public static function curlRequest($url, $method = 'GET', $options = array()) {
+        $ch = curl_init();
+
+        // 옵션 기본값 설정
+        $data = isset($options['data']) ? $options['data'] : null;
+        $timeout = isset($options['timeout']) ? $options['timeout'] : 10;
+        $http_build = isset($options['http_build']) ? $options['http_build'] : false;
+        $content_type = isset($options['content_type']) ? $options['content_type'] : 'Content-Type: application/json';
+        $accept = isset($options['accept']) ? $options['accept'] : 'Accept: application/json';
+
+        // Content-Type 헤더 설정
+        $headers = array($content_type,$accept);
+        if($options['authorization']) array_push($headers,$options['authorization']);
+
+        // 요청 메서드 설정
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+
+        // 데이터 설정
+        if ($data !== null) {
+            $postData = $http_build ? http_build_query($data) : json_encode($data);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        }
+
+        // URL 설정
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        // 요청 실행
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+
+        if($httpCode != "200") {
+            self::error("curl 통신 실패($httpCode) : \nerror : $error\nreponse : $response");
+        }
+
+        return json_decode($response,true);
+    }
+
+    public static function formatPhoneNumber($phone) {
+        // 숫자만 남기기 (+, -, 공백 등 제거)
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // +82 국가 코드 처리
+        if (preg_match('/^82(10|1[1-9])/', $phone)) {
+            $phone = '0' . substr($phone, 2); // 8210XXXXYYYY -> 010XXXXYYYY
+        }
+
+        // 010-XXXX-XXXX 형식으로 변환 (010, 011, 016, 017, 018, 019 지원)
+        if (preg_match('/^(01[016789])(\d{4})(\d{4})$/', $phone, $matches)) {
+            return $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+        }
+
+        return $phone; // 변환되지 않는 경우 원본 유지
+    }
+
+    public static function goURL($url)
+    {
+        // &amp; 를 & 로 변경
+        $url = str_replace("&amp;", "&", $url);
+
+        // 헤더가 전송되지 않았다면 HTTP 리다이렉트
+        if (!headers_sent()) {
+            header("Location: $url");
+            exit;
+        }
+
+        // 헤더가 이미 전송된 경우 JavaScript & meta refresh 사용
+        echo '<script>';
+        echo 'window.location.href = "'.$url.'";';
+        echo '</script>';
+
+        echo '<noscript>';
+        echo '<meta http-equiv="refresh" content="0;url='.$url.'" />';
+        echo '</noscript>';
+        exit;
+    }
+
+    public static function snsLogin($user,$table = "") {
+        if(!$table) Lib::error("snsLogin() : 테이블명이 없습니다.");
+        $model = new Model($table);
+        $row = $model->where("sns_code",$user['primary'])->get();
+
+        if(!$row['count']) {
+            $data = array(
+                "mb_id" => self::generateUniqueId(),
+                "mb_password" => self::encrypt(self::generateUniqueId()),
+                "mb_name" => $user['name'],
+                "mb_email" => $user['email'],
+                "mb_level" => 2,
+                "mb_hp" => $user['phone'],
+                "mb_datetime" => "now()",
+                "sns_code" => $user['primary'],
+            );
+
+            $model->insert($data);
+
+            $row = $model->where("sns_code",$user['primary'])->get();
+        }
+
+        self::userLogin($row['data'][0]);
+    }
+
+    public static function userLogin($user) {
+        Session::set('ss_mb_id', $user['mb_id']);
+        Session::set('ss_mb_key', md5($user['mb_datetime'] . self::getClientIP() . $_SERVER['HTTP_USER_AGENT']));
+
+
     }
 
 }

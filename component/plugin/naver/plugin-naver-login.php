@@ -4,7 +4,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div>
         <div v-if="load">
-
+            <a :href="redirect_uri">네이버 로그인</a>
         </div>
 
         <div v-if="!load"></div>
@@ -25,15 +25,16 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                     row: {},
                     rows : [],
+
+                    redirect_uri : "",
                 };
             },
             async created() {
                 this.component_idx = this.$jd.lib.generateUniqueId();
             },
             async mounted() {
-                //this.row = await this.$getData({table : "",});
-                //await this.$getsData({table : "",},this.rows);
 
+                await this.getLoginUri();
                 this.load = true;
 
                 this.$nextTick(() => {
@@ -44,7 +45,15 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             methods: {
+                async getLoginUri() {
+                    try {
+                        let res = await this.$jd.lib.ajax("login_uri",{},"/JayDream/plugin/naver/api.php",{});
+                        this.redirect_uri = res.uri;
 
+                    }catch (e) {
+                        await this.$jd.lib.alert(e.message)
+                    }
+                }
             },
             computed: {
 

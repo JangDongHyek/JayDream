@@ -71,10 +71,11 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                         where: [
                             {
-                                column: "",            // join 조건시 user.idx
-                                value: "",             // LIKE일시 %% 필수 || relations일시  $parent.idx
-                                logical: "AND",        // AND,OR,AND NOT
-                                operator: "=",         // = ,!= >= <=, LIKE,
+                                column: "",             // join 조건시 user.idx
+                                value: "",              // LIKE일시 %% 필수 || relations일시  $parent.idx
+                                logical: "AND",         // AND,OR,AND NOT
+                                operator: "=",          // = ,!= >= <=, LIKE,
+                                encrypt : false,        // true시 벨류가 암호화된 값으로 들어감
                             },
                         ],
 

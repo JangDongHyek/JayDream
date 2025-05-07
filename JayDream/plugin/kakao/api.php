@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/../../require.php';
+require_once __DIR__ . "/Kakao.php";
 
 use JayDream\Lib;
 use JayDream\Service;
 use JayDream\Config;
+use JayDream\Kakao;
 
 if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.");
 $jwt = Lib::jwtDecode($_COOKIE['jd_jwt_token']);
@@ -19,14 +21,12 @@ $response = array(
 
 $obj = Lib::jsonDecode($_POST['obj'],false);
 $options = Lib::jsonDecode($_POST['options'],false);
-
+Kakao::init();
 switch ($method) {
-    case "innopay" :
-        if (!Config::existsTable("jd_plugin_innopay")) {
-            $schema = require __DIR__ . '/../../schema/jd_plugin_innopay.php';
-            Config::createTableFromSchema("jd_plugin_innopay",$schema);
-        }
-        $response = require __DIR__ . '/../../plugin/innopay/config.php';
+    case "login_uri" :
+        $response['success'] = true;
+        $response['message'] = "";
+        $response['uri'] = Kakao::createUri();
         break;
 }
 

@@ -67,11 +67,11 @@ class App {
             echo Lib::js_obfuscate("var JayDream_api_iv = CryptoJS.enc.Utf8.parse('".$iv."');");
 
             echo "</script>";
-            echo "<script src='".Config::$URL."/JayDream/js/init.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/prototypes.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/lib.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/plugin.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/vue.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/obf/init.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/obf/prototypes.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/obf/lib.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/obf/plugin.js'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/obf/vue.js'></script>";
 
             self::$JS_LOAD = true;
             echo "<script>";

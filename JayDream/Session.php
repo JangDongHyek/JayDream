@@ -7,6 +7,7 @@ use JayDream\Lib;
 class Session {
     public static function init() {
         if(Config::$framework == "gnuboard") {
+            //session_name('G5PHPSESSID'); // 안쓰는곳도있으므로 common 확인후 설정
             session_save_path(Config::$ROOT."/data/session");
         }else if(Config::$framework == "legacy") {
             if(!session_save_path()) Lib::error("session_save_path가 없습니다.");
