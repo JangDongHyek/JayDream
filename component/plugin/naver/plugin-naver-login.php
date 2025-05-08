@@ -2,13 +2,7 @@
 $componentName = str_replace(".php","",basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?=$componentName?>-template">
-    <div>
-        <div v-if="load">
-            <a :href="redirect_uri">네이버 로그인</a>
-        </div>
-
-        <div v-if="!load"></div>
-    </div>
+    <slot></slot>
 </script>
 
 <script>

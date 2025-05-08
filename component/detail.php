@@ -16,6 +16,18 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             </template>
         </plugin-innopay>
 
+        <plugin-kakao-login ref="pluginKakaoLogin">
+            <template v-slot:default>
+                <button @click="$refs.pluginKakaoLogin.goUri();"></button>
+            </template>
+        </plugin-kakao-login>
+
+        <plugin-naver-login ref="pluginNaverLogin">
+            <template v-slot:default>
+                <button @click="$refs.pluginNaverLogin.goUri();"></button>
+            </template>
+        </plugin-naver-login>
+
         <!-- ref로 접근해 taxInvoice()함수 실행해야함 -->
         <plugin-barobill-tax-invoice ref="pluginBarobillTaxInvocue"></plugin-barobill-tax-invoice>
 
