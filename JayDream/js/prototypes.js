@@ -5,12 +5,23 @@ Number.prototype.format = function (n, x) {
 };
 
 // Date 타입의 변수 자동으로 포맷팅 YYYY-MM-DD 로 반환됌
-Date.prototype.format = function () {
-    const year = this.getFullYear();
-    const month = String(this.getMonth() + 1).padStart(2, '0');
-    const day = String(this.getDate()).padStart(2, '0');
+Date.prototype.format = function(fmt = 'yyyy-mm-dd') {
+    const yyyy = this.getFullYear();
+    const yy = String(yyyy).slice(-2);
+    const mm = String(this.getMonth() + 1).padStart(2, '0');
+    const dd = String(this.getDate()).padStart(2, '0');
+    const hh = String(this.getHours()).padStart(2, '0');
+    const mi = String(this.getMinutes()).padStart(2, '0');
+    const ss = String(this.getSeconds()).padStart(2, '0');
 
-    return `${year}-${month}-${day}`;
+    return fmt
+        .replace(/yyyy/g, yyyy)
+        .replace(/yy/g, yy)
+        .replace(/mm/g, mm)
+        .replace(/dd/g, dd)
+        .replace(/hh/g, hh)
+        .replace(/mi/g, mi)
+        .replace(/ss/g, ss);
 };
 
 //배열을 튜플형식으로 변환하는
@@ -37,41 +48,12 @@ Number.prototype.formatBytes = function (decimals = 2) {
     return `${size} ${sizes[i]}`;
 };
 
-String.prototype.formatDate = function(options = { time: false, type: '-', simple: true, second : false}) {
-    // 기본 옵션 설정
-    const defaultOptions = { time: false, type: '-', simple: true , second : false,};
-    const opts = Object.assign({}, defaultOptions, options); // 사용자 옵션 병합
-
-    // 날짜와 시간 분리
-    let [datePart, timePart] = this.split(' ');
-
-    // 날짜를 '-' 기준으로 분리
-    let parts = datePart.split('-');
-
-    // simple 옵션이 true이면 연도를 두 자리로 변환
-    if (opts.simple) {
-        parts[0] = parts[0].slice(2); // "2024" -> "24"
+String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
+    const date = new Date(this);
+    if (isNaN(date.getTime())) {
+        throw new Error(`Invalid date string: "${this}"`);
     }
-
-    // 변환된 날짜 문자열
-    let formattedDate = parts.join(opts.type);
-
-    // time 옵션이 true이면 시간 추가
-    if (opts.time && timePart) {
-        let timeParts = timePart.split(':');
-
-        if (!opts.second && timeParts.length >= 2) {
-            // 초 제외: HH:mm
-            formattedDate += ` ${timeParts[0]}:${timeParts[1]}`;
-        } else if (opts.second && timeParts.length === 3) {
-            // 초 포함: HH:mm:ss
-            formattedDate += ` ${timeParts.join(':')}`;
-        }
-    }
-
-
-
-    return formattedDate;
+    return date.format(fmt);
 };
 
 /**

@@ -27,7 +27,7 @@ class JayDreamVue {
                     const reader = new FileReader();
                     reader.onload = (function(f) {
                         return function(e) {
-                            f.preview = e.target.result;
+                            f.src = e.target.result;
                             obj[key].push(f); // 비동기로 파일을 읽는 중이라 onload 안에 넣어줘야 파일을 다 읽고 데이터가 완벽하게 들어간다
                         };
                     })(file); // 클로저 사용
@@ -55,7 +55,7 @@ class JayDreamVue {
                     const reader = new FileReader();
                     reader.onload = (function(f) {
                         return function(e) {
-                            f.preview = e.target.result;
+                            f.src = e.target.result;
                             obj[key] = (f); // 비동기로 파일을 읽는 중이라 onload 안에 넣어줘야 파일을 다 읽고 데이터가 완벽하게 들어간다
                         };
                     })(file); // 클로저 사용

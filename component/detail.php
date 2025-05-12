@@ -3,7 +3,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
-        <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')">
+        <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')" name="names[]">
         <input type="text" @input="$jd.vue.onInput"> <!-- 숫자만 입력가능하게 -->
 
         <button @click="$postData(row,options)">테스트</button>

@@ -2,13 +2,11 @@
 $componentName = str_replace(".php","",basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?=$componentName?>-template">
-    <div>
-        <div v-if="load">
+    <div v-if="load">
 
-        </div>
-
-        <div v-if="!load"></div>
     </div>
+
+    <div v-if="!load"></div>
 </script>
 
 <script>
