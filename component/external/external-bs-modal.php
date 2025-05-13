@@ -1,7 +1,7 @@
 <?php $componentName = str_replace(".php","",basename(__FILE__)); ?>
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div>
-        <div class="modal fade" :class="modelValue.class_1" :id="component_idx" tabindex="-1" :aria-hidden="modelValue.status">
+        <div class="modal fade" :class="modelValue.class_1" :id="component_idx" tabindex="-1" :aria-hidden="!modelValue.status">
             <div class="modal-dialog" :class="modelValue.class_2">
                 <template v-if="modelValue.status">
                     <div class="modal-content">

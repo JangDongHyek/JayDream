@@ -1,7 +1,7 @@
 class JayDreamVue {
-    onNumber(e) {
+    inputNumber(e,object = null, field = '') {
         e.target.value = e.target.value.replace(/[^0-9]/g, ""); // 숫자 이외 제거
-        value.value = e.target.value;
+        if(object) object[field] = e.target.value;
     }
 
     commonFile(files,obj,key,permission) {

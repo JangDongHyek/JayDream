@@ -66,9 +66,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                     modal: {
                         status: false,
-                        load: false,
-                        primary: "",
-                        data: {},
                         class_1: "",
                         class_2: "",
                     },
