@@ -166,6 +166,14 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         await this.$jd.lib.alert("구매자이메일이 없습니다");
                         return false;
                     }
+
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(this.pay_data.buyerEmail)) {
+                        await this.$jd.lib.alert("올바른 이메일 형식이 아닙니다.");
+                        return false;
+                    }
+
+
                     innopay.goPay(this.pay_data);
                 }
             },

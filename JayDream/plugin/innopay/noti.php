@@ -246,6 +246,9 @@ fwrite( $logfile,"************************************************");
 fclose( $logfile );
 
 //노티 테이블에 데이터 삽입
+/*
+ 가상계좌시 (계좌번호,금액,입금자명) 일치하지않으면 없는 계좌로 뜨기때문에 잘못입력했을떄의 로직은 필요없음
+ */
 $data = array_merge($_GET, $_POST);
 $model = new Model("jd_plugin_innopay_noti");
 $model->insert($data);

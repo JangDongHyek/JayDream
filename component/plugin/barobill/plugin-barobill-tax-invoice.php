@@ -87,6 +87,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                     try {
                         let res = await this.$jd.lib.ajax("RegistAndIssueTaxInvoice",baro_company,"/JayDream/plugin/barobill/api.php",options);
+
+                        await this.$jd.lib.alert("세금계산서 발행을 신청했습니다.");
                     }catch (e) {
                         await this.$jd.lib.alert(e.message)
                     }
