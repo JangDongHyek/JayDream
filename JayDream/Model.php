@@ -287,8 +287,21 @@ class Model {
                 $this->sql .= " $logical ";
             }
 
-            if($value == "CURDATE()") $this->sql .= "$table.`{$column}` {$operator} {$value}";
-            else $this->sql .= "$table.`{$column}` {$operator} '{$value}'";
+            if($value == "CURDATE()") {
+                $this->sql .= "$table.`{$column}` {$operator} {$value}";
+            }else if($value == "null") {
+                $operator_upper = strtoupper($operator);
+                if (in_array($operator_upper, ["=", "IS"])) {
+                    $this->sql .= "$table.`{$column}` IS NULL";
+                } else if (in_array($operator_upper, ["!=", "IS NOT"])) {
+                    $this->sql .= "$table.`{$column}` IS NOT NULL";
+                } else {
+                    Lib::error("Model where() : NULL 비교는 =, !=, IS, IS NOT 만 사용할 수 있습니다.");
+                }
+            }else {
+                $this->sql .= "$table.`{$column}` {$operator} '{$value}'";
+            }
+
         }else {
             Lib::error("Model where() : {$table}에  {$column}컬럼이 존재하지않습니다.");
         }
