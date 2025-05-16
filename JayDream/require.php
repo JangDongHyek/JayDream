@@ -16,3 +16,7 @@ use JayDream\Session;
 
 Config::init();
 Session::init();
+
+if(Config::$framework == "gnuboard") {
+    include_once (Config::$ROOT . "/common.php");
+}

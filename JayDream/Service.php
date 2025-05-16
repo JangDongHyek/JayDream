@@ -37,7 +37,7 @@ class Service {
                 ],
                 [
                     'column'  => 'table_primary',
-                    'value'   => '$parent.idx',
+                    'value'   => '$parent.primary',
                     'logical' => 'AND',
                     'operator'=> '='
                 ]

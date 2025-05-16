@@ -224,8 +224,12 @@ class Lib {
             case 'hmac':
                 $secret = Config::PASSWORD;
                 return hash_hmac('sha256', $value, $secret);
-            default:
+            case 'md5' :
                 return md5($value);
+            case 'gnuboard' :
+                return get_encrypt_string($value);
+            default:
+                Lib::error("ENCRYPT 설정이 없습니다");
         }
     }
 
