@@ -161,6 +161,12 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 table: "",
                             }
                         ],
+
+                        blocks : [
+                            { // filter 형식으로 넣어주면된다 , 객체 하나당 () 괄호 조건문이 꾸며진다
+                                where : []
+                            },
+                        ]
                     },
 
                     options : {
@@ -198,8 +204,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             }
                         ],
 
-                        exists: [ // post * 필터방식
-                            {
+                        exists: [ // post
+                            { // 필터방식
                                 table : "",
                                 message: "",
                             }

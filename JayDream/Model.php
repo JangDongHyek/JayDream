@@ -10,8 +10,8 @@ class Model {
 
     private $sql = "";
     private $sql_order_by = "";
-    private $where_group = false;
-    private $where_group_index = 0;
+    private $block = false;
+    private $block_index = 0;
 
     public $joins = array();
     public $group_bys = array();
@@ -66,10 +66,19 @@ class Model {
     function init() {
         $this->sql = "";
         $this->sql_order_by = "";
-        $this->where_group = false;
-        $this->where_group_index = 0;
+        $this->block = false;
+        $this->block_index = 0;
 
         $this->joins = array();
+    }
+
+    function blockStart() {
+        $this->block = true;
+        $this->block_index = 0;
+    }
+
+    function blockEnd() {
+        $this->block = false;
     }
 
     function setFilter($obj,$parent = null) {
@@ -280,8 +289,8 @@ class Model {
             if($value == "") return $this;
             if($value == "__null__") $value = "";
 
-            if($this->where_group) {
-                if(!$this->where_group_index) $this->where_group_index = 1;
+            if($this->block) {
+                if(!$this->block_index) $this->block_index = 1;
                 else $this->sql .= " $logical ";
             }else {
                 $this->sql .= " $logical ";
@@ -320,8 +329,8 @@ class Model {
         if(strtolower($column) == "curdate()" || strtolower($column) == "now()" || strtotime($column) !== false) {
             if(!in_array($start, $columns)) Lib::error("Model between() : start 컬럼이 존재하지않습니다.");
             if(!in_array($end, $columns)) Lib::error("Model between() : end 컬럼이 존재하지않습니다.");
-            if($this->where_group) {
-                if(!$this->where_group_index) $this->where_group_index = 1;
+            if($this->block) {
+                if(!$this->block_index) $this->block_index = 1;
                 else $this->sql .= " {$logical} ";
             }else {
                 $this->sql .= " {$logical} ";
@@ -335,8 +344,8 @@ class Model {
                 if(strpos($start,":") === false) $start .= " 00:00:00";
                 if(strpos($end,":") === false) $end .= " 23:59:59";
 
-                if($this->where_group) {
-                    if(!$this->where_group_index) $this->where_group_index = 1;
+                if($this->block) {
+                    if(!$this->block_index) $this->block_index = 1;
                     else $this->sql .= " {$logical} ";
                 }else {
                     $this->sql .= " {$logical} ";
@@ -362,8 +371,8 @@ class Model {
         if(!is_array($value)) Lib::error("JlModel in() : 비교값이 배열이 아닙니다.");
 
         if(in_array($column, $columns) && count($value)){
-            if($this->where_group) {
-                if(!$this->where_group_index) $this->where_group_index = 1;
+            if($this->block) {
+                if(!$this->block_index) $this->block_index = 1;
                 else $this->sql .= " $logical ";
             }else {
                 $this->sql .= " $logical ";

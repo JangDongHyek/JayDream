@@ -1,8 +1,8 @@
+
 <? $jd->jsLoad();?>
 
 <script>
     let jd = {};
-
     jd.url = JayDream_url;
     jd.dev = JayDream_dev;
     jd.alert = JayDream_alert;
@@ -11,6 +11,26 @@
     jd.plugin = new JayDreamPlugin(jd);
     jd.lib = new JayDreamLib(jd);
 
+    async function getData() {
+        try {
+            let res = await jd.lib.ajax("get",{
+                table : "",
+
+                where: [
+                    {
+                        column: "",             // join 조건시 user.idx
+                        value: "",              // LIKE일시 %% 필수 || relations일시  $parent.idx
+                        logical: "AND",         // AND,OR,AND NOT
+                        operator: "=",          // = ,!= >= <=, LIKE,
+                        encrypt : false,        // true시 벨류가 암호화된 값으로 들어감
+                    },
+                ],
+            },"/JayDream/api.php");
+        }catch (e) {
+            await jd.lib.alert(e.message)
+        }
+
+    }
 
     async function putData() {
         let row = {};
