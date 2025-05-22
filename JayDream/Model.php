@@ -11,7 +11,7 @@ class Model {
     private $sql = "";
     private $sql_order_by = "";
     private $block = false;
-    private $block_index = 0;
+    private $block_bool = 0;
 
     public $joins = array();
     public $group_bys = array();
@@ -67,18 +67,27 @@ class Model {
         $this->sql = "";
         $this->sql_order_by = "";
         $this->block = false;
-        $this->block_index = 0;
+        $this->block_bool = 0;
 
         $this->joins = array();
     }
 
-    function blockStart() {
+    function blockStart($logical = "AND") {
+        if($this->block) Lib::error("block이 이미 시작되어있습니다.");
         $this->block = true;
-        $this->block_index = 0;
+        $this->sql .= " {$logical} ( ";
+
+        return $this;
     }
 
     function blockEnd() {
+        if(!$this->block) Lib::error("block이 시작된적이 없습니다.");
+        
         $this->block = false;
+        $this->block_bool = 0;
+        $this->sql .= " ) ";
+        
+        return $this;
     }
 
     function setFilter($obj,$parent = null) {
@@ -113,6 +122,14 @@ class Model {
         if(isset($obj['in'])) {
             foreach($obj['in'] as $item) {
                 $this->in($item['column'],$item['value'],$item['logical']);
+            }
+        }
+
+        if(isset($obj['blocks'])) {
+            foreach($obj['blocks'] as $item) {
+                $this->blockStart($item['logical']);
+                $this->setFilter($item,$parent);
+                $this->blockEnd();
             }
         }
 
@@ -290,7 +307,7 @@ class Model {
             if($value == "__null__") $value = "";
 
             if($this->block) {
-                if(!$this->block_index) $this->block_index = 1;
+                if(!$this->block_bool) $this->block_bool = 1;
                 else $this->sql .= " $logical ";
             }else {
                 $this->sql .= " $logical ";
@@ -330,7 +347,7 @@ class Model {
             if(!in_array($start, $columns)) Lib::error("Model between() : start 컬럼이 존재하지않습니다.");
             if(!in_array($end, $columns)) Lib::error("Model between() : end 컬럼이 존재하지않습니다.");
             if($this->block) {
-                if(!$this->block_index) $this->block_index = 1;
+                if(!$this->block_bool) $this->block_bool = 1;
                 else $this->sql .= " {$logical} ";
             }else {
                 $this->sql .= " {$logical} ";
@@ -345,7 +362,7 @@ class Model {
                 if(strpos($end,":") === false) $end .= " 23:59:59";
 
                 if($this->block) {
-                    if(!$this->block_index) $this->block_index = 1;
+                    if(!$this->block_bool) $this->block_bool = 1;
                     else $this->sql .= " {$logical} ";
                 }else {
                     $this->sql .= " {$logical} ";
@@ -372,7 +389,7 @@ class Model {
 
         if(in_array($column, $columns) && count($value)){
             if($this->block) {
-                if(!$this->block_index) $this->block_index = 1;
+                if(!$this->block_bool) $this->block_bool = 1;
                 else $this->sql .= " $logical ";
             }else {
                 $this->sql .= " $logical ";

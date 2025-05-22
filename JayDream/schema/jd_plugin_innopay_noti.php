@@ -366,5 +366,15 @@ return [
         "nullable" => true,
         "comment" => "은행코드"
     ],
+    "insert_date" => [
+        "type" => "DATETIME",
+        "nullable" => false,
+        "comment" => "등록일"
+    ],
+    "update_date" => [
+        "type" => "DATETIME",
+        "nullable" => false,
+        "comment" => "수정일"
+    ],
     "primary" => "idx",
 ];

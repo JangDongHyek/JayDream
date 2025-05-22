@@ -131,5 +131,15 @@ return [
         "nullable" => false,
         "comment" => "현금 영수증 발행 체크할 경우, 현금 영수증 관련 데이터"
     ],
+    "insert_date" => [
+        "type" => "DATETIME",
+        "nullable" => false,
+        "comment" => "등록일"
+    ],
+    "update_date" => [
+        "type" => "DATETIME",
+        "nullable" => false,
+        "comment" => "수정일"
+    ],
     "primary" => "idx"
 ];
