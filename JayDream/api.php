@@ -77,3 +77,5 @@ switch ($method) {
 }
 if(!Config::$DEV) $response = Lib::encryptAPI($response);
 echo Lib::jsonEncode($response);
+
+exit();

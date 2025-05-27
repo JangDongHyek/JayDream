@@ -32,14 +32,24 @@ class Config
         // 개발환경체크
         if (in_array(Lib::getClientIP(), self::$DEV_IPS)) self::$DEV = true;
 
+        // 프레임워크 환경 체크
+        self::getFramework();
+
         // 루트 및 URL 설정
-        self::$ROOT = dirname(__DIR__);
-        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-        $user = str_replace(str_replace(self::$ROOT, '', $_SERVER['SCRIPT_FILENAME']), '', $_SERVER['SCRIPT_NAME']);
-        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-        if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
-            $host = preg_replace('/:[0-9]+$/', '', $host);
-        self::$URL = $http . $host . $user;
+        if(self::$framework == "ci3" || self::$framework == "ci4") {
+            self::$ROOT = FCPATH;
+            self::$URL = base_url();
+        }else {
+            self::$ROOT = dirname(__DIR__);
+            $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+            $user = str_replace(str_replace(self::$ROOT, '', $_SERVER['SCRIPT_FILENAME']), '', $_SERVER['SCRIPT_NAME']);
+            $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+            if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
+                $host = preg_replace('/:[0-9]+$/', '', $host);
+            self::$URL = $http . $host . $user;
+        }
+
+
 
         //폴더 권한체크
         if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");
@@ -50,8 +60,7 @@ class Config
             self::createTableFromSchema("jd_file",$schema);
         }
 
-        // 프레임워크 환경 체크
-        self::getFramework();
+
     }
 
     public static function resourcePath()

@@ -227,8 +227,10 @@ class Model {
             $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$join['table']} ON ";
             $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
 
-            foreach ($join['on'] as $on) {
-                $join_sql .= "{$on['logical']} {$join['table']}.{$on['column']} {$on['operator']} '{$on['value']}' ";
+            if (isset($join['on']) && is_array($join['on'])) {
+                foreach ($join['on'] as $on) {
+                    $join_sql .= "{$on['logical']} {$join['table']}.{$on['column']} {$on['operator']} '{$on['value']}' ";
+                }
             }
         }
 
