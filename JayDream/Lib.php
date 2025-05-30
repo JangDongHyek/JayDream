@@ -228,8 +228,33 @@ class Lib {
                 return md5($value);
             case 'gnuboard' :
                 return get_encrypt_string($value);
+            case 'ci4' :
+                $secret = Config::PASSWORD;
+                return password_hash($value, $secret);
             default:
                 Lib::error("ENCRYPT 설정이 없습니다");
+        }
+    }
+
+    public static function verify($value, $hash)
+    {
+        switch (Config::ENCRYPT) {
+            case 'sha256':
+                return hash('sha256', $value) == $hash;
+            case 'sha512':
+                return hash('sha512', $value) == $hash;
+            case 'hmac':
+                $secret = Config::PASSWORD;
+                return hash_hmac('sha256', $value, $secret) == $hash;
+            case 'md5':
+                return md5($value) == $hash;
+            case 'gnuboard':
+                return get_encrypt_string($value) == $hash;
+            case 'ci4':
+                return password_verify($value, $hash);
+            default:
+                Lib::error("VERIFY 설정이 없습니다");
+                return false;
         }
     }
 
@@ -331,7 +356,7 @@ class Lib {
         exit;
     }
 
-    public static function snsLogin($user,$table = "") {
+    public static function snsLogin($user,$table,$type) {
         if(!$table) Lib::error("snsLogin() : 테이블명이 없습니다.");
         $model = new Model($table);
         $row = $model->where("sns_code",$user['primary'])->get();
@@ -346,6 +371,7 @@ class Lib {
                 "mb_hp" => $user['phone'],
                 "mb_datetime" => "now()",
                 "sns_code" => $user['primary'],
+                "sns_type" => $type,
             );
 
             $model->insert($data);

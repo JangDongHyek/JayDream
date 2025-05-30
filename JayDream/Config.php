@@ -22,7 +22,7 @@ class Config
     const COOKIE_TIME = 7200;
 
     const ALERT = "origin"; // origin , swal
-    const ENCRYPT = "gnuboard"; // mb_5,sha256,sha512,hmac,gnuboard;
+    const ENCRYPT = "gnuboard"; // mb_5,sha256,sha512,hmac,gnuboard,ci4;
 
     public static function init()
     {
@@ -48,8 +48,6 @@ class Config
                 $host = preg_replace('/:[0-9]+$/', '', $host);
             self::$URL = $http . $host . $user;
         }
-
-
 
         //폴더 권한체크
         if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");

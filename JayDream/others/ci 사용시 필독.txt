@@ -1,9 +1,14 @@
+********************************************************
+ci4 환경
 App/Libraries 밑에 JayDream 복사 777필수
 js,resource 폴더는 필요없음
 
 public_html 밑에 JayDream 복사 777 필수
 js,resource 폴더만 필요함
 
-route에 api부분 추가해주기 $routes->post('JayDream/api.php', 'api\JayDreamController::method');
+routes에 통신 추가해주기 $routes->post('JayDream/api.php', 'JayDreamController::method');
 
 ci4 controller 추가해주기
+********************************************************
+ci3 환경
+아직 못해봄

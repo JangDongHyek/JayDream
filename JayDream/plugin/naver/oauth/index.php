@@ -21,7 +21,7 @@ $user = $user_response['response'];
 $user['phone'] = $user['mobile'];
 $user['primary'] = $user['id'];
 
-Lib::snsLogin($user,"g5_member");
+Lib::snsLogin($user,"g5_member","naver");
 
 Lib::goURL("/");
 ?>

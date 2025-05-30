@@ -22,7 +22,7 @@ $user = $user_response['kakao_account'];
 $user['phone'] = Lib::formatPhoneNumber($user['phone_number']);
 $user['primary'] = $user_response['id'];
 
-Lib::snsLogin($user,"g5_member");
+Lib::snsLogin($user,"g5_member","kakao");
 
 Lib::goURL("/");
 ?>
