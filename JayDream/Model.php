@@ -461,7 +461,9 @@ class Model {
                 }
             }
 
-            if($column == 'insert_date') $value = 'now()';
+            if($column == 'insert_date') {
+                if($value == "0000-00-00 00:00:00") $value = 'now()';
+            }
             if($column == 'wr_datetime') $value = 'now()';
 
             if(!empty($columns)) $columns .= ", ";
