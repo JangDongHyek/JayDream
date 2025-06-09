@@ -148,12 +148,16 @@ class Model {
 
     function count(){
         $sql = $this->getSql(array("count" => true));
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) $this->jl->error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
 
-        $total_count = mysqli_num_rows($result);
+            $total_count = mysqli_num_rows($result);
+            return $total_count ? $total_count : 0;
 
-        return $total_count ? $total_count : 0;
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
+
     }
 
     function get($_param = array()) {
@@ -170,8 +174,11 @@ class Model {
         $object["sql"] = $sql;
 
         $index = 1;
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) $this->jl->error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
 
         while($row = mysqli_fetch_assoc($result)){
             $row["__no__"] = ($page -1) * $limit + $index;
@@ -186,13 +193,15 @@ class Model {
             $row['primary'] = $row[$this->primary];
             foreach ($row as $key => $value) {
                 if($this->primary == $key) continue;
-                // JSON인지 확인하고 디코딩 시도
-                $decoded_value = json_decode($value, true);
 
-                // JSON 디코딩이 성공했다면 값을 디코딩된 데이터로 변경
-                if (!is_null($decoded_value)) {
-                    $row[$key] = $decoded_value;
+                if(Lib::isJson($value)) {
+                    $decoded_value = json_decode($value, true);
+
+                    if (!is_null($decoded_value)) {
+                        $row[$key] = $decoded_value;
+                    }
                 }
+
             }
             array_push($object["data"], $row);
             $index++;
@@ -251,10 +260,12 @@ class Model {
                 $select_field .= ", {$select['type']}({$select['column']}) AS {$select['as']}";
             }
 
-            foreach ($this->group_bys['having'] as $having) {
-                $having_sql .= "{$having['logical']} {$having['column']} {$having['operator']} ";
-                if(is_numeric($having['value'])) $having_sql .= $having['value'];
-                else $having_sql .= "'{$having['value']}'";
+            if(isset($this->group_bys['having'])) {
+                foreach ($this->group_bys['having'] as $having) {
+                    $having_sql .= "{$having['logical']} {$having['column']} {$having['operator']} ";
+                    if(is_numeric($having['value'])) $having_sql .= $having['value'];
+                    else $having_sql .= "'{$having['value']}'";
+                }
             }
         }
 
@@ -269,7 +280,7 @@ class Model {
     }
 
     function join($object) {
-        if(!in_array($object['table'], $this->schema['tables'])) Lib::error("JlModel setJoins() : {$object['table']} 테이블을 찾을수 없습니다.");
+        if(!in_array($object['table'], $this->schema['tables'])) Lib::error("Model setJoins() : {$object['table']} 테이블을 찾을수 없습니다.");
 
         $this->schema[$object['table']]['columns'] = $this->getColumns($object['table']);
         array_push($this->joins,$object);
@@ -387,7 +398,7 @@ class Model {
         }
         $columns = $this->schema[$table]['columns'];
 
-        if(!is_array($value)) Lib::error("JlModel in() : 비교값이 배열이 아닙니다.");
+        if(!is_array($value)) Lib::error("Model in() : 비교값이 배열이 아닙니다.");
 
         if(in_array($column, $columns) && count($value)){
             if($this->block) {

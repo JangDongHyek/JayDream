@@ -4,11 +4,6 @@ class JayDreamPlugin {
     }
 
     async alert(message, options = {}) {
-        //if(this.jl.isMobile()) {
-        //    await this.toast(message,options);
-        //    return false;
-        //}
-
         switch (this.jd.alert) {
             case "origin" : {
                 alert(message);
@@ -88,7 +83,7 @@ class JayDreamPlugin {
 
     /*
        this.$nextTick(() =>{
-            this.jl.imageViewer('main_image',{
+            this.$jd.plugin.imageViewer('main_image',{
                 zIndex:9999,
                 toolbar : false,
                 title : (image) => {return this.data.main_image_array[i].name}

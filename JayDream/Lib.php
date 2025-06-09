@@ -58,9 +58,9 @@ class Lib {
             $obj = json_decode($json, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $msg = "Jl jsonDecode()";
+                $msg = " jsonDecode()";
 
-                self::error("Jl jsonDecode()\norigin : ".$origin_json."\nreplace : $json");
+                self::error(" jsonDecode()\norigin : ".$origin_json."\nreplace : $json");
             }
         }
 
@@ -168,17 +168,17 @@ class Lib {
 
     public static function deleteDir($path) {
         if($path == "") {
-            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 빈값입니다.");
+            Lib::error(" deleteDir() : 삭제 할려는 폴더가 빈값입니다.");
         }
         if($path == Config::$ROOT) {
-            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 루트 디렉토리입니다.");
+            Lib::error(" deleteDir() : 삭제 할려는 폴더가 루트 디렉토리입니다.");
         }
         if(strpos($path,Config::$ROOT) !== false) $dir = $path;
         else $dir = Config::$ROOT.$path;
 
 
         if (!file_exists($dir)) {
-            Lib::error("Jl deleteDir() : 삭제 할려는 폴더가 존재하지 않습니다.");
+            Lib::error(" deleteDir() : 삭제 할려는 폴더가 존재하지 않습니다.");
         }
 
         $files = array_diff(scandir($dir), array('.', '..'));
@@ -188,7 +188,7 @@ class Lib {
 
             if (is_dir($filePath)) {
                 //$this->deleteDir($filePath); // 해당부분은 너무 위험해서 주석처리
-                Lib::error("Jl deleteDir() : 삭제 할려는 폴더안에 폴더가 또 있습니다 폴더부터 지운후 진행해주세요.");
+                Lib::error(" deleteDir() : 삭제 할려는 폴더안에 폴더가 또 있습니다 폴더부터 지운후 진행해주세요.");
             } else {
                 unlink($filePath);
             }
@@ -229,8 +229,7 @@ class Lib {
             case 'gnuboard' :
                 return get_encrypt_string($value);
             case 'ci4' :
-                $secret = Config::PASSWORD;
-                return password_hash($value, $secret);
+                return password_hash($value, PASSWORD_DEFAULT);
             default:
                 Lib::error("ENCRYPT 설정이 없습니다");
         }
@@ -387,6 +386,25 @@ class Lib {
         Session::set('ss_mb_key', md5($user['mb_datetime'] . self::getClientIP() . $_SERVER['HTTP_USER_AGENT']));
 
 
+    }
+
+    public static function isJson($string) {
+        // 정규식 패턴 정의
+        $pattern = '/^\s*(\{.*\}|\[.*\])\s*$/';
+
+        // 문자열이 비어있으면 false
+        if (empty($string)) {
+            return false;
+        }
+
+        // 정규식 검사
+        if (!preg_match($pattern, $string)) {
+            return false;
+        }
+
+        // json_decode로 실제 JSON 유효성 확인
+        json_decode($string);
+        return (json_last_error() === JSON_ERROR_NONE);
     }
 
 }

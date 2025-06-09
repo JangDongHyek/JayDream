@@ -152,7 +152,7 @@ class App {
         }else if(is_dir($path)) {
             Lib::includeDir($path);
         }else {
-            Lib::error("Jl componentLoad() : $path 가 존재하지않습니다.");
+            Lib::error("componentLoad() : $path 가 존재하지않습니다.");
         }
     }
 }

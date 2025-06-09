@@ -108,8 +108,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         joins: [
                             {
                                 table: "payment",
-                                base: "idx",               // 갑 테이블의 연결 key
-                                foreign: "idx",            // 을 테이블의 연결 key
+                                base: "idx",               // filter 테이블의 연결 key
+                                foreign: "idx",            // join 테이블의 연결 key
                                 type: "INNER",             // INNER, LEFT, RIGHT
                                 select_column: ["column"], // 조회할 컬럼 $payment__column 식으로 as되서 들어간다 || "*"
                                 on: [ // 안할거면 삭제해줘야함
