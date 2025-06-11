@@ -194,7 +194,7 @@ class Model {
             foreach ($row as $key => $value) {
                 if($this->primary == $key) continue;
 
-                if(Lib::isJson($value)) {
+                if(Lib::isDecode($value)) {
                     $decoded_value = json_decode($value, true);
 
                     if (!is_null($decoded_value)) {
@@ -299,7 +299,6 @@ class Model {
         $columns = $this->schema[$table]['columns'];
 
         if(!in_array($column, $columns)) Lib::error("Model orderBy() : {$table}에  {$column}컬럼이 존재하지않습니다.");
-        if(!in_array($value,array("DESC","ASC"))) Lib::error("Model orderBy() : DESC , ASC 둘중 하나만 선택가능합니다.");
 
         if($this->sql_order_by) $this->sql_order_by .= ",";
         $this->sql_order_by .= " {$table}.{$column} {$value}";

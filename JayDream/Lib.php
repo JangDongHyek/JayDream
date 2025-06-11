@@ -388,23 +388,26 @@ class Lib {
 
     }
 
-    public static function isJson($string) {
-        // 정규식 패턴 정의
-        $pattern = '/^\s*(\{.*\}|\[.*\])\s*$/';
-
-        // 문자열이 비어있으면 false
-        if (empty($string)) {
+    public static function isDecode($value) {
+        if (!is_string($value) || trim($value) === '') {
             return false;
         }
 
-        // 정규식 검사
-        if (!preg_match($pattern, $string)) {
+        $decoded = json_decode($value, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
             return false;
         }
 
-        // json_decode로 실제 JSON 유효성 확인
-        json_decode($string);
-        return (json_last_error() === JSON_ERROR_NONE);
+        // 허용 조건: null, true, false, 배열([]), 연관배열({})만
+        if (is_null($decoded) || $decoded === true || $decoded === false) {
+            return true;
+        }
+
+        if (is_array($decoded)) {
+            return true;
+        }
+
+        return false;
     }
 
 }
