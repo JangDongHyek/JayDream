@@ -314,6 +314,8 @@ class Model {
         }
         $columns = $this->schema[$table]['columns'];
 
+        if($column == 'primary') $column = $this->primary;
+
         if(in_array($column, $columns)){
             if($value == "") return $this;
             if($value == "__null__") $value = "";

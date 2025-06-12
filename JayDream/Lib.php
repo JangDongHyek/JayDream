@@ -24,7 +24,7 @@ class Lib {
                 $er['line_'.$index] = $t['line'];
             }
         }
-
+        header('Content-Type: application/json; charset=UTF-8');
         if(Config::$DEV) echo self::jsonEncode($er);
         else echo self::jsonEncode(self::encryptAPI($er));
         die();

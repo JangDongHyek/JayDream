@@ -32,15 +32,19 @@
 
     }
 
-    async function putData() {
-        let row = {};
+    async function postData() {
+        let row = {
+            subject : document.getElementById("subject").value,
+            upfiles : document.getElementById("fileInput_0").files[0] || null,
+        };
 
         let options = {
             table : ""
         }
 
         try {
-            let res = await jd.lib.ajax("update",row,"/JayDream/api.php",options);
+            let method = row.primary ? 'update' : 'insert'
+            let res = await jd.lib.ajax(method,row,"/JayDream/api.php",options);
 
             await jd.lib.alert('수정되었습니다.');
             // window.location.reload();
