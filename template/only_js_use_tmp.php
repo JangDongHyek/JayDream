@@ -29,7 +29,6 @@
         }catch (e) {
             await jd.lib.alert(e.message)
         }
-
     }
 
     async function postData() {
