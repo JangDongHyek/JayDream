@@ -489,8 +489,11 @@ class Model {
 
         $sql = "INSERT INTO {$this->table} ($columns) VALUES ($values)";
 
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
 
         if($param[$this->primary]) {
             $response = array("sql" => $sql,"primary" => $param[$this->primary]);
@@ -529,8 +532,11 @@ class Model {
 
         $sql = "UPDATE {$this->table} SET $update_sql WHERE 1 $search_sql";
 
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
@@ -560,8 +566,11 @@ class Model {
         $sql = "UPDATE {$this->table} SET $update_sql";
         $sql .= "WHERE 1 {$this->sql} ";
 
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
@@ -578,8 +587,11 @@ class Model {
 
         $sql = "DELETE FROM {$this->table} WHERE 1 $search_sql ";
 
-        $result = mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect)."\n $sql");
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
