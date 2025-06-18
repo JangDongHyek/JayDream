@@ -39,7 +39,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             <!-- body -->
             <template v-slot:default>
-                <external-daum-postcode v-model="row" field1="Addr1" @close="modal.status = false;"></external-daum-postcode>
+                <external-daum-postcode v-model="row" field1="Addr1"
+                                        @close="modal.status = false;"></external-daum-postcode>
             </template>
 
 
@@ -70,12 +71,12 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         class_2: "",
                     },
 
-                    filter : {
+                    filter: {
                         table: "user",
                         file_db: true, // 연관된 파일들 불러옴
 
                         page: 1,
-                        limit: 1,
+                        limit: 1, // 해당 값 수정시 페이지에 노출되는 게시글 갯수가 바뀜
                         count: 0,
 
                         where: [
@@ -84,7 +85,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 value: "",              // LIKE일시 %% 필수 || relations일시  $parent.idx
                                 logical: "AND",         // AND,OR,AND NOT
                                 operator: "=",          // = ,!= >= <=, LIKE,
-                                encrypt : false,        // true시 벨류가 암호화된 값으로 들어감
+                                encrypt: false,        // true시 벨류가 암호화된 값으로 들어감
                             },
                         ],
 
@@ -162,58 +163,62 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             }
                         ],
 
-                        blocks : [
+                        blocks: [
                             { // filter 형식으로 넣어주면된다 , 객체 하나당 () 괄호 조건문이 꾸며진다
-                                logical : "AND" // 괄호 전 어떤 논리 연사자가 들어갈지
-                                where : []
+                                logical: "AND" // 괄호 전 어떤 논리 연사자가 들어갈지
+                                where: []
                             },
                         ]
                     },
 
-                    options : {
-                        table: "", // post || delete
+                    options: {// 추가,삭제시에만 사용되는 데이터 셋
+                        table: "",
 
-                        required: [ // post
-                            {name: "", message: ``}, //simple
-                            {//String
+                        required: [ // (추가) 필수값 설정
+                            // (String)  row.name 값이 빈값일경우 message가 alert으로 노출됌
+                            { name: "", message: `` },
+                            // (String) min미만 max초과일때  message가 alert으로 노출됌
+                            {
                                 name: "",
                                 message: ``,
                                 min: {length: 10, message: ""},
                                 max: {length: 30, message: ""}
                             },
-                            {//Array
+                            // (Array) min미만 max초과일때 message가 alert으로 노출됌
+                            {
                                 name: "",
                                 min: {length: 1, message: ""}
                                 max: {length: 10, message: ""}
                             },
                         ],
 
-                        href: "", // post || delete
-                        message : "", // delete
+                        href: "", // (추가,삭제) 로직 완료시 이동되는 페이지 빈값이면 새로고침
 
-                        confirm: { // post
+                        message: "", // (추가,삭제) 추가 : 추가 후 나오는 메세지, 삭제 : 삭제 전 confirm 메세지
+
+                        confirm: { // (추가) 추가전 Confirm 으로 물어보고싶을때
                             message: '',
-                            callback: async () => { // false 시 실행되는 callback
+                            callback: async () => { // 취소 시 실행되는 callback
 
                             },
                         },
 
-                        hashes : [ // post * 대입방식 row[alias] 값이 암호화되서 row[column]에 대입된다
+                        hashes: [ // (추가) * 대입방식 row[alias] 값이 암호화되서 row[column]에 대입된다
                             {
-                                column : "",
-                                alias : "",
+                                column: "",
+                                alias: "",
                             }
                         ],
 
-                        exists: [ // post
-                            { // 필터방식
-                                table : "",
+                        exists: [ // (추가) 조건에 해당하는 데이터가 있는지 있다면 alert으로 message 노출
+                            { // 최상단 filter 방식으로 똑같이 넣어주면된다
+                                table: "",
                                 message: "",
                             }
                         ],
                     },
 
-                    sessions : {},
+                    sessions: {},
                 };
             },
             async created() {
@@ -224,15 +229,15 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 await this.$getsData(this.filter, this.rows);
 
                 //session 등록하기
-                await this.$jd.lib.ajax("session_set",{
-                    name : "exam"
-                },"/JayDream/api.php");
+                await this.$jd.lib.ajax("session_set", {
+                    name: "exam"
+                }, "/JayDream/api.php");
 
                 //session 가져오기
-                this.sessions = (await this.$jd.lib.ajax("session_get",{
-                    example : "",
-                    ss_mb_id : "",
-                },"/JayDream/api.php")).sessions;
+                this.sessions = (await this.$jd.lib.ajax("session_get", {
+                    example: "",
+                    ss_mb_id: "",
+                }, "/JayDream/api.php")).sessions;
             },
             updated() {
 
@@ -244,29 +249,27 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     let options = {}
 
                     try {
-                        let res = await this.$jd.lib.ajax("update",row,"/JayDream/api.php",options);
+                        let res = await this.$jd.lib.ajax("update", row, "/JayDream/api.php", options);
 
                         await this.$jd.lib.alert("결제가 완료되었습니다.");
                         this.$jd.lib.href()
 
-                    }catch (e) {
+                    } catch (e) {
                         await this.$jd.lib.alert(e.message)
                     }
                 },
                 async restApi() {
-                    let row = {
-
-                    };
+                    let row = {};
 
                     let options = {
-                        table : ""
+                        table: ""
                     }
 
                     try {
-                        let res = await this.$jd.lib.ajax("method",row,"/JayDream/api.php",options);
+                        let res = await this.$jd.lib.ajax("method", row, "/JayDream/api.php", options);
 
 
-                    }catch (e) {
+                    } catch (e) {
                         await this.$jd.lib.alert(e.message)
                     }
                 }
@@ -283,12 +286,12 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 },
                 pay_core() {
                     return {
-                        payMethod : this.payMethod,
-                        goodsName : this.order.product_log.name,
-                        amt : this.order.price,
-                        buyerName : "테스트",
-                        buyerTel : this.member.mb_hp.formatOnlyNumber(),
-                        buyerEmail : this.member.mb_email,
+                        payMethod: this.payMethod,
+                        goodsName: this.order.product_log.name,
+                        amt: this.order.price,
+                        buyerName: "테스트",
+                        buyerTel: this.member.mb_hp.formatOnlyNumber(),
+                        buyerEmail: this.member.mb_email,
                     }
                 }
             },

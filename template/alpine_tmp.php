@@ -1,6 +1,6 @@
+<div x-data="pageComponent"></div>
 
 <? $jd->jsLoad();?>
-
 <script>
     window.pageComponent = function () {
         return {

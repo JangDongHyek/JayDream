@@ -82,11 +82,11 @@ class Model {
 
     function blockEnd() {
         if(!$this->block) Lib::error("block이 시작된적이 없습니다.");
-        
+
         $this->block = false;
         $this->block_bool = 0;
         $this->sql .= " ) ";
-        
+
         return $this;
     }
 
@@ -161,8 +161,8 @@ class Model {
     }
 
     function get($_param = array()) {
-        $page = $_param['page'] ? $_param['page'] : 0;
-        $limit = $_param['limit'] ? $_param['limit'] : 0;
+        $page =  isset($_param['page']) ? $_param['page'] : 0;
+        $limit = isset($_param['limit']) ? $_param['limit'] : 0;
         $skip  = ($page - 1) * $limit;
 
         $sql = $this->getSql($_param);
@@ -243,7 +243,7 @@ class Model {
             }
         }
 
-        if($_param['count']) $select_field = "{$this->table}.{$this->primary}";
+        if(isset($_param['count'])) $select_field = "{$this->table}.{$this->primary}";
 
         $having_sql = "";
         $group_sql = "";
@@ -440,6 +440,8 @@ class Model {
             $param[$this->primary] = empty($param[$this->primary]) ? Lib::generateUniqueId() : $param[$this->primary];
         }
 
+        $columns = "";
+        $values = "";
         foreach($this->schema[$this->table]['columns'] as $column) {
             $info = $this->schema[$this->table]['columns_info'][$column];
 
@@ -450,6 +452,7 @@ class Model {
                 }
             }
 
+            if(!isset($param[$column])) continue;
             $value = $param[$column];
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 
@@ -474,6 +477,9 @@ class Model {
             }
 
             if($column == 'insert_date') {
+                if($value == "0000-00-00 00:00:00") $value = 'now()';
+            }
+            if($column == 'created_at') {
                 if($value == "0000-00-00 00:00:00") $value = 'now()';
             }
             if($column == 'wr_datetime') $value = 'now()';
@@ -506,17 +512,22 @@ class Model {
 
     function update($_param){
         $param = $this->escape($_param);
-
         if($param['primary']) $param[$this->primary] = $param['primary'];
+
 
         if(!isset($param[$this->primary])) Lib::error("Model update() : 고유 키 값이 존재하지 않습니다.");
 
         $search_sql = " AND $this->primary='{$param[$this->primary]}' ";
 
+        $update_sql = "";
         foreach($param as $key => $value){
-            if($key == "update_date") continue;
+            if($key == "update_date" || $key == "updated_at") continue;
+
             if(in_array($key, $this->schema[$this->table]['columns'])){
                 $column = $this->schema[$this->table]['columns_info'][$key];
+                if ($column['IS_NULLABLE'] == "YES" && $value == "") {
+                    continue;
+                }
                 if(!empty($update_sql)) $update_sql .= ", ";
 
                 if($value == "now()") $update_sql .= "`{$key}`={$value}";
@@ -528,6 +539,9 @@ class Model {
 
         if(in_array("update_date", $this->schema[$this->table]['columns'])){
             $update_sql .= ", `update_date` = now() ";
+        }
+        if(in_array("updated_at", $this->schema[$this->table]['columns'])){
+            $update_sql .= ", `updated_at` = now() ";
         }
 
         $sql = "UPDATE {$this->table} SET $update_sql WHERE 1 $search_sql";
@@ -547,7 +561,7 @@ class Model {
         if($param['primary']) $param[$this->primary] = $param['primary'];
 
         foreach($param as $key => $value){
-            if($key == "update_date") continue;
+            if($key == "update_date" || $key == "updated_at") continue;
             if(in_array($key, $this->schema[$this->table]['columns'])){
                 $column = $this->schema[$this->table]['columns_info'][$key];
                 if(!empty($update_sql)) $update_sql .= ", ";
@@ -561,6 +575,9 @@ class Model {
 
         if(in_array("update_date", $this->schema[$this->table]['columns'])){
             $update_sql .= ", `update_date` = now() ";
+        }
+        if(in_array("updated_at", $this->schema[$this->table]['columns'])){
+            $update_sql .= ", `updated_at` = now() ";
         }
 
         $sql = "UPDATE {$this->table} SET $update_sql";

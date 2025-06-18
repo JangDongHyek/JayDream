@@ -66,7 +66,8 @@ function vueLoad(app_name) {
             if(options.callback) {
                 await options.callback(res)
             }else {
-                await this.$jd.plugin.alert("완료되었습니다.");
+                let message = options.message ? options.message : "완료되었습니다.";
+                await this.$jd.plugin.alert(message);
 
                 if(options.href) window.location.href = JayDream.url + options.href;
                 else window.location.reload();
