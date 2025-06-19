@@ -296,12 +296,9 @@ class Model {
         } else {
             $table = $this->table;
         }
-        $columns = $this->schema[$table]['columns'];
-
-        if(!in_array($column, $columns)) Lib::error("Model orderBy() : {$table}에  {$column}컬럼이 존재하지않습니다.");
 
         if($this->sql_order_by) $this->sql_order_by .= ",";
-        $this->sql_order_by .= " {$table}.{$column} {$value}";
+        $this->sql_order_by .= " {$column} {$value}";
 
         return $this;
     }

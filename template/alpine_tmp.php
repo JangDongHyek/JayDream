@@ -4,7 +4,7 @@
 <script>
     window.pageComponent = function () {
         return {
-            $jd : null,
+            $jd : {},
 
             async init() {
                 this.$jd.url = JayDream_url;
@@ -12,8 +12,8 @@
                 this.$jd.alert = JayDream_alert;
                 this.$jd.api_key = JayDream_api_key;
                 this.$jd.api_iv = JayDream_api_iv;
-                this.$jd.plugin = new JayDreamPlugin(jd);
-                this.$jd.lib = new JayDreamLib(jd);
+                this.$jd.plugin = new JayDreamPlugin(this.$jd);
+                this.$jd.lib = new JayDreamLib(this.$jd);
             },
 
             async postData() {

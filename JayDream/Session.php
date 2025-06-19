@@ -1,16 +1,12 @@
 <?php
 namespace JayDream;
 
-use JayDream\Config;
-use JayDream\Lib;
-
 class Session {
     public static function init() {
-        if(Config::$framework == "gnuboard") {
-            //session_name('G5PHPSESSID'); // 안쓰는곳도있으므로 common 확인후 설정
+        if (Config::$framework == "gnuboard") {
             session_save_path(Config::$ROOT."/data/session");
-        }else if(Config::$framework == "legacy") {
-            if(!session_save_path()) Lib::error("session_save_path가 없습니다.");
+        } else if (Config::$framework == "legacy") {
+            if (!session_save_path()) Lib::error("session_save_path가 없습니다.");
         }
 
         if (!session_id()) {
@@ -19,26 +15,32 @@ class Session {
     }
 
     public static function get($key) {
-        if(Config::$framework == "gnuboard" || Config::$framework == "legacy") {
+        if (Config::$framework == "ci4") {
+            return \CodeIgniter\Config\Services::session()->get($key);
+        } else if (in_array(Config::$framework, ["gnuboard", "legacy"])) {
             return $_SESSION[$key] ? $_SESSION[$key] : null;
-        }else {
-            Lib::error("개발해야함");
+        } else {
+            Lib::error("세션 프레임워크 미지원");
         }
     }
 
-    public static function set($key,$value) {
-        if(Config::$framework == "gnuboard" || Config::$framework == "legacy") {
+    public static function set($key, $value) {
+        if (Config::$framework == "ci4") {
+            \CodeIgniter\Config\Services::session()->set($key, $value);
+        } else if (in_array(Config::$framework, ["gnuboard", "legacy"])) {
             $_SESSION[$key] = $value;
-        }else {
-            Lib::error("개발해야함");
+        } else {
+            Lib::error("세션 프레임워크 미지원");
         }
     }
 
     public static function remove($key) {
-        if(Config::$framework == "gnuboard" || Config::$framework == "legacy") {
+        if (Config::$framework == "ci4") {
+            \CodeIgniter\Config\Services::session()->remove($key);
+        } else if (in_array(Config::$framework, ["gnuboard", "legacy"])) {
             unset($_SESSION[$key]);
-        }else {
-            Lib::error("개발해야함");
+        } else {
+            Lib::error("세션 프레임워크 미지원");
         }
     }
 }
