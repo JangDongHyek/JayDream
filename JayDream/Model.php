@@ -147,7 +147,7 @@ class Model {
     }
 
     function count(){
-        $sql = $this->getSql(array("count" => true));
+        $sql = $this->getSql(array("count_check" => true));
         try {
             $result = mysqli_query(Config::$connect, $sql);
 
@@ -243,7 +243,7 @@ class Model {
             }
         }
 
-        if(isset($_param['count'])) $select_field = "{$this->table}.{$this->primary}";
+        if(isset($_param['count_check'])) $select_field = "{$this->table}.{$this->primary}";
 
         $having_sql = "";
         $group_sql = "";
@@ -442,15 +442,8 @@ class Model {
         foreach($this->schema[$this->table]['columns'] as $column) {
             $info = $this->schema[$this->table]['columns_info'][$column];
 
-            //보낸 데이터에서 해당 값이없는데 null설정이 되어있다면 건너뛰게
-            if (!array_key_exists($column, $param)) {
-                if ($info['IS_NULLABLE'] == "YES") {
-                    continue;
-                }
-            }
-
-            if(!isset($param[$column])) continue;
-            $value = $param[$column];
+            if(isset($param[$column])) $value = $param[$column];
+            else $value = "";
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 
             // 컬럼의 데이터타입이 datetime 인데 널값이 허용이면 넘기고 아니면 기본값을 넣어서 쿼리작성
@@ -458,6 +451,8 @@ class Model {
                 if($value == '') {
                     if($info['IS_NULLABLE'] == "NO") $value = '0';
                     else continue;
+                }else {
+                    $value = str_replace(',', '', $value);
                 }
             }
             if($info['DATA_TYPE'] == "datetime") {
@@ -480,6 +475,10 @@ class Model {
                 if($value == "0000-00-00 00:00:00") $value = 'now()';
             }
             if($column == 'wr_datetime') $value = 'now()';
+
+            if ($info['IS_NULLABLE'] == "YES" && !$value) {
+                continue;
+            }
 
             if(!empty($columns)) $columns .= ", ";
             $columns .= "`{$column}`";
@@ -522,9 +521,15 @@ class Model {
 
             if(in_array($key, $this->schema[$this->table]['columns'])){
                 $column = $this->schema[$this->table]['columns_info'][$key];
-                if ($column['IS_NULLABLE'] == "YES" && $value == "") {
-                    continue;
+
+                if($column['DATA_TYPE'] == "int" || $column['DATA_TYPE'] == "tinyint") {
+                    if($value == '') {
+                        $value = '0';
+                    }else {
+                        $value = str_replace(',', '', $value);
+                    }
                 }
+
                 if(!empty($update_sql)) $update_sql .= ", ";
 
                 if($value == "now()") $update_sql .= "`{$key}`={$value}";
@@ -557,6 +562,7 @@ class Model {
 
         if($param['primary']) $param[$this->primary] = $param['primary'];
 
+        $update_sql = "";
         foreach($param as $key => $value){
             if($key == "update_date" || $key == "updated_at") continue;
             if(in_array($key, $this->schema[$this->table]['columns'])){

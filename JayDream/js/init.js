@@ -36,6 +36,44 @@ function vueLoad(app_name) {
     JayDream.lib = new JayDreamLib(JayDream);
     JayDream.vue = new JayDreamVue();
 
+    //디렉티브
+    app.directive('price', {
+        mounted(el) {
+            el.addEventListener('input', () => {
+                JayDream.vue.formatPrice(el);
+            });
+
+            // 초기값이 있을 경우에도 포맷 적용
+            JayDream.vue.formatPrice(el);
+        },
+        updated(el) {
+            // 값이 외부에서 바뀐 경우에도 포맷 재적용
+            JayDream.vue.formatPrice(el);
+        }
+    });
+    app.directive('phone', {
+        mounted(el) {
+            el.addEventListener('input', () => {
+                JayDream.vue.formatPhone(el);
+            });
+            JayDream.vue.formatPhone(el); // 초기값 대응
+        },
+        updated(el) {
+            JayDream.vue.formatPhone(el);
+        }
+    });
+    app.directive('number', {
+        mounted(el) {
+            el.addEventListener('input', () => {
+                JayDream.vue.formatNumber(el);
+            });
+            JayDream.vue.formatNumber(el); // 초기값 대응
+        },
+        updated(el) {
+            JayDream.vue.formatNumber(el);
+        }
+    });
+
     // Vue 내부에서만 접근 가능하게 설정
     app.config.globalProperties.$jd = JayDream;
 

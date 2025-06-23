@@ -34,7 +34,11 @@
                 };
             },
             created: function () {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                if(this.modelValue.id) {
+                    this.component_id = this.modelValue.id
+                }else {
+                    this.component_idx = this.$jd.lib.generateUniqueId();
+                }
 
             },
             mounted: function () {

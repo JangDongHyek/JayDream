@@ -1,7 +1,31 @@
 class JayDreamVue {
-    inputNumber(e,object = null, field = '') {
-        e.target.value = e.target.value.replace(/[^0-9]/g, ""); // 숫자 이외 제거
-        if(object) object[field] = e.target.value;
+    formatPrice(el) {
+        let value = el.value.replace(/[^0-9]/g, '').replace(/^0+/, '').slice(0, 13);
+
+        if (value) {
+            value = parseInt(value, 10).toLocaleString();
+        }
+
+        el.value = value;
+    }
+
+    formatPhone(el) {
+        let value = el.value.replace(/[^0-9]/g, '').slice(0, 11);
+
+        if (value.length >= 11) {
+            value = value.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+        } else if (value.length >= 7) {
+            value = value.replace(/(\d{3})(\d{3,4})/, "$1-$2");
+        } else if (value.length >= 4) {
+            value = value.replace(/(\d{3})(\d{1,3})/, "$1-$2");
+        }
+
+        el.value = value;
+    }
+
+    formatNumber(el) {
+        let value = el.value.replace(/[^0-9]/g, '');
+        el.value = value;
     }
 
     commonFile(files,obj,key,permission) {

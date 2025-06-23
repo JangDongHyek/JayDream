@@ -4,7 +4,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
         <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')" name="names[]">
-        <input type="text" @input="$jd.vue.onInput"> <!-- 숫자만 입력가능하게 -->
+        <input type="text" @input="$jd.vue.inputNumber"> <!-- 숫자만 입력가능하게 -->
 
         <button @click="$postData(row,options)">테스트</button>
         <button @click="$deleteData(row,options)">삭제</button>
@@ -50,6 +50,9 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         </external-bs-modal>
 
         <external-summernote :row="row" field="content"></external-summernote>
+
+        <!--  item  -->
+        <item-paging :filter="filter" @change="$getsData(filter,rows);"></item-paging>
     </div>
 </script>
 
@@ -66,9 +69,10 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     rows: [],
 
                     modal: {
+                        id : "", // modal의 id값을 설정합니다 빈값이라면 고유값을 랜덤으로 생성해 지정합니다
+                        class_1: "", // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
+                        class_2: "", // modal-dialog 부분에 클래스를 추가합니다
                         status: false,
-                        class_1: "",
-                        class_2: "",
                     },
 
                     filter: {
@@ -82,7 +86,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         where: [
                             {
                                 column: "",             // join 조건시 user.idx
-                                value: "",              // LIKE일시 %% 필수 || relations일시  $parent.idx
+                                value: ``,              // LIKE일시 %% 필수 || relations일시  $parent.idx
                                 logical: "AND",         // AND,OR,AND NOT
                                 operator: "=",          // = ,!= >= <=, LIKE,
                                 encrypt: false,        // true시 벨류가 암호화된 값으로 들어감
