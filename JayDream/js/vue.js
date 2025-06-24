@@ -1,31 +1,51 @@
 class JayDreamVue {
     formatPrice(el) {
-        let value = el.value.replace(/[^0-9]/g, '').replace(/^0+/, '').slice(0, 13);
+        let raw = el.value.replace(/[^0-9]/g, '').replace(/^0+/, '').slice(0, 13);
+        let formatted = raw;
 
-        if (value) {
-            value = parseInt(value, 10).toLocaleString();
+        if (raw) {
+            formatted = parseInt(raw, 10).toLocaleString();
         }
 
-        el.value = value;
+        if (el.value !== formatted) {
+            el.value = formatted;
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+        }
     }
 
     formatPhone(el) {
-        let value = el.value.replace(/[^0-9]/g, '').slice(0, 11);
+        let raw = el.value.replace(/[^0-9]/g, '');
 
-        if (value.length >= 11) {
-            value = value.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-        } else if (value.length >= 7) {
-            value = value.replace(/(\d{3})(\d{3,4})/, "$1-$2");
-        } else if (value.length >= 4) {
-            value = value.replace(/(\d{3})(\d{1,3})/, "$1-$2");
+        if (raw.length > 11) {
+            raw = raw.slice(0, 11);
         }
 
-        el.value = value;
+        let formatted = raw;
+
+        if (raw.length >= 11) {
+            formatted = raw.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+        } else if (raw.length >= 7) {
+            formatted = raw.replace(/(\d{3})(\d{3,4})/, "$1-$2");
+        } else if (raw.length >= 4) {
+            formatted = raw.replace(/(\d{3})(\d{1,3})/, "$1-$2");
+        }
+
+        if (formatted.length > 13) {
+            formatted = formatted.slice(0, 13);
+        }
+
+        if (el.value !== formatted) {
+            el.value = formatted;
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+        }
     }
 
     formatNumber(el) {
-        let value = el.value.replace(/[^0-9]/g, '');
-        el.value = value;
+        const raw = el.value.replace(/[^0-9]/g, '');
+        if (el.value !== raw) {
+            el.value = raw;
+            el.dispatchEvent(new Event("input", { bubbles: true }));
+        }
     }
 
     commonFile(files,obj,key,permission) {

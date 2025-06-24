@@ -443,11 +443,15 @@ class Model {
             $info = $this->schema[$this->table]['columns_info'][$column];
 
             if(isset($param[$column])) $value = $param[$column];
-            else $value = "";
+            else {
+                if($info['COLUMN_DEFAULT']) continue;
+
+                $value = "";
+            }
             if($column == $this->primary && $value == '') continue; // 10.2부터 int에 빈값이 허용안되기때문에 빈값일경우 패스
 
             // 컬럼의 데이터타입이 datetime 인데 널값이 허용이면 넘기고 아니면 기본값을 넣어서 쿼리작성
-            if($info['DATA_TYPE'] == "int" || $info['DATA_TYPE'] == "tinyint") {
+            if($info['DATA_TYPE'] == "int" || $info['DATA_TYPE'] == "tinyint" || $info['DATA_TYPE'] == "bigint") {
                 if($value == '') {
                     if($info['IS_NULLABLE'] == "NO") $value = '0';
                     else continue;
@@ -522,11 +526,24 @@ class Model {
             if(in_array($key, $this->schema[$this->table]['columns'])){
                 $column = $this->schema[$this->table]['columns_info'][$key];
 
-                if($column['DATA_TYPE'] == "int" || $column['DATA_TYPE'] == "tinyint") {
+                if($column['DATA_TYPE'] == "int" || $column['DATA_TYPE'] == "tinyint" || $column['DATA_TYPE'] == "bigint") {
                     if($value == '') {
-                        $value = '0';
+                        if($column['IS_NULLABLE'] == "NO") $value = '0';
+                        else continue;
                     }else {
                         $value = str_replace(',', '', $value);
+                    }
+                }
+                if($column['DATA_TYPE'] == "datetime") {
+                    if($value == '') {
+                        if($column['IS_NULLABLE'] == "NO") $value = '0000-00-00 00:00:00';
+                        else continue;
+                    }
+                }
+                if($column['DATA_TYPE'] == "date") {
+                    if($value == '') {
+                        if($column['IS_NULLABLE'] == "NO") $value = '0000-00-00';
+                        else continue;
                     }
                 }
 
