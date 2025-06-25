@@ -410,4 +410,16 @@ class Lib {
         return false;
     }
 
+    public static function normalizeUrl($url) {
+        $parts = parse_url($url);
+
+        $scheme = isset($parts['scheme']) ? $parts['scheme'] . '://' : '';
+        $host   = $parts['host'] ? $parts['host'] : '';
+        $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $path   = isset($parts['path']) ? preg_replace('#/+#', '/', $parts['path']) : '';
+        $query  = isset($parts['query']) ? '?' . $parts['query'] : '';
+
+        return $scheme . $host . $port . $path . $query;
+    }
+
 }

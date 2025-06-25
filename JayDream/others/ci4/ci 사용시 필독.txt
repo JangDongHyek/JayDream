@@ -1,0 +1,21 @@
+********************************************************
+ci4 환경
+App/Libraries 밑에 JayDream 복사 777필수
+js,resource 폴더는 필요없음
+
+public_html 밑에 JayDream 복사 777 필수
+js,resource 폴더만 필요함
+
+controller 추가해주기
+
+routes에 통신 추가해주기
+// 공통 rest API
+$routes->post('JayDream/api.php', 'jaydream\JayDreamController::method');
+// 카카오 로그인
+$routes->post('JayDream/plugin/kakao/api.php', 'jaydream\kakao\JayDreamKakaoController::method');
+$routes->get('JayDream/plugin/kakao/api.php', 'jaydream\kakao\JayDreamKakaoController::index');
+// 네이버 로그인
+$routes->post('JayDream/plugin/naver/api.php', 'jaydream\naver\JayDreamNaverController::method');
+$routes->get('JayDream/plugin/naver/api.php', 'jaydream\naver\JayDreamNaverController::index');
+
+

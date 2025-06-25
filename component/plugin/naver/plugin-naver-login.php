@@ -39,6 +39,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             methods: {
+                goUri() {
+                    window.location.href = this.redirect_uri
+                },
                 async getLoginUri() {
                     try {
                         let res = await this.$jd.lib.ajax("login_uri",{},"/JayDream/plugin/naver/api.php",{});

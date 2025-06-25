@@ -1,5 +1,5 @@
 <?php
-namespace App\Controllers;
+namespace App\Controllers\jaydream;
 
 use App\Controllers\BaseController;
 
@@ -10,7 +10,7 @@ use JayDream\Config;
 
 include_once(APPPATH . 'Libraries/JayDream/require.php');
 
-class JayDreamControllerCi4 extends BaseController
+class JayDreamController extends BaseController
 {
     private $service;
 

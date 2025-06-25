@@ -240,8 +240,12 @@ class JayDreamLib {
     }
 
     href(url) {
-        url = url.substring(1);
-        window.location.href = `${this.jd.url}/${url}`;
+        // 앞뒤 슬래시 정리
+        url = url.trim();
+        const base = this.jd.url.replace(/\/+$/, ''); // 끝 슬래시 제거
+        const path = url.replace(/^\/+/, '');         // 앞 슬래시 제거
+        const fullUrl = `${base}/${path}`;
+        window.location.href = this.normalizeUrl(fullUrl);
     }
 
     decryptAES(cipherText) {
@@ -251,5 +255,16 @@ class JayDreamLib {
             padding: CryptoJS.pad.Pkcs7
         });
         return decrypted.toString(CryptoJS.enc.Utf8);
+    }
+
+    normalizeUrl(url) {
+        try {
+            const urlObj = new URL(url);
+
+            const normalizedPath = urlObj.pathname.replace(/\/{2,}/g, '/');
+            return `${urlObj.protocol}//${urlObj.host}${normalizedPath}${urlObj.search}`;
+        } catch (e) {
+            return url;
+        }
     }
 }

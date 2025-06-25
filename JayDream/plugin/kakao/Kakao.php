@@ -16,7 +16,7 @@ class Kakao {
     }
 
     public static function redirectUri() {
-        return Config::$URL . "/JayDream/plugin/kakao/oauth/index.php";
+        return Lib::normalizeUrl(Config::$URL . "/JayDream/plugin/kakao/oauth/index.php");
     }
 
     public static function createUri() {

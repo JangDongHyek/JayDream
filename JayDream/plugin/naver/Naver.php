@@ -19,7 +19,7 @@ class Naver {
     }
 
     public static function redirectUri() {
-        return Config::$URL . "/JayDream/plugin/naver/oauth/index.php";
+        return Lib::normalizeUrl(Config::$URL . "/JayDream/plugin/naver/oauth/index.php");
     }
 
     public static function createUri() {
