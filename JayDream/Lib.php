@@ -407,6 +407,21 @@ class Lib {
             return true;
         }
 
+        // 숫자인 경우 → 지수 형태 제외하고 일반 숫자만 허용
+        if (is_int($decoded) || is_float($decoded)) {
+            // 지수 형태인지 확인 (예: 1e5, 10E3 등)
+            if (preg_match('/[eE]/', $value)) {
+                return false;
+            }
+
+            // 숫자만으로 구성된 값인지 (문자열로 주어진 경우)
+            if (!preg_match('/^-?\d+(\.\d+)?$/', $value)) {
+                return false;
+            }
+
+            return true;
+        }
+
         return false;
     }
 
