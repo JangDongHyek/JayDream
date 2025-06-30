@@ -57,9 +57,11 @@ class Service {
         if(isset($obj['relations'])) {
             foreach ($obj['relations'] as $filter) {
                 $model = new Model($filter['table']);
+                $as = "$".$filter['table'];
+                if(isset($filter['as']) && $filter['as']) $as = "$".$filter['as'];
 
                 foreach ($object["data"] as $index =>$data) {
-                    $object["data"][$index]["$".$filter['table']] = $model->setFilter($filter,$data)->get($filter);
+                    $object["data"][$index][$as] = $model->setFilter($filter,$data)->get($filter);
                     $ref = &$object["data"][$index]["$".$filter['table']];
                     self::resolveRelations($filter,$ref);
                 }

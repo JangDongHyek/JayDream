@@ -86,7 +86,7 @@ class Lib {
             return $jwt;
         }catch (ExpiredException $e) {
             setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
-            Lib::error("JWT 만료됨");
+            Lib::error("JWT 만료됐습니다\n새로고침을 해주세요.");
         } catch (SignatureInvalidException $e) {
             setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
             Lib::error("JWT 서명 오류");

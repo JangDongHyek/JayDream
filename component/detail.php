@@ -154,7 +154,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             },
                         ],
 
-                        add_object: [
+                        add_object: [ // 검색되는 모든 데이터에 해당하는 객체를 추가한다 * vue 데이터 선인식때문에
                             {
                                 name: "",
                                 value: ""
@@ -164,6 +164,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         relations: [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
                             {
                                 table: "",
+                                as : "" // 사용안할거면 삭제 해도됌
                             }
                         ],
 
@@ -172,6 +173,10 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 logical: "AND" // 괄호 전 어떤 논리 연사자가 들어갈지
                                 where: []
                             },
+                        ],
+
+                        fields : [
+                            "SUM(exam) as exam", // 조회하는 부분에 강제 추가한다 조인을 할경우 테이블 명시 필수
                         ]
                     },
 

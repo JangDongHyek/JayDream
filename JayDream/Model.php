@@ -303,14 +303,67 @@ class Model {
         return $this;
     }
 
-    function where($column,$value,$logical = "AND",$operator = "=") {
-        if (strpos($column, '.') !== false) {
-            list($table, $column) = explode('.', $column);
-        } else {
-            $table = $this->table;
-        }
-        $columns = $this->schema[$table]['columns'];
+    function parseColumn($columnStr) {
+        // 1. 함수 호출 (복수 인자 포함 지원)
+        if (preg_match('/^([A-Z_]+)\(\s*(.+?)\s*\)$/i', $columnStr, $matches)) {
+            $func = strtoupper($matches[1]);
+            $args = explode(',', $matches[2]);
 
+            $args = array_map('trim', $args); // 공백 제거
+
+            // 첫 번째 인자를 기준으로 column/table 추출
+            $firstArg = $args[0];
+
+            if (preg_match('/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)$/', $firstArg, $m)) {
+                $table = $m[1];
+                $column = $m[2];
+            } else {
+                $table = $this->table;
+                $column = $firstArg;
+            }
+
+            return [
+                'func' => $func,
+                'table' => $table,
+                'column' => $column,
+                'args' => $args
+            ];
+        }
+
+        // 2. 테이블.컬럼
+        if (preg_match('/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)$/', $columnStr, $matches)) {
+            return [
+                'func' => null,
+                'table' => $matches[1],
+                'column' => $matches[2],
+                'args' => []
+            ];
+        }
+
+        // 3. 컬럼만
+        return [
+            'func' => null,
+            'table' => $this->table,
+            'column' => $columnStr,
+            'args' => []
+        ];
+    }
+
+    function isFunction($value) {
+        return preg_match('/^[A-Z_]+\s*\(.*\)$/i', $value) === 1;
+    }
+
+    function where($column,$value,$logical = "AND",$operator = "=") {
+        $parsed = $this->parseColumn($column);
+        $func = $parsed['func'];
+        $table = $parsed['table'];
+        $column = $parsed['column'];
+        $args = $parsed['args'];
+
+        $field = $func ? $func.'('.implode(', ', $args).')' : "$table.`{$column}`";
+
+
+        $columns = $this->schema[$table]['columns'];
         if($column == 'primary') $column = $this->primary;
 
         if(in_array($column, $columns)){
@@ -324,19 +377,19 @@ class Model {
                 $this->sql .= " $logical ";
             }
 
-            if($value == "CURDATE()") {
-                $this->sql .= "$table.`{$column}` {$operator} {$value}";
-            }else if($value == "null") {
+            if($value == "null") {
                 $operator_upper = strtoupper($operator);
                 if (in_array($operator_upper, ["=", "IS"])) {
-                    $this->sql .= "$table.`{$column}` IS NULL";
+                    $this->sql .= "$field IS NULL";
                 } else if (in_array($operator_upper, ["!=", "IS NOT"])) {
-                    $this->sql .= "$table.`{$column}` IS NOT NULL";
+                    $this->sql .= "$field IS NOT NULL";
                 } else {
                     Lib::error("Model where() : NULL 비교는 =, !=, IS, IS NOT 만 사용할 수 있습니다.");
                 }
             }else {
-                $this->sql .= "$table.`{$column}` {$operator} '{$value}'";
+                if(!$this->isFunction($value)) $value = "'$value'";
+
+                $this->sql .= "$field {$operator} {$value}";
             }
 
         }else {
@@ -347,14 +400,13 @@ class Model {
     }
 
     function between($column,$start,$end,$logical = "AND") {
-        if (strpos($column, '.') !== false) {
-            list($table, $column) = explode('.', $column);
-        } else {
-            $table = $this->table;
-        }
+        $parsed = $this->parseColumn($column);
+        $table = $parsed['table'];
+        $column = $parsed['column'];
+
         $columns = $this->schema[$table]['columns'];
 
-        if(strtolower($column) == "curdate()" || strtolower($column) == "now()" || strtotime($column) !== false) {
+        if($this->isFunction($column) || strtotime($column) !== false) {
             if(!in_array($start, $columns)) Lib::error("Model between() : start 컬럼이 존재하지않습니다.");
             if(!in_array($end, $columns)) Lib::error("Model between() : end 컬럼이 존재하지않습니다.");
             if($this->block) {
@@ -371,6 +423,8 @@ class Model {
             if(in_array($column, $columns)){
                 if(strpos($start,":") === false) $start .= " 00:00:00";
                 if(strpos($end,":") === false) $end .= " 23:59:59";
+                if(!$this->isFunction($start)) $start = "'$start'";
+                if(!$this->isFunction($end)) $end = "'$end'";
 
                 if($this->block) {
                     if(!$this->block_bool) $this->block_bool = 1;
@@ -379,7 +433,7 @@ class Model {
                     $this->sql .= " {$logical} ";
                 }
 
-                $this->sql .= "$table.{$column} BETWEEN '{$start}' AND '{$end}' ";
+                $this->sql .= "$table.{$column} BETWEEN {$start} AND {$end} ";
             }else {
                 Lib::error("Model between() : {$table}에  {$column}컬럼이 존재하지않습니다.");
             }
@@ -389,11 +443,10 @@ class Model {
     }
 
     function in($column,$value,$logical = "AND") {
-        if (strpos($column, '.') !== false) {
-            list($table, $column) = explode('.', $column);
-        } else {
-            $table = $this->table;
-        }
+        $parsed = $this->parseColumn($column);
+        $table = $parsed['table'];
+        $column = $parsed['column'];
+
         $columns = $this->schema[$table]['columns'];
 
         if(!is_array($value)) Lib::error("Model in() : 비교값이 배열이 아닙니다.");

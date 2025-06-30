@@ -6,7 +6,7 @@ use JayDream\Service;
 use JayDream\Session;
 use JayDream\Config;
 
-if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.");
+if (!isset($_COOKIE['jd_jwt_token'])) Lib::error("jwt 토큰이 존재하지않습니다.\n새로고침을 해주세요.");
 $jwt = Lib::jwtDecode($_COOKIE['jd_jwt_token']);
 
 $method = $_POST['_method'];
