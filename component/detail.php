@@ -137,7 +137,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                     as: "total_sum", // 필수값
                                 },
                             ],
-                            having: [ // 안할거면 삭제해줘야함
+                            having: [ // 사용 안할거면 삭제해줘야함
                                 {
                                     column: "",//as 사용가능, 컬럼으로 사용시 앞에 테이블명시 필수
                                     value: "",
@@ -164,7 +164,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         relations: [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
                             {
                                 table: "",
-                                as : "" // 사용안할거면 삭제 해도됌
+                                as : "" // 빈값일시 $table 으로 삽입됌
                             }
                         ],
 
@@ -176,7 +176,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         ],
 
                         fields : [
-                            "SUM(exam) as exam", // 조회하는 부분에 강제 추가한다 조인을 할경우 테이블 명시 필수
+                            "SUM(column) as sum_column", // 조회하는 부분에 강제 추가한다 조인을 할경우 테이블 명시 필수
                         ]
                     },
 

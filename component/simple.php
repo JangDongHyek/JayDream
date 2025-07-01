@@ -34,7 +34,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                 this.load = true;
 
-                this.$nextTick(() => {
+                this.$nextTick(async () => {
                     // 해당부분에 퍼블리싱 라이브러리,플러그인 선언부분 하시면 됩니다 ex) swiper
                 });
             },

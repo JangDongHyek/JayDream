@@ -18,6 +18,13 @@ class Naver {
         self::$code = $_GET['code'];
     }
 
+    public static function getInfo() {
+        return array(
+            "client_id" => self::$client_id,
+            "client_secret" => self::$client_secret
+        );
+    }
+
     public static function redirectUri() {
         return Lib::normalizeUrl(Config::$URL . "/JayDream/plugin/naver/oauth/index.php");
     }

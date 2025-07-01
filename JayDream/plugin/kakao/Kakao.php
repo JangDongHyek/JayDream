@@ -15,6 +15,10 @@ class Kakao {
         self::$code = $_GET['code'];
     }
 
+    public static function getInfo() {
+        return array("client_id" => self::$client_id);
+    }
+
     public static function redirectUri() {
         return Lib::normalizeUrl(Config::$URL . "/JayDream/plugin/kakao/oauth/index.php");
     }

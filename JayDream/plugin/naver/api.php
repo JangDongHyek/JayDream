@@ -28,6 +28,18 @@ switch ($method) {
         $response['message'] = "";
         $response['uri'] = Naver::createUri();
         break;
+
+    case "redirect_uri" :
+        $response['success'] = true;
+        $response['message'] = "";
+        $response['uri'] = Naver::redirectUri();
+        break;
+
+    case "info" :
+        $response['success'] = true;
+        $response['message'] = "";
+        $response['info'] = Naver::getInfo();
+        break;
 }
 
 if(!Config::$DEV) $response = Lib::encryptAPI($response);

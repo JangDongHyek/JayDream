@@ -28,6 +28,18 @@ switch ($method) {
         $response['message'] = "";
         $response['uri'] = Kakao::createUri();
         break;
+
+    case "info" :
+        $response['success'] = true;
+        $response['message'] = "";
+        $response['info'] = Kakao::getInfo();
+        break;
+
+    case "redirect_uri" :
+        $response['success'] = true;
+        $response['message'] = "";
+        $response['uri'] = Kakao::redirectUri();
+        break;
 }
 
 if(!Config::$DEV) $response = Lib::encryptAPI($response);
