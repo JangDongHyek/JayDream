@@ -1,3 +1,7 @@
+<?php
+include_once(G5_PATH."/JayDream/init.php");
+?>
+
 <div id="app">
     <exam-input></exam-input>
 </div>

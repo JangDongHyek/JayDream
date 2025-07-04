@@ -290,7 +290,13 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     return options
                 },
                 filter() {
-                    let filter =
+                    let filter = {
+                        table : "",
+
+                        page : this.page,
+                        limit : this.limit,
+                        count : this.count,
+                    }
                     return filter
                 },
                 pay_core() {
