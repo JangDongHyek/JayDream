@@ -170,7 +170,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                         blocks: [
                             { // filter 형식으로 넣어주면된다 , 객체 하나당 () 괄호 조건문이 꾸며진다
-                                logical: "AND" // 괄호 전 어떤 논리 연사자가 들어갈지
+                                logical: "AND", // 괄호 전 어떤 논리 연사자가 들어갈지
                                 where: []
                             },
                         ],
