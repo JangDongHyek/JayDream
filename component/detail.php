@@ -53,6 +53,16 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
         <!--  item  -->
         <item-paging :filter="filter" @change="$getsData(filter,rows);"></item-paging>
+
+        <!-- Vue -->
+        <draggable v-model="ArrayObject" item-key="primary" @end="onDragEnd" tag="ul">
+            <template #item="{ element : item, index }">
+                <li>
+                    <p>{{ item.name }}</p>
+                    <a @click="deleteContent(index)" style="float:right;">&times;</a>
+                </li>
+            </template>
+        </draggable>
     </div>
 </script>
 
@@ -252,6 +262,24 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             },
             methods: {
+                async onDragEnd(evt) {
+                    if (evt.oldIndex === evt.newIndex) return;
+
+                    const array = this.category.$df_category.data;
+                    const movedItem = array[evt.newIndex];
+
+                    const start = Math.min(evt.oldIndex, evt.newIndex);
+                    const end = Math.max(evt.oldIndex, evt.newIndex);
+
+                    console.log(`이동된 범위: ${start} ~ ${end}`);
+
+                    for (let i = start; i <= end; i++) {
+                        const item = array[i];
+                        console.log(`수정 대상 idx ${i}:`, item);
+                    }
+
+                    console.log('드래그 완료:', evt.oldIndex, '→', evt.newIndex);
+                },
                 async paySuccess() {
                     let row = {};
 

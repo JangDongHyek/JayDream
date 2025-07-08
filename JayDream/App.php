@@ -27,14 +27,13 @@ class App {
 
     function vueLoad($app_name = "app",$plugin = array()) {
         if(!self::$VUE_LOAD) {
-            $this->jsLoad($plugin);
             if(Config::$DEV) {
                 echo '<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>';
             }
             else {
                 echo '<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>';
             }
-
+            $this->jsLoad($plugin);
             self::$VUE_LOAD = true;
         }
 
@@ -86,8 +85,8 @@ class App {
 
         if(in_array('drag',$plugins)) {
             if(!in_array("drag",self::$PLUGINS)) {
-                echo '<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>';
-                echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>';
+                echo '<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>';
+                echo '<script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.js"></script>';
                 array_push(self::$PLUGINS,"drag");
             }
         }

@@ -6,7 +6,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
     </div>
 
-    <div v-if="!load"></div>
+    <div v-if="!load"><div class="loader"></div></div>
 </script>
 
 <script>

@@ -20,6 +20,11 @@ function vueLoad(app_name) {
         }
     });
 
+    // drag 일때 컴포넌트삽입
+    if (window.vuedraggable) {
+        app.component("draggable", window.vuedraggable);
+    }
+
     for (const component of JayDream_components) {
         app.component(component.name,component.object)
     }
