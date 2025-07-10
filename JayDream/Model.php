@@ -298,7 +298,7 @@ class Model {
         }
 
         if($this->sql_order_by) $this->sql_order_by .= ",";
-        $this->sql_order_by .= " {$column} {$value}";
+        $this->sql_order_by .= " {$table}.{$column} {$value}";
 
         return $this;
     }
@@ -488,6 +488,14 @@ class Model {
 
         }else {
             $param[$this->primary] = empty($param[$this->primary]) ? Lib::generateUniqueId() : $param[$this->primary];
+        }
+
+        //우선순위 컬럼이있으면 max보다 1높여서 추가되게
+        $hasPriority = in_array('priority', $this->schema[$this->table]['columns']);
+        if ($hasPriority && !isset($param['priority'])) {
+            $result = mysqli_query(Config::$connect, "SELECT MAX(priority) as max_priority FROM {$this->table}");
+            $row = mysqli_fetch_assoc($result);
+            $param['priority'] = $row['max_priority'] !== null ? $row['max_priority'] + 1 : 0;
         }
 
         $columns = "";
