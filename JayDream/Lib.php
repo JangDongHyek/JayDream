@@ -31,6 +31,19 @@ class Lib {
         //throw new \Exception($msg);
     }
 
+    public static function alert($message, $redirect = null)
+    {
+        header("Content-Type: text/html; charset=UTF-8");
+        $message = addslashes($message); // 따옴표 깨짐 방지
+        echo "<script>";
+        echo "alert('{$message}');";
+        if ($redirect) {
+            echo "window.location.href = '" . Config::$URL . "{$redirect}';";
+        }
+        echo "</script>";
+        die();
+    }
+
     //jsonEncode 한글깨짐 방지설정넣은
     public static function jsonEncode($data) {
         $value = json_encode($data,JSON_UNESCAPED_UNICODE);
