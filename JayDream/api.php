@@ -54,6 +54,11 @@ switch ($method) {
         $response = Service::delete($obj,$options);
         break;
 
+    case "where_delete" :
+        if(!$obj['table']) Lib::error("obj에 테이블이 없습니다.");
+        $response = Service::whereDelete($obj);
+        break;
+
     case "file_save" :
         $response = Service::fileSave($obj,$options);
         break;

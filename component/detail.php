@@ -94,6 +94,10 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         count: 0,
 
                         where: [
+                            {column: "",value: ``},
+                        ],
+
+                        where: [
                             {
                                 column: "",             // join 조건시 user.idx
                                 value: ``,              // LIKE일시 %% 필수 || relations일시  $parent.idx

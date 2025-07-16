@@ -109,7 +109,6 @@ class Service {
         $response = $model->whereUpdate($obj);
 
         $response['success'] = true;
-        $response['trace'] = true;
 
         return $response;
     }
@@ -125,6 +124,16 @@ class Service {
             File::delete($d);
             $file_model->delete($d);
         }
+
+        $response['success'] = true;
+
+        return $response;
+    }
+
+    public static function whereDelete($filter) {
+        $model = new Model($filter['table']);
+        $model->setFilter($filter);
+        $response = $model->whereDelete();
 
         $response['success'] = true;
 

@@ -354,6 +354,9 @@ class Model {
     }
 
     function where($column,$value,$logical = "AND",$operator = "=") {
+        if(!$logical) $logical = "AND";
+        if(!$operator) $operator = "=";
+
         $parsed = $this->parseColumn($column);
         $func = $parsed['func'];
         $table = $parsed['table'];
@@ -692,6 +695,18 @@ class Model {
         }
 
         return array("sql" => $sql,"primary" => $param[$this->primary]);
+    }
+
+    function whereDelete(){
+        $sql = "DELETE FROM {$this->table} WHERE 1 {$this->sql} ";
+
+        try {
+            $result = mysqli_query(Config::$connect, $sql);
+        }catch (\Exception $e) {
+            Lib::error($e->getMessage() . "\n$sql");
+        }
+
+        return array("sql" => $sql);
     }
 
     function isTable() {
