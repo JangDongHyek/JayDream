@@ -4,25 +4,7 @@ Number.prototype.format = function (n, x) {
     return this.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,');
 };
 
-// Date 타입의 변수 자동으로 포맷팅 YYYY-MM-DD 로 반환됌
-Date.prototype.format = function(fmt = 'yyyy-mm-dd') {
-    const yyyy = this.getFullYear();
-    const yy = String(yyyy).slice(-2);
-    const mm = String(this.getMonth() + 1).padStart(2, '0');
-    const dd = String(this.getDate()).padStart(2, '0');
-    const hh = String(this.getHours()).padStart(2, '0');
-    const mi = String(this.getMinutes()).padStart(2, '0');
-    const ss = String(this.getSeconds()).padStart(2, '0');
 
-    return fmt
-        .replace(/yyyy/g, yyyy)
-        .replace(/yy/g, yy)
-        .replace(/mm/g, mm)
-        .replace(/dd/g, dd)
-        .replace(/hh/g, hh)
-        .replace(/mi/g, mi)
-        .replace(/ss/g, ss);
-};
 
 //배열을 튜플형식으로 변환하는
 Array.prototype.tuple = function () {
@@ -48,13 +30,7 @@ Number.prototype.formatBytes = function (decimals = 2) {
     return `${size} ${sizes[i]}`;
 };
 
-String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
-    const date = new Date(this);
-    if (isNaN(date.getTime())) {
-        throw new Error(`Invalid date string: "${this}"`);
-    }
-    return date.format(fmt);
-};
+
 
 /**
  * 문자열에서 숫자만 추출하는 프로토타입
@@ -62,4 +38,65 @@ String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
  */
 String.prototype.formatOnlyNumber = function () {
     return this.replace(/\D/g, '');
+};
+
+// DATE
+Date.prototype.format = function(fmt = 'yyyy-mm-dd') {
+    const yyyy = this.getFullYear();
+    const yy = String(yyyy).slice(-2);
+    const mm = String(this.getMonth() + 1).padStart(2, '0');
+    const dd = String(this.getDate()).padStart(2, '0');
+    const hh = String(this.getHours()).padStart(2, '0');
+    const mi = String(this.getMinutes()).padStart(2, '0');
+    const ss = String(this.getSeconds()).padStart(2, '0');
+
+    return fmt
+        .replace(/yyyy/g, yyyy)
+        .replace(/yy/g, yy)
+        .replace(/mm/g, mm)
+        .replace(/dd/g, dd)
+        .replace(/hh/g, hh)
+        .replace(/mi/g, mi)
+        .replace(/ss/g, ss);
+};
+
+Date.prototype.lastDay = function () {
+    const nextMonth = new Date(this.getFullYear(), this.getMonth() + 1, 1);
+    nextMonth.setDate(0);
+
+    const yyyy = nextMonth.getFullYear();
+    const mm = String(nextMonth.getMonth() + 1).padStart(2, '0');
+    const dd = String(nextMonth.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
+};
+
+String.prototype.lastDay = function () {
+    const date = new Date(this);
+    if (isNaN(date)) {
+        throw new Error(`Invalid date string: ${this}`);
+    }
+    return date.lastDay();
+};
+
+Date.prototype.firstDay = function () {
+    const yyyy = this.getFullYear();
+    const mm = String(this.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}-01`;
+};
+
+String.prototype.firstDay = function () {
+    const date = new Date(this);
+    if (isNaN(date)) {
+        throw new Error(`Invalid date string: ${this}`);
+    }
+    return date.firstDay();
+};
+
+String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
+    const date = new Date(this);
+    if (isNaN(date.getTime())) {
+        throw new Error(`Invalid date string: "${this}"`);
+    }
+    return date.format(fmt);
 };

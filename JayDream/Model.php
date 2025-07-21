@@ -234,7 +234,12 @@ class Model {
 
 
             $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$join['table']} ON ";
-            $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
+            if (strpos($join['base'], '.') !== false) {
+                $parts = explode('.', $join['base']);
+                $join_sql .= "$parts[0].$parts[1] = {$join['table']}.{$join['foreign']} ";
+            }else {
+                $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
+            }
 
             if (isset($join['on']) && is_array($join['on'])) {
                 foreach ($join['on'] as $on) {
