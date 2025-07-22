@@ -32,6 +32,10 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <plugin-barobill-tax-invoice ref="pluginBarobillTaxInvocue"></plugin-barobill-tax-invoice>
 
         <!-- external -->
+        <!--
+        모달을 따로 컴포넌트로 뺄때 거기에 추가
+        @update:modelValue="value => $emit('update:modelValue', value)"
+        -->
         <external-bs-modal v-model="modal">
             <template v-slot:header>
 
@@ -162,10 +166,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         },
 
                         order_by: [
-                            {
-                                column: "idx",
-                                value: "DESC"
-                            },
+                            { column: "idx", value: "DESC" },
                         ],
 
                         add_object: [ // 검색되는 모든 데이터에 해당하는 객체를 추가한다 * vue 데이터 선인식때문에
