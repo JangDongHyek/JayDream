@@ -32,10 +32,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <plugin-barobill-tax-invoice ref="pluginBarobillTaxInvocue"></plugin-barobill-tax-invoice>
 
         <!-- external -->
-        <!--
-        모달을 따로 컴포넌트로 뺄때 거기에 추가
-        @update:modelValue="value => $emit('update:modelValue', value)"
-        -->
+        <!-- 모달을 따로 컴포넌트로 뺄때 거기에 추가 @update:modelValue="value => $emit('update:modelValue', value)" -->
         <external-bs-modal v-model="modal">
             <template v-slot:header>
 
