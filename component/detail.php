@@ -176,14 +176,14 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         relations: [// filter 형식으로 똑같이 넣어주면 하위로 들어간다
                             {
                                 table: "",
-                                as : "" // 빈값일시 $table 으로 삽입됌
-                            }
+                                as : "", // 빈값일시 $table 으로 삽입됌
+                            },
                         ],
 
                         blocks: [
                             { // filter 형식으로 넣어주면된다 , 객체 하나당 () 괄호 조건문이 꾸며진다
                                 logical: "AND", // 괄호 전 어떤 논리 연사자가 들어갈지
-                                where: []
+                                where: [],
                             },
                         ],
 
