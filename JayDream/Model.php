@@ -183,6 +183,7 @@ class Model {
         while($row = mysqli_fetch_assoc($result)){
             $row["__no__"] = ($page -1) * $limit + $index;
             $row["__no_desc__"] = $object['count'] - $index + 1 - (($page -1) * $limit);
+            $row['$table'] = $this->table;
 
             if (isset($_param['add_object']) && is_array($_param['add_object'])) {
                 foreach ($_param['add_object'] as $add_object) {

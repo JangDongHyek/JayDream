@@ -52,6 +52,7 @@
                 hideModal() {
                     let copy = Object.assign({}, this.modelValue);
                     copy.status = false;
+                    copy.primary = "";
                     this.$emit("update:modelValue", copy);
                 }
             },

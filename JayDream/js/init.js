@@ -165,7 +165,8 @@ function vueLoad(app_name) {
         }
 
         try {
-            if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
+            options.table = data['$table'];
             let res = await this.$jd.lib.ajax("remove",data,"/JayDream/api.php",options);
 
             if(options.return) return res

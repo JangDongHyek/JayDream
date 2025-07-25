@@ -84,6 +84,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         class_1: "", // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
                         class_2: "", // modal-dialog 부분에 클래스를 추가합니다
                         status: false,
+                        primary : "",
                     },
 
                     filter: {
@@ -341,12 +342,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             },
             watch: {
                 async "object.key"(value, old_value) {
-                    if (value) {
-                        this.modal.load = true;
-                    } else {
-                        this.modal.load = false;
-                        this.modal.data = {};
-                    }
+
                 }
             }
         }
