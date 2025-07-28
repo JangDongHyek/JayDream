@@ -38,6 +38,9 @@ class App {
         }
 
         echo "<script>";
+        echo "if (typeof window.JayDream_components === 'undefined') {";
+        echo Lib::js_obfuscate("var JayDream_components = [];");
+        echo "}";
         echo "document.addEventListener('DOMContentLoaded', function(){";
         echo "vueLoad('$app_name')";
         echo "}, false);";
@@ -58,7 +61,6 @@ class App {
             echo Lib::js_obfuscate("var JayDream_computed = {};");
             //Vue3 데이터 연동을 위한 변수
             echo Lib::js_obfuscate("var JayDream_vue = [];");
-            echo Lib::js_obfuscate("var JayDream_components = [];");
             //통신 복호화 키
             $key = substr(hash('sha256', Config::USERNAME), 0, 32); // 32바이트 = AES-256 키
             $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
