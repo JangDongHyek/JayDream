@@ -12,7 +12,7 @@ class Config
     public static $connect = null;
     public static $framework = "";
 
-    private static $DEV_IPS = ["121.140.204.65", "112.160.220.208"];
+    private static $DEV_IPS = [];
 
     const HOSTNAME = "localhost";
     const DATABASE = "exam";
@@ -26,11 +26,11 @@ class Config
 
     public static function init()
     {
-        // DB 체크
-        self::initConnect();
-
         // 개발환경체크
         if (in_array(Lib::getClientIP(), self::$DEV_IPS)) self::$DEV = true;
+
+        // DB 체크
+        self::initConnect();
 
         // 루트 및 URL 설정
         if(self::$framework == "ci3" || self::$framework == "ci4") {

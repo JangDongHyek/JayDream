@@ -19,9 +19,27 @@ class JayDreamPlugin {
     async swalAlert(message, options = {}) {
         const defaultOptions = {
             title: message,
-            icon: null, // success,error,warning,question
-            confirmButtonText: "확인"
-        }
+            icon: null,
+            confirmButtonText: "확인",
+            focusConfirm: true,
+            didOpen: (popup) => {
+                const btn = popup.querySelector(".swal2-confirm");
+
+                // document 레벨에서 keydown 이벤트 등록
+                const handler = (e) => {
+                    if (e.key === "Enter") {
+                        btn.click();   // 버튼 클릭과 동일하게 실행
+                        document.removeEventListener("keydown", handler); // 이벤트 제거
+                    }
+                };
+                document.addEventListener("keydown", handler);
+
+                // 스타일 커스터마이징
+                popup.querySelector(".swal2-title").style.fontSize = "16px";
+                btn.style.backgroundColor = "#4e73df";
+                btn.style.border = "0";
+            },
+        };
 
         await Swal.fire({ ...defaultOptions, ...options });
     }
@@ -43,7 +61,13 @@ class JayDreamPlugin {
             icon: null,
             showCancelButton: true,
             confirmButtonText: "확인",
-            cancelButtonText: "취소"
+            cancelButtonText: "취소",
+            didOpen: (popup) => {
+                popup.querySelector(".swal2-title").style.fontSize = "16px";
+                const btn = popup.querySelector(".swal2-confirm");
+                btn.style.backgroundColor = "#4e73df";
+                btn.style.border = "0";
+            },
         };
 
         const result = await Swal.fire({ ...defaultOptions, ...options });

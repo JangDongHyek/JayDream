@@ -87,7 +87,9 @@ function vueLoad(app_name) {
         let url = "/JayDream/api.php";
         options.component_name = this.component_name;
         try {
-            if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if(data['$table'] && !options.table) options.table = data['$table'];
+
 
             if("confirm" in options) {
                 if(!await this.$jd.plugin.confirm(options.confirm.message)) {
