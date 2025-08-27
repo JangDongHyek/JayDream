@@ -62,7 +62,7 @@ class Service {
 
                 foreach ($object["data"] as $index =>$data) {
                     $object["data"][$index][$as] = $model->setFilter($filter,$data)->get($filter);
-                    $ref = &$object["data"][$index]["$".$filter['table']];
+                    $ref = &$object["data"][$index][$as];
                     self::resolveRelations($filter,$ref);
                 }
             }

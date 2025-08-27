@@ -185,7 +185,7 @@ function vueLoad(app_name) {
         }
     }
 
-    app.config.globalProperties.$whereUpdateData = async function(update_column,options = {}) {
+    app.config.globalProperties.$whereUpdate = async function(update_column,options = {}) {
         let url = "/JayDream/api.php";
         options.component_name = this.component_name;
         try {
@@ -204,6 +204,41 @@ function vueLoad(app_name) {
             if(options.url) url = options.url;
 
             let res = await this.$jd.lib.ajax("where_update", update_column, url,options);
+
+            if(options.return) return res
+
+            if(options.callback) {
+                await options.callback(res)
+            }else {
+                await this.$jd.plugin.alert("완료되었습니다.");
+
+                if(options.href) window.location.href = JayDream.url + options.href;
+                else window.location.reload();
+            }
+        }catch (e) {
+            await this.$jd.plugin.alert(e.message)
+        }
+    }
+
+    app.config.globalProperties.$whereDelete = async function(filter,options = {}) {
+        let url = "/JayDream/api.php";
+        options.component_name = this.component_name;
+        try {
+            if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
+
+            if("confirm" in options) {
+                if(!await this.$jd.plugin.confirm(options.confirm.message)) {
+                    if(options.confirm.callback) {
+                        await options.confirm.callback()
+                    }else {
+                        return false;
+                    }
+                }
+            }
+
+            if(options.url) url = options.url;
+
+            let res = await this.$jd.lib.ajax("where_delete", filter, url,options);
 
             if(options.return) return res
 

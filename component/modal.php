@@ -35,6 +35,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     component_name : "<?=$componentName?>",
                     component_idx: "",
 
+                    temp : {},
                     row: {},
                     rows : [],
                 };
@@ -61,15 +62,20 @@ $componentName = str_replace(".php","",basename(__FILE__));
             watch: {
                 async "modelValue.status"(value, old_value) {
                     if (value) {
-                        if(this.modelValue.primary) {
-                            // this.row = await this.$getData({
-                            //     table : "project_base",
-                            //
-                            //     where: [
-                            //         {column: "primary",value: this.modelValue.primary},
-                            //     ],
-                            // });
-                        }
+                        // if(this.modelValue.primary) {
+                        //     this.row = await this.$getData({
+                        //         table : "category",
+                        //         file_db: true,
+                        //
+                        //         where: [
+                        //             {column: "primary",value: this.modelValue.primary},
+                        //         ],
+                        //     });
+                        // }else {
+                        //     this.row = this.temp;
+                        // }
+                    }else {
+                        // this.modelValue.parent = null;
                     }
                 }
             }

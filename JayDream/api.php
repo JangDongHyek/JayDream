@@ -68,6 +68,7 @@ switch ($method) {
             Session::set($key, $value);
         }
         $response['success'] = true;
+        $response['message'] = "";
         break;
 
     case "session_get" :
@@ -75,6 +76,12 @@ switch ($method) {
             $obj[$key] = Session::get($key);
         }
         $response['sessions'] = $obj;
+        $response['success'] = true;
+        $response['message'] = "";
+        break;
+
+    case "get_ip" :
+        $response['ip'] = Lib::getClientIP();
         $response['success'] = true;
         $response['message'] = "";
         break;

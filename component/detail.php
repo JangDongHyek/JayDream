@@ -56,7 +56,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <item-paging :filter="filter" @change="$getsData(filter,rows);"></item-paging>
 
         <!-- Vue -->
-        <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,rows)" tag="ul">
+        <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,ArrayObject)" tag="ul">
             <template #item="{ element : item, index }">
                 <li>
                     <p>{{ item.name }}</p>
@@ -102,7 +102,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         where: [
                             {
                                 column: "",             // join 조건시 user.idx
-                                value: ``,              // LIKE일시 %% 필수 || relations일시  $parent.idx
+                                value: ``,              // LIKE일시 %% 필수 || relations일시  $parent.idx , 공백일경우 __null__ , null 값인경우 null
                                 logical: "AND",         // AND,OR,AND NOT
                                 operator: "=",          // = ,!= >= <=, LIKE,
                                 encrypt: false,        // true시 벨류가 암호화된 값으로 들어감
@@ -218,7 +218,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                         message: "", // (추가,삭제) 추가 : 추가 후 나오는 메세지, 삭제 : 삭제 전 confirm 메세지
 
-                        confirm: { // (추가) 추가전 Confirm 으로 물어보고싶을때
+                        confirm: { // (추가,삭제) 로직전 Confirm 으로 물어보고싶을때
                             message: '',
                             callback: async () => { // 취소 시 실행되는 callback
 
@@ -238,6 +238,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 message: "",
                             }
                         ],
+                        
+                        return : false, // true 시 결과값 리턴후 아무것도안함
                     },
 
                     sessions: {},
@@ -260,6 +262,20 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     example: "",
                     ss_mb_id: "",
                 }, "/JayDream/api.php")).sessions;
+
+                await this.$whereDelete({
+                    where: [
+                        {
+                            column: "",             // join 조건시 user.idx
+                            value: ``,              // LIKE일시 %% 필수 || relations일시  $parent.idx , 공백일경우 __null__ , null 값인경우 null
+                            logical: "AND",         // AND,OR,AND NOT
+                            operator: "=",          // = ,!= >= <=, LIKE,
+                            encrypt: false,        // true시 벨류가 암호화된 값으로 들어감
+                        },
+                    ],
+                },{
+                    table : "",
+                });
             },
             updated() {
 
@@ -273,14 +289,17 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     const start = Math.min(evt.oldIndex, evt.newIndex);
                     const end = Math.max(evt.oldIndex, evt.newIndex);
 
-                    console.log(`이동된 범위: ${start} ~ ${end}`);
+                    // console.log(`이동된 범위: ${start} ~ ${end}`);
 
                     for (let i = start; i <= end; i++) {
                         const item = array[i];
-                        console.log(`수정 대상 idx ${i}:`, item);
+                        item.priority = i;
+
+                        this.$postData(item,{return : true});
+                        // console.log(`수정 대상 idx ${i}:`, item);
                     }
 
-                    console.log('드래그 완료:', evt.oldIndex, '→', evt.newIndex);
+                    // console.log('드래그 완료:', evt.oldIndex, '→', evt.newIndex);
                 },
                 async paySuccess() {
                     let row = {};

@@ -22,7 +22,7 @@ class Config
     const COOKIE_TIME = 7200;
 
     const ALERT = "origin"; // origin , swal
-    const ENCRYPT = "gnuboard"; // mb_5,sha256,sha512,hmac,gnuboard,ci4;
+    const ENCRYPT = "md5"; // md5,sha256,sha512,hmac,gnuboard,ci4;
 
     public static function init()
     {
