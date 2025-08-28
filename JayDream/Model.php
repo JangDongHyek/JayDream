@@ -531,8 +531,15 @@ class Model {
             }
             if($info['DATA_TYPE'] == "datetime") {
                 if($value == '') {
-                    if($info['IS_NULLABLE'] == "NO") $value = '0000-00-00 00:00:00';
-                    else continue;
+                    if($info['IS_NULLABLE'] == "NO") {
+                        $value = '0000-00-00 00:00:00';
+                    }else {
+                        if($column == 'insert_date') $value = 'now()';
+                        else if($column == 'created_at') $value = 'now()';
+                        else if($column == 'wr_datetime') $value = 'now()';
+                        else continue;
+                    }
+
                 }
             }
             if($info['DATA_TYPE'] == "date") {
@@ -541,14 +548,6 @@ class Model {
                     else continue;
                 }
             }
-
-            if($column == 'insert_date') {
-                if($value == "0000-00-00 00:00:00") $value = 'now()';
-            }
-            if($column == 'created_at') {
-                if($value == "0000-00-00 00:00:00") $value = 'now()';
-            }
-            if($column == 'wr_datetime') $value = 'now()';
 
             if ($info['IS_NULLABLE'] == "YES" && !$value) {
                 continue;

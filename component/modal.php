@@ -15,7 +15,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
 
             <template v-slot:footer>
-
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" @click="$postData(row)">저장</button>
             </template>
         </external-bs-modal>
     </div>
@@ -35,7 +36,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     component_name : "<?=$componentName?>",
                     component_idx: "",
 
-                    temp : {},
+                    temp : {
+                        $table : "",
+                    },
                     row: {},
                     rows : [],
                 };
@@ -62,18 +65,18 @@ $componentName = str_replace(".php","",basename(__FILE__));
             watch: {
                 async "modelValue.status"(value, old_value) {
                     if (value) {
-                        // if(this.modelValue.primary) {
-                        //     this.row = await this.$getData({
-                        //         table : "category",
-                        //         file_db: true,
-                        //
-                        //         where: [
-                        //             {column: "primary",value: this.modelValue.primary},
-                        //         ],
-                        //     });
-                        // }else {
-                        //     this.row = this.temp;
-                        // }
+                        if(this.modelValue.primary) {
+                            this.row = await this.$getData({
+                                table : "category",
+                                file_db: true,
+
+                                where: [
+                                    {column: "primary",value: this.modelValue.primary},
+                                ],
+                            });
+                        }else {
+                            this.row = this.temp;
+                        }
                     }else {
                         // this.modelValue.parent = null;
                     }
