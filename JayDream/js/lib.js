@@ -285,4 +285,14 @@ class JayDreamLib {
         link.click(); // 클릭 이벤트로 다운로드 트리거
         document.body.removeChild(link); // DOM에서 제거
     }
+
+    checkEmail(email) {
+        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !pattern.test(email);
+    }
+
+    checkUserId(userId) {
+        const pattern = /^[a-zA-Z0-9]{4,20}$/;
+        return !pattern.test(userId);
+    }
 }

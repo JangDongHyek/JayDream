@@ -4,7 +4,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
         <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')" name="names[]">
-        <input type="text" @input="$jd.vue.inputNumber"> <!-- 숫자만 입력가능하게 -->
+        <input type="text" @input="$jd.vue.inputNumber" @keyup.enter=""> <!-- 숫자만 입력가능하게 -->
 
         <button @click="$postData(row,options)">테스트</button>
         <button @click="$deleteData(row,options)">삭제</button>
@@ -40,7 +40,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             <!-- body -->
             <template v-slot:default>
-                <external-daum-postcode v-model="row" field1="Addr1"
+                <external-daum-postcode v-model="row" field1="Addr1" field1="zipcode"
                                         @close="modal.status = false;"></external-daum-postcode>
             </template>
 
