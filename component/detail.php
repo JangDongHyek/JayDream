@@ -87,13 +87,15 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         primary : "",
                     },
 
-                    filter: {
-                        table: "user",
-                        file_db: true, // 연관된 파일들 불러옴
-
+                    paging : {
                         page: 1,
                         limit: 1, // 해당 값 수정시 페이지에 노출되는 게시글 갯수가 바뀜
                         count: 0,
+                    },
+
+                    filter: {
+                        table: "user",
+                        file_db: true, // 연관된 파일들 불러옴
 
                         where: [
                             {column: "",value: ``},

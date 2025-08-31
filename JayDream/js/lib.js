@@ -239,13 +239,13 @@ class JayDreamLib {
         console.groupEnd();
     }
 
-    href(url) {
+    href(url,obj = null) {
         // 앞뒤 슬래시 정리
         url = url.trim();
         const base = this.jd.url.replace(/\/+$/, ''); // 끝 슬래시 제거
         const path = url.replace(/^\/+/, '');         // 앞 슬래시 제거
         const fullUrl = `${base}/${path}`;
-        window.location.href = this.normalizeUrl(fullUrl);
+        window.location.href = this.normalizeUrl(fullUrl,obj);
     }
 
     decryptAES(cipherText) {
@@ -257,13 +257,26 @@ class JayDreamLib {
         return decrypted.toString(CryptoJS.enc.Utf8);
     }
 
-    normalizeUrl(url) {
+    normalizeUrl(url, obj = null) {
         try {
-            const urlObj = new URL(url);
+            // 절대 URL이 아니면 현재 origin 기준으로 생성
+            const urlObj = url.startsWith("http")
+                ? new URL(url)
+                : new URL(url, window.location.origin);
 
-            const normalizedPath = urlObj.pathname.replace(/\/{2,}/g, '/');
-            return `${urlObj.protocol}//${urlObj.host}${normalizedPath}${urlObj.search}`;
+            // path 정규화
+            urlObj.pathname = urlObj.pathname.replace(/\/{2,}/g, '/');
+
+            // obj 있으면 GET 파라미터 추가
+            if (obj && typeof obj === "object") {
+                for (const [key, value] of Object.entries(obj)) {
+                    urlObj.searchParams.set(key, value);
+                }
+            }
+
+            return urlObj.toString();
         } catch (e) {
+            console.error("normalizeUrl error:", e);
             return url;
         }
     }

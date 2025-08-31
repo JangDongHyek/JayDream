@@ -29,7 +29,12 @@ switch ($method) {
 
     case "insert" :
         if(!$options['table']) Lib::error("options에 테이블이 없습니다.");
-        if(isset($options['exists'])) Service::exists($options['exists']);
+        if(isset($options['exists'])) {
+            if(Service::exists($options['exists'])) {
+                $response['success'] = true;
+                break;
+            }
+        }
         if(isset($options['hashes'])) Service::hashes($options['hashes'],$obj);
         $response = Service::insert($obj,$options);
         break;

@@ -27,7 +27,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
     JayDream_components.push({name : "<?=$componentName?>",object : {
             template: "#<?=$componentName?>-template",
             props: {
-                filter: {type: Object, default: null},
+                paging: {type: Object, default: null},
             },
             data: function () {
                 return {
@@ -68,19 +68,19 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     else if (page > this.last) page = this.last;
 
                     this.page = page;
-                    this.filter.page = page;
+                    this.paging.page = page;
                     this.$emit("change", page);
                 }
             },
             computed: {
                 count: function () {
-                    return this.filter.count
+                    return this.paging.count
                 },
                 limit: function () {
-                    return this.filter.limit
+                    return this.paging.limit
                 },
                 page: function () {
-                    return this.filter.page
+                    return this.paging.page
                 },
                 current: function () {
                     return parseInt(this.page);

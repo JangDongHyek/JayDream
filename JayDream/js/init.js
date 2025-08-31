@@ -132,7 +132,7 @@ function vueLoad(app_name) {
             if(options.callback) {
                 await options.callback(res)
             }else {
-                filter.count = res.count;
+                if(filter.paging) filter.paging.count = res.count;
                 arrays.splice(0, arrays.length, ...res.data); // vue가 인식을 못할수도 있으므로 splice후 배열 복제
             }
         } catch (e) {

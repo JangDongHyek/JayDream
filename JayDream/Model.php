@@ -161,8 +161,8 @@ class Model {
     }
 
     function get($_param = array()) {
-        $page =  isset($_param['page']) ? $_param['page'] : 0;
-        $limit = isset($_param['limit']) ? $_param['limit'] : 0;
+        $page  = isset($_param['paging']['page']) ? $_param['paging']['page'] : 0;
+        $limit = isset($_param['paging']['limit']) ? $_param['paging']['limit'] : 0;
         $skip  = ($page - 1) * $limit;
 
         $sql = $this->getSql($_param);
