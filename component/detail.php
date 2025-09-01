@@ -53,7 +53,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <external-summernote :row="row" field="content"></external-summernote>
 
         <!--  item  -->
-        <item-paging :filter="filter" @change="$getsData(filter,rows);"></item-paging>
+        <item-paging :paging="paging" @change="getData()"></item-paging>
 
         <!-- Vue -->
         <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,ArrayObject)" tag="ul">
@@ -96,6 +96,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     filter: {
                         table: "user",
                         file_db: true, // 연관된 파일들 불러옴
+                        file_keywords : [""], // 해당 키워드별로 따로 가져옴
 
                         where: [
                             {column: "",value: ``},
@@ -135,6 +136,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                                 foreign: "idx",            // join 테이블의 연결 key
                                 type: "LEFT",             // INNER, LEFT, RIGHT
                                 select_column: ["column"], // 조회할 컬럼 $table__column 식으로 as되서 들어간다 || "*"
+                                as : "", // 값이 있을경우 $as__column 해당방식으로 들어감
                                 on: [ // 안할거면 삭제해줘야함
                                     {
                                         column: "",        // 해당하는 테이블의 컬럼만 사용해야함

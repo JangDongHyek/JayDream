@@ -259,6 +259,11 @@ class JayDreamLib {
 
     normalizeUrl(url, obj = null) {
         try {
+            // url이 빈 값이면 현재 페이지 URL로 설정
+            if (!url || url.trim() === "") {
+                url = window.location.href;
+            }
+
             // 절대 URL이 아니면 현재 origin 기준으로 생성
             const urlObj = url.startsWith("http")
                 ? new URL(url)

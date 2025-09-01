@@ -4,21 +4,15 @@ $componentName = str_replace(".php","",basename(__FILE__));
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div class="paging" v-if="parseInt(count)">
         <div class="pagingWrap">
-            <a class="first" @click="setPage(1)">
-                <i class="fa-light fa-angles-left"></i>
-            </a>
-            <a class="prev" @click="setPage(page-1)">
-                <i class="fa-light fa-angle-left"></i>
-            </a>
+            <a class="first" @click="setPage(1)">«</a>
+            <a class="prev" @click="setPage(page-1)">‹</a>
+
             <template v-for="index in getPages()">
                 <a @click="setPage(index)" :class="{'active': index == page}">{{ index }}</a>
             </template>
-            <a class="next" @click="setPage(page+1)">
-                <i class="fa-light fa-angle-right"></i>
-            </a>
-            <a class="last" @click="setPage(last)">
-                <i class="fa-light fa-angles-right"></i>
-            </a>
+
+            <a class="next" @click="setPage(page+1)">›</a>
+            <a class="last" @click="setPage(last)">»</a>
         </div>
     </div>
 </script>
@@ -108,35 +102,29 @@ $componentName = str_replace(".php","",basename(__FILE__));
         display: inline-flex;
         justify-content: center;
         align-items: center;
-        margin: 0 5px;
-        padding: 8px 12px;
+        margin: 0 4px;
+        padding: 6px 12px;
         border: 1px solid #ddd;
         border-radius: 4px;
         text-decoration: none;
         color: #333;
         cursor: pointer;
+        font-size: 14px;
+        min-width: 32px;
         transition: background-color 0.3s, color 0.3s;
     }
 
+    /* hover */
     .pagingWrap a:hover {
         background-color: #007BFF;
         color: #fff;
     }
 
+    /* 현재 페이지 */
     .pagingWrap a.active {
         background-color: #007BFF;
         color: #fff;
         border-color: #007BFF;
-    }
-
-    .pagingWrap svg {
-        width: 16px;
-        height: 16px;
-        fill: #333;
-        transition: fill 0.3s;
-    }
-
-    .pagingWrap a:hover svg {
-        fill: #fff;
+        font-weight: bold;
     }
 </style>

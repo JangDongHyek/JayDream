@@ -219,14 +219,16 @@ class Model {
 
         foreach ($this->joins as $join) {
             $columns = $this->schema[$join['table']]['columns'];
+            $alias = (!empty($join['as'])) ? $join['as'] : $join['table'];
+
             if($join['select_column'] == "*") {
                 foreach ($columns as $column) {
-                    $select_field .= ", {$join['table']}.{$column} as ".'`$'."{$join['table']}__{$column}`";
+                    $select_field .= ", {$alias}.{$column} as ".'`$'."{$alias}__{$column}`";
                 }
             }else {
                 foreach ($join['select_column'] as $column) {
                     if(in_array($column, $columns)) {
-                        $select_field .= ", {$join['table']}.{$column} as ".'`$'."{$join['table']}__{$column}`";
+                        $select_field .= ", {$alias}.{$column} as ".'`$'."{$alias}__{$column}`";
                     }else {
                         Lib::error("Model getSql() : {$join['table']}에  {$column}컬럼이 존재하지않습니다.");
                     }
@@ -234,17 +236,17 @@ class Model {
             }
 
 
-            $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$join['table']} ON ";
+            $join_sql .= "{$join['type']} JOIN {$join['table']} AS {$alias} ON ";
             if (strpos($join['base'], '.') !== false) {
                 $parts = explode('.', $join['base']);
-                $join_sql .= "$parts[0].$parts[1] = {$join['table']}.{$join['foreign']} ";
+                $join_sql .= "$parts[0].$parts[1] = {$alias}.{$join['foreign']} ";
             }else {
-                $join_sql .= "{$this->table}.{$join['base']} = {$join['table']}.{$join['foreign']} ";
+                $join_sql .= "{$this->table}.{$join['base']} = {$alias}.{$join['foreign']} ";
             }
 
             if (isset($join['on']) && is_array($join['on'])) {
                 foreach ($join['on'] as $on) {
-                    $join_sql .= "{$on['logical']} {$join['table']}.{$on['column']} {$on['operator']} '{$on['value']}' ";
+                    $join_sql .= "{$on['logical']} {$alias}.{$on['column']} {$on['operator']} '{$on['value']}' ";
                 }
             }
         }

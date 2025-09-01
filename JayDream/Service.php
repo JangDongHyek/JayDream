@@ -26,30 +26,54 @@ class Service {
     }
 
     private static function injectFileRelation(&$obj) {
-        $jdFileRelation = [
-            'table' => 'jd_file',
-            'where' => [
-                [
-                    'column'  => 'table_name',
-                    'value'   => $obj['table'], // 현재 대상 테이블명
-                    'logical' => 'AND',
-                    'operator'=> '='
-                ],
-                [
-                    'column'  => 'table_primary',
-                    'value'   => '$parent.primary',
-                    'logical' => 'AND',
-                    'operator'=> '='
-                ]
+        // 공통 where 조건
+        $baseWhere = [
+            [
+                'column'  => 'table_name',
+                'value'   => $obj['table'],
+                'logical' => 'AND',
+                'operator'=> '='
+            ],
+            [
+                'column'  => 'table_primary',
+                'value'   => '$parent.primary',
+                'logical' => 'AND',
+                'operator'=> '='
             ]
         ];
 
-        // relations 키가 없거나 비어 있으면 새 배열 생성
-        if (!isset($obj['relations']) || !is_array($obj['relations'])) {
-            $obj['relations'] = [$jdFileRelation];
+        $relations = [];
+
+        // file_keywords 배열이 있으면 반복
+        if (!empty($obj['file_keywords']) && is_array($obj['file_keywords'])) {
+            foreach ($obj['file_keywords'] as $keyword) {
+                $relation = [
+                    'table' => 'jd_file',
+                    'as'    => 'jd_file_' . $keyword,
+                    'where' => array_merge($baseWhere, [
+                        [
+                            'column'  => 'keyword',
+                            'value'   => $keyword,
+                            'logical' => 'AND',
+                            'operator'=> '='
+                        ]
+                    ])
+                ];
+                $relations[] = $relation;
+            }
         } else {
-            // 무조건 jd_file 객체를 추가
-            $obj['relations'][] = $jdFileRelation;
+            // 단일 relation (기존 로직)
+            $relations[] = [
+                'table' => 'jd_file',
+                'where' => $baseWhere
+            ];
+        }
+
+        // obj에 relations 키 병합
+        if (!isset($obj['relations']) || !is_array($obj['relations'])) {
+            $obj['relations'] = $relations;
+        } else {
+            $obj['relations'] = array_merge($obj['relations'], $relations);
         }
     }
 
@@ -156,6 +180,8 @@ class Service {
                 if($filter['message']) Lib::error($filter['message']);
                 else return true;
             }
+
+            return false;
         }
     }
 
