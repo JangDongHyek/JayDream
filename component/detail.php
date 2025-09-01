@@ -10,7 +10,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <button @click="$deleteData(row,options)">삭제</button>
 
         <!-- plugin -->
-        <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="paySuccess()" redirect_url="/index.php">
+        <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="paySuccess" redirect_url="/index.php">
             <template v-slot:default>
                 <button @click="$refs.pluginInnopay.pay()">결제</button>
             </template>
@@ -305,17 +305,24 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                     // console.log('드래그 완료:', evt.oldIndex, '→', evt.newIndex);
                 },
-                async paySuccess() {
-                    let row = {};
+                async paySuccess(data) {
+                    //data.tid // 거래 결제번호
+                    //data.moid // 거래 주문번호
 
-                    let options = {}
+                    let order = await this.$getData({
+                        table : "orders",
 
+                        where: [
+                            {column: "moid",value: data.moid},
+                        ],
+                    });
+
+                    order.tid = data.tid;
                     try {
-                        let res = await this.$jd.lib.ajax("update", row, "/JayDream/api.php", options);
-
-                        await this.$jd.lib.alert("결제가 완료되었습니다.");
-                        this.$jd.lib.href()
-
+                        await this.$postData(order,{
+                            message : "결제가 완료되었습니다.",
+                            href : ""
+                        });
                     } catch (e) {
                         await this.$jd.lib.alert(e.message)
                     }
@@ -360,6 +367,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         buyerName: "테스트",
                         buyerTel: this.member.mb_hp.formatOnlyNumber(),
                         buyerEmail: this.member.mb_email,
+                        // 주문데이터에 해당 값이 있어야 미리 주문을 만듬 * 결제리턴시 새로고침되어 유지되어있는값이 초기화되는형상떄문에 데이터를 만든후 업데이트로 작업해야함
+                        moid : this.order.moid,
                     }
                 }
             },

@@ -80,6 +80,8 @@ class Service {
     private static function resolveRelations($obj,&$object) {
         if(isset($obj['relations'])) {
             foreach ($obj['relations'] as $filter) {
+                if($filter['file_db'] == "true") self::injectFileRelation($filter);
+
                 $model = new Model($filter['table']);
                 $as = "$".$filter['table'];
                 if(isset($filter['as']) && $filter['as']) $as = "$".$filter['as'];

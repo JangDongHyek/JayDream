@@ -145,7 +145,7 @@ class Config
         }
 
         $columnsSQL = implode(",\n    ", $columns);
-        $createSQL = "CREATE TABLE `{$tableName}` (\n    {$columnsSQL}\n) DEFAULT CHARSET=utf8mb4;";
+        $createSQL = "CREATE TABLE `{$tableName}` (\n    {$columnsSQL}\n) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
         if (!self::$connect->query($createSQL)) {
             Lib::error("{$tableName} 테이블 생성에 실패했습니다 : " . self::$connect->error);

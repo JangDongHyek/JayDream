@@ -121,7 +121,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                 this.$jd.lib.href(this.redirect_url);
                             }else {
                                 //결제성공시 로직
-                                this.$emit('paySuccess');
+                                this.$emit('paySuccess',result.data);
                             }
 
                         }else {

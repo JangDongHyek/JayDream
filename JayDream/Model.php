@@ -15,6 +15,7 @@ class Model {
 
     public $joins = array();
     public $group_bys = array();
+    public $fields = array();
 
     public  $primary;
     public $autoincrement;
@@ -94,6 +95,12 @@ class Model {
         if(isset($obj['joins'])) {
             foreach($obj['joins'] as $item) {
                 $this->join($item);
+            }
+        }
+
+        if(isset($obj['fields'])) {
+            foreach($obj['fields'] as $item) {
+                $this->field($item);
             }
         }
 
@@ -217,6 +224,10 @@ class Model {
         $select_field = "$this->table.*";
         $join_sql = "";
 
+        foreach ($this->fields as $field) {
+            $select_field .= ", $field";
+        }
+
         foreach ($this->joins as $join) {
             $columns = $this->schema[$join['table']]['columns'];
             $alias = (!empty($join['as'])) ? $join['as'] : $join['table'];
@@ -292,6 +303,10 @@ class Model {
 
         $this->schema[$object['table']]['columns'] = $this->getColumns($object['table']);
         array_push($this->joins,$object);
+    }
+
+    function field($string) {
+        array_push($this->fields,$string);
     }
 
     function groupBy($object) {
