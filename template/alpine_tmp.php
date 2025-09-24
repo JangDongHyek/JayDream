@@ -7,6 +7,8 @@
         return {
             $jd : {},
 
+            rows : [],
+
             async init() {
                 this.$jd.url = JayDream_url;
                 this.$jd.dev = JayDream_dev;
@@ -50,6 +52,8 @@
                             },
                         ],
                     },"/JayDream/api.php");
+
+                    this.rows = res.data;
                 }catch (e) {
                     await this.$jd.lib.alert(e.message)
                 }
@@ -62,14 +66,14 @@
                     table : "",
                 }
 
-                if(await tihs.$jd.lib.confirm(`정말 삭제 하시겠습니까?`)) {
+                if(await this.$jd.lib.confirm(`정말 삭제 하시겠습니까?`)) {
                     try {
-                        let res = await tihs.$jd.lib.ajax("remove",row,"/JayDream/api.php",options);
+                        let res = await this.$jd.lib.ajax("remove",row,"/JayDream/api.php",options);
 
-                        await tihs.$jd.lib.alert('삭제되었습니다.');
+                        await this.$jd.lib.alert('삭제되었습니다.');
                         window.location.reload();
                     }catch (e) {
-                        await tihs.$jd.lib.alert(e.message)
+                        await this.$jd.lib.alert(e.message)
                     }
                 }
             },
