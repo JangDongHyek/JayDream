@@ -84,6 +84,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         class_1: "", // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
                         class_2: "", // modal-dialog 부분에 클래스를 추가합니다
                         status: false,
+                        table : "",
                         primary : "",
                     },
 

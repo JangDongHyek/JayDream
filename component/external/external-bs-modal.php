@@ -42,7 +42,7 @@
 
             },
             mounted: function () {
-                $(`#${this.component_idx}`).on('hide.bs.modal', this.hideModal);
+                document.getElementById(this.component_idx).addEventListener('hide.bs.modal', this.hideModal);
 
                 this.$nextTick(() => {
 
@@ -59,9 +59,13 @@
             computed: {},
             watch: {
                 "modelValue.status"(value) {
-                    if (value) $(`#${this.component_idx}`).modal('show');
-                    else {
-                        $(`#${this.component_idx}`).modal('hide');
+                    const modalEl = document.getElementById(this.component_idx);
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+                    if (value) {
+                        modal.show();
+                    } else {
+                        modal.hide();
                     }
                 }
             }

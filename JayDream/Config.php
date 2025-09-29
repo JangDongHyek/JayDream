@@ -50,7 +50,7 @@ class Config
         self::getFramework();
 
         //폴더 권한체크
-        if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");
+        //if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");
 
         // 파일관련 테이블 생성
         if (!self::existsTable("jd_file")) {

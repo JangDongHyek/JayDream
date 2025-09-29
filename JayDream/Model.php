@@ -379,6 +379,7 @@ class Model {
     function where($column,$value,$logical = "AND",$operator = "=") {
         if(!$logical) $logical = "AND";
         if(!$operator) $operator = "=";
+        if($column == 'primary') $column = $this->primary;
 
         $parsed = $this->parseColumn($column);
         $func = $parsed['func'];
@@ -388,9 +389,7 @@ class Model {
 
         $field = $func ? $func.'('.implode(', ', $args).')' : "$table.`{$column}`";
 
-
         $columns = $this->schema[$table]['columns'];
-        if($column == 'primary') $column = $this->primary;
 
         if(in_array($column, $columns)){
             if($value == "") return $this;

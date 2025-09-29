@@ -295,6 +295,15 @@ class Lib {
         $content_type = isset($options['content_type']) ? $options['content_type'] : 'Content-Type: application/json';
         $accept = isset($options['accept']) ? $options['accept'] : 'Accept: application/json';
 
+        $curl_type = $http_build ? 'form' : 'json';
+
+        // URL에 curl_type 파라미터 붙이기
+        if (strpos($url, '?') !== false) {
+            $url .= "&curl_type={$curl_type}";
+        } else {
+            $url .= "?curl_type={$curl_type}";
+        }
+
         // Content-Type 헤더 설정
         $headers = array($content_type,$accept);
         if($options['authorization']) array_push($headers,$options['authorization']);
@@ -327,6 +336,35 @@ class Lib {
         }
 
         return json_decode($response,true);
+    }
+
+    public static function curlResponse($log = true) {
+        // curl_type 파라미터 확인
+        $curl_type = $_GET['curl_type'] ? $_GET['curl_type'] : 'json';
+
+        if ($curl_type === 'form') {
+            $data = $_POST;
+        } else {
+            $raw  = file_get_contents("php://input");
+            $data = json_decode($raw,true);
+        }
+
+        if($log) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+            $callerFile = isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__;
+            $callerDir  = dirname($callerFile);
+
+            // 로그 파일 경로
+            $logFile = $callerDir . "/curl_log.txt";
+
+            // 로그 내용
+            $log  = "[" . date("Y-m-d H:i:s") . "] curlResponse 실행\n";
+            $log .= json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n\n";
+
+            file_put_contents($logFile, $log, FILE_APPEND);
+        }
+
+        return $data;
     }
 
     public static function formatPhoneNumber($phone) {

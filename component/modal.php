@@ -5,7 +5,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
     <div v-if="load">
         <external-bs-modal v-model="modelValue" @update:modelValue="value => $emit('update:modelValue', value)">
             <template v-slot:header>
-
+                <h5 class="modal-title" id="exampleModalLabel">데이터 입력</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </template>
 
             <!-- body -->
@@ -67,7 +68,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     if (value) {
                         if(this.modelValue.primary) {
                             this.row = await this.$getData({
-                                table : "category",
+                                table : this.modelValue.table,
                                 file_db: true,
 
                                 where: [
