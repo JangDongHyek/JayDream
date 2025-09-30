@@ -101,7 +101,15 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             watch: {
-
+                'row.primary'(newVal, oldVal) {
+                    if (!newVal) return;         // primary가 없으면 무시
+                    this.$nextTick(() => {
+                        const $el = $(`#${this.component_idx}`);
+                        if (!$el.length) return;
+                        const html = (this.row && this.row[this.field]) ? this.row[this.field] : '';
+                        $el.summernote('code', html);
+                    });
+                }
             }
         }});
 </script>

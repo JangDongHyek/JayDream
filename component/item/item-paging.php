@@ -1,130 +1,67 @@
 <?php
-$componentName = str_replace(".php","",basename(__FILE__));
+$componentName = str_replace(".php", "", basename(__FILE__));
 ?>
-<script type="text/x-template" id="<?=$componentName?>-template">
-    <div class="paging" v-if="parseInt(count)">
-        <div class="pagingWrap">
-            <a class="first" @click="setPage(1)">«</a>
-            <a class="prev" @click="setPage(page-1)">‹</a>
+<script type="text/x-template" id="<?= $componentName ?>-template">
+    <nav v-if="parseInt(count)" aria-label="Page navigation">
+        <ul class="pagination justify-content-center mb-0">
+            <li class="page-item" :class="{ disabled: page <= 1 }">
+                <a class="page-link" href="javascript:;" @click="setPage(1)">«</a>
+            </li>
+            <li class="page-item" :class="{ disabled: page <= 1 }">
+                <a class="page-link" href="javascript:;" @click="setPage(page-1)">‹</a>
+            </li>
 
-            <template v-for="index in getPages()">
-                <a @click="setPage(index)" :class="{'active': index == page}">{{ index }}</a>
-            </template>
+            <li v-for="index in getPages()" class="page-item" :class="{ active: index == page }" :key="index">
+                <a class="page-link" href="javascript:;" @click="setPage(index)">{{ index }}</a>
+            </li>
 
-            <a class="next" @click="setPage(page+1)">›</a>
-            <a class="last" @click="setPage(last)">»</a>
-        </div>
-    </div>
+            <li class="page-item" :class="{ disabled: page >= last }">
+                <a class="page-link" href="javascript:;" @click="setPage(page+1)">›</a>
+            </li>
+            <li class="page-item" :class="{ disabled: page >= last }">
+                <a class="page-link" href="javascript:;" @click="setPage(last)">»</a>
+            </li>
+        </ul>
+    </nav>
 </script>
 
 <script>
-    JayDream_components.push({name : "<?=$componentName?>",object : {
-            template: "#<?=$componentName?>-template",
+    JayDream_components.push({
+        name: "<?= $componentName ?>", object: {
+            template: "#<?= $componentName ?>-template",
             props: {
-                paging: {type: Object, default: null},
-            },
-            data: function () {
-                return {
-                    load : false,
-                    component_name : "<?=$componentName?>",
-                    component_idx: "",
-
-                };
-            },
-            async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
-            },
-            async mounted() {
-
-            },
-            updated() {
-
+                paging: { type: Object, default: null },
             },
             methods: {
-                getPages: function () {
-                    var current = this.current;
-                    var last = this.last;
-                    var offset = 0;
-                    var min = current - 2;
-                    var max = current + 2;
+                getPages() {
+                    let current = this.current;
+                    let last = this.last;
+                    let min = current - 2;
+                    let max = current + 2;
 
-                    if (min < 1) offset = 1 - min;
-                    if (max > last) offset = last - max;
+                    if (min < 1) max += (1 - min);
+                    if (max > last) min -= (max - last);
 
-                    var pages = [];
-                    for (var i = min + offset; i <= max + offset; i++) {
-                        if (1 <= i && i <= last) pages.push(i);
+                    let pages = [];
+                    for (let i = min; i <= max; i++) {
+                        if (i >= 1 && i <= last) pages.push(i);
                     }
                     return pages;
                 },
-                setPage: function (page) {
+                setPage(page) {
                     if (page < 1) page = 1;
-                    else if (page > this.last) page = this.last;
-
-                    this.page = page;
+                    if (page > this.last) page = this.last;
                     this.paging.page = page;
                     this.$emit("change", page);
                 }
             },
             computed: {
-                count: function () {
-                    return this.paging.count
-                },
-                limit: function () {
-                    return this.paging.limit
-                },
-                page: function () {
-                    return this.paging.page
-                },
-                current: function () {
-                    return parseInt(this.page);
-                },
-                last: function () {
-                    return Math.ceil(this.count / this.limit);
-                }
-            },
-            watch: {
-
+                count() { return this.paging.count },
+                limit() { return this.paging.limit },
+                page() { return this.paging.page },
+                current() { return parseInt(this.page) },
+                last() { return Math.ceil(this.count / this.limit) }
             }
-        }});
+        }
+    });
 </script>
-
-<style>
-    .paging {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 20px 0;
-        font-family: Arial, sans-serif;
-    }
-
-    .pagingWrap a {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        margin: 0 4px;
-        padding: 6px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-decoration: none;
-        color: #333;
-        cursor: pointer;
-        font-size: 14px;
-        min-width: 32px;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    /* hover */
-    .pagingWrap a:hover {
-        background-color: #007BFF;
-        color: #fff;
-    }
-
-    /* 현재 페이지 */
-    .pagingWrap a.active {
-        background-color: #007BFF;
-        color: #fff;
-        border-color: #007BFF;
-        font-weight: bold;
-    }
-</style>

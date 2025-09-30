@@ -29,8 +29,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 this.component_idx = this.$jd.lib.generateUniqueId();
             },
             async mounted() {
-                //this.row = await this.$getData({table : "",});
-                //await this.$getsData({table : "",},this.rows);
+                //this.row = await this.$getData(this.filtering);
+                //await this.$getsData(this.filtering,this.rows);
 
                 this.load = true;
 
@@ -45,7 +45,10 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             computed: {
-
+                filtering() {
+                    // let filter = {table : ""}
+                    return { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
+                }
             },
             watch: {
 

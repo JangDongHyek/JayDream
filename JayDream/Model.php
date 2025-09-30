@@ -635,6 +635,7 @@ class Model {
                 if(!empty($update_sql)) $update_sql .= ", ";
 
                 if($value == "now()") $update_sql .= "`{$key}`={$value}";
+                else if ($value === null || strtolower($value) === "null") $update_sql .= "`{$key}`=NULL";
                 else if($column['DATA_TYPE'] == 'int' && $value == 'incr') $update_sql = "`{$key}`={$key}+1";
                 else if($column['DATA_TYPE'] == 'int' && $value == 'decr') $update_sql = "`{$key}`={$key}-1";
                 else $update_sql .= "`{$key}`='{$value}'";
