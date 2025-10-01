@@ -33,7 +33,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
         <!-- external -->
         <!-- 모달을 따로 컴포넌트로 뺄때 거기에 추가 @update:modelValue="value => $emit('update:modelValue', value)" -->
-        <external-bs-modal v-model="modal">
+        <external-bs-modal v-model="modal" @update:modelValue="value => $emit('update:modelValue', value)">
             <template v-slot:header>
 
             </template>
@@ -86,6 +86,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         status: false,
                         table : "",
                         primary : "",
+                        row : null,
                     },
 
                     paging : {

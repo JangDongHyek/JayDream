@@ -2,7 +2,7 @@
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div>
         <div class="modal fade" :class="modelValue.class_1" :id="component_idx" tabindex="-1" :aria-hidden="!modelValue.status">
-            <div class="modal-dialog" :class="modelValue.class_2">
+            <div class="modal-dialog modal-dialog-centered" :class="modelValue.class_2">
                 <template v-if="modelValue.status">
                     <div class="modal-content">
                         <div class="modal-header" v-if="$slots.header">
@@ -53,6 +53,8 @@
                     let copy = Object.assign({}, this.modelValue);
                     copy.status = false;
                     copy.primary = "";
+                    copy.table = "";
+                    copy.row = null;
                     this.$emit("update:modelValue", copy);
                 }
             },

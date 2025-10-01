@@ -313,4 +313,17 @@ class JayDreamLib {
         const pattern = /^[a-zA-Z0-9]{4,20}$/;
         return !pattern.test(userId);
     }
+
+    getParam(key) {
+        const params = new URLSearchParams(window.location.search);
+        const allParams = Object.fromEntries(params.entries());
+
+        // key가 없으면 전체 반환
+        if (!key) {
+            return allParams;
+        }
+
+        // key가 있으면 해당 값 반환 (없으면 null)
+        return allParams[key] ?? null;
+    }
 }

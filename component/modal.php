@@ -66,13 +66,13 @@ $componentName = str_replace(".php","",basename(__FILE__));
             watch: {
                 async "modelValue.status"(value, old_value) {
                     if (value) {
-                        if(this.modelValue.primary) {
+                        if(this.modelValue.primary || this.modelValue.row) {
                             this.row = await this.$getData({
-                                table : this.modelValue.table,
+                                table : this.modelValue.primary && this.modelValue.table || this.modelValue.row?.$table,
                                 file_db: true,
 
                                 where: [
-                                    {column: "primary",value: this.modelValue.primary},
+                                    {column: "primary",value: this.modelValue.primary ?? this.modelValue.row.primary },
                                 ],
                             });
                         }else {

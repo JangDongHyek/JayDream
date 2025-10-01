@@ -141,7 +141,18 @@ class App {
         }
     }
 
-    function componentLoad($path) {
+    function componentLoad($path,$allow = []) {
+        if (!empty($allow) && isset($_GET['is'])) {
+            // is 파라미터를 - 기준으로 쪼개기
+            $isValues = explode("-", $_GET['is']); // 예: "exam-list" → ["exam","list"]
+
+            // $allow 배열 값 중 하나라도 포함되면 실행
+            $intersect = array_intersect($isValues, $allow);
+            if (empty($intersect)) {
+                return; // 교집합이 없으면 실행 안 함
+            }
+        }
+
         if($path[0] != "/") $path = "/".$path;
 
         $path = Config::$ROOT."/component".$path;
