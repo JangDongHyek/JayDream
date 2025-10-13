@@ -72,7 +72,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                 file_db: true,
 
                                 where: [
-                                    {column: "primary",value: this.modelValue.primary ?? this.modelValue.row.primary },
+                                    {column: "primary",value: this.modelValue.primary || this.modelValue.row.primary },
                                 ],
                             });
                         }else {

@@ -53,7 +53,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <external-summernote :row="row" field="content"></external-summernote>
 
         <!--  item  -->
-        <item-paging :paging="paging" @change="getData()"></item-paging>
+        <item-paging :paging="paging" @change="$getsData(this.filtering,this.rows)"></item-paging>
 
         <!-- Vue -->
         <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,ArrayObject)" tag="ul">
@@ -351,16 +351,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                     return options
                 },
-                filter() {
-                    let filter = {
-                        table : "",
 
-                        page : this.page,
-                        limit : this.limit,
-                        count : this.count,
-                    }
-                    return filter
-                },
                 pay_core() {
                     return {
                         payMethod: this.payMethod,

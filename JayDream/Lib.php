@@ -439,7 +439,7 @@ class Lib {
 
     }
 
-    public static function isDecode($value) {
+    public static function isDecode($value,$info) {
         if (!is_string($value) || trim($value) === '') {
             return false;
         }
@@ -447,6 +447,22 @@ class Lib {
         $decoded = json_decode($value, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             return false;
+        }
+
+        // 문자열 계열 컬럼 타입 확인
+        $dataType = strtolower($info['DATA_TYPE'] ? $info['DATA_TYPE'] : '');
+
+        // ① varchar, text, char 등 문자열 계열이면
+        //    JSON 구조(null, true, false, 배열, 객체) 외엔 false
+        if (in_array($dataType, ['varchar', 'text', 'char', 'tinytext', 'mediumtext', 'longtext'])) {
+            if (
+                !is_null($decoded) &&
+                $decoded !== true &&
+                $decoded !== false &&
+                !is_array($decoded)
+            ) {
+                return false;
+            }
         }
 
         // 허용 조건: null, true, false, 배열([]), 연관배열({})만

@@ -202,7 +202,9 @@ class Model {
             foreach ($row as $key => $value) {
                 if($this->primary == $key) continue;
 
-                if(Lib::isDecode($value)) {
+                $info = $this->schema[$this->table]['columns_info'][$key];
+
+                if(Lib::isDecode($value,$info)) {
                     $decoded_value = json_decode($value, true);
 
                     if (!is_null($decoded_value)) {

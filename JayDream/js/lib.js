@@ -326,4 +326,16 @@ class JayDreamLib {
         // key가 있으면 해당 값 반환 (없으면 null)
         return allParams[key] ?? null;
     }
+
+    async clipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            this.alert("복사가 완료되었습니다.")
+            return true; // 성공
+        } catch (err) {
+            this.alert("복사를 실패했습니다." + err)
+            return false; // 실패
+        }
+    }
+
 }
