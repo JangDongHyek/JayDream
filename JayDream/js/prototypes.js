@@ -100,3 +100,27 @@ String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
     }
     return date.format(fmt);
 };
+
+String.prototype.korDate = function() {
+    let str = this.trim();
+
+    // 시간 분리
+    let [datePart, timePart] = str.split(' ');
+    let parts = datePart.split(/[-/.]/).map(p => p.replace(/^0+/, '')); // 0 제거
+
+    let year = parts[0] || '';
+    let month = parts[1] || '';
+    let day = parts[2] || '';
+
+    let result = '';
+
+    if (year) result += `${year}년`;
+    if (month) result += ` ${month}월`;
+    if (day) result += ` ${day}일`;
+
+    if (timePart) {
+        result += ` ${timePart}`;
+    }
+
+    return result.trim();
+};

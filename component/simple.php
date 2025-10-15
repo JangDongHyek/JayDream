@@ -21,7 +21,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     component_name : "<?=$componentName?>",
                     component_idx: "",
 
-                    row: {},
+                    row: null,
                     rows : [],
                 };
             },
