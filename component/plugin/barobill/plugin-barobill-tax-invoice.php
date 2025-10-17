@@ -28,7 +28,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
                 this.load = true;
@@ -43,12 +43,12 @@ $componentName = str_replace(".php","",basename(__FILE__));
             methods: {
                 async taxInvoice(company,order) {
                     if(!company) {
-                        await this.$jd.lib.alert("회사 정보가 없습니다.");
+                        await this.lib.alert("회사 정보가 없습니다.");
                         return false;
                     }
 
                     if(!order) {
-                        await this.$jd.lib.alert("주문이 없습니다.");
+                        await this.lib.alert("주문이 없습니다.");
                         return false;
                     }
 
@@ -86,11 +86,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     }
 
                     try {
-                        let res = await this.$jd.lib.ajax("RegistAndIssueTaxInvoice",baro_company,"/JayDream/plugin/barobill/api.php",options);
+                        let res = await this.lib.ajax("RegistAndIssueTaxInvoice",baro_company,"/JayDream/plugin/barobill/api.php",options);
 
-                        await this.$jd.lib.alert("세금계산서 발행을 신청했습니다.");
+                        await this.lib.alert("세금계산서 발행을 신청했습니다.");
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 }
             },

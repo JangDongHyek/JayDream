@@ -3,8 +3,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
-        <input type="file" @change="$jd.vue.changeFile($event,row,'key_name')" name="names[]">
-        <input type="text" @input="$jd.vue.inputNumber" @keyup.enter=""> <!-- 숫자만 입력가능하게 -->
+        <input type="file" @change="vue.changeFile($event,row,'key_name')" name="names[]">
+        <input type="text" @input="vue.inputNumber" @keyup.enter=""> <!-- 숫자만 입력가능하게 -->
 
         <button @click="$postData(row,options)">테스트</button>
         <button @click="$deleteData(row,options)">삭제</button>
@@ -255,19 +255,14 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             },
             async mounted() {
-                this.row = await this.$getData(this.filter);
-                await this.$getsData(this.filter, this.rows);
+                this.row = await this.$getData(this.filter); // 단일 데이터 가져오기
+                await this.$getsData(this.filter, this.rows); // 조건에 해당하는 데이터 가져오기
 
                 //session 등록하기
-                await this.$jd.lib.ajax("session_set", {
-                    name: "exam"
-                }, "/JayDream/api.php");
+                await this.session.set("exam",'value') // string,array,object
 
                 //session 가져오기
-                this.sessions = (await this.$jd.lib.ajax("session_get", {
-                    example: "",
-                    ss_mb_id: "",
-                }, "/JayDream/api.php")).sessions;
+                this.exam = await this.session.get("exam") // string,array,object
 
                 await this.$whereDelete({
                     where: [
@@ -326,7 +321,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             href : ""
                         });
                     } catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 },
                 async restApi() {
@@ -337,11 +332,11 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     }
 
                     try {
-                        let res = await this.$jd.lib.ajax("method", row, "/JayDream/api.php", options);
+                        let res = await this.lib.ajax("method", row, "/JayDream/api.php", options);
 
 
                     } catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 }
             },

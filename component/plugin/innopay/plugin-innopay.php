@@ -39,7 +39,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         //         (EPAY   ,EBANK  ,VBANK  ,BANK   ,NONE,CARD         ,OPCARD)
                         payMethod : "",
                         mid : "", // 상점 아이디
-                        moid : this.$jd.lib.generateUniqueId(), // 주문 번호 6~40 소문자, 대문자, 숫자, -, _ 값 만으로 충분히 랜덤한 값을 만들어주세요.
+                        moid : this.lib.generateUniqueId(), // 주문 번호 6~40 소문자, 대문자, 숫자, -, _ 값 만으로 충분히 랜덤한 값을 만들어주세요.
                         goodsName : "", // 상품명
                         amt : "", // 거래금액 (과세금액) 면세금액은 taxFreeAmt에 넣어 주세요. ※ 총 결제금액 = amt + taxFreeAmt
                         buyerName : "", // 구매자 이름
@@ -64,7 +64,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
                 this.init();
@@ -111,65 +111,65 @@ $componentName = str_replace(".php","",basename(__FILE__));
                             await this.$postData(result.data,{table:'jd_plugin_innopay',return : true});
 
                             if(result.data.payMethod == "VBANK") {
-                                await this.$jd.lib.alert(`
+                                await this.lib.alert(`
                                     은행 : ${result.data.virtualAccount.bankName}\n
                                     계좌 : ${result.data.virtualAccount.accountNumber}\n
                                     금액 : ${item.$jd_plugin_innopay__amt.format()}원\n
                                     입금시 자동으로 결제완료로 변경됩니다\n
                                     `);
 
-                                this.$jd.lib.href(this.redirect_url);
+                                this.lib.href(this.redirect_url);
                             }else {
                                 //결제성공시 로직
                                 this.$emit('paySuccess',result.data);
                             }
 
                         }else {
-                            await this.$jd.lib.alert(result.error.message)
+                            await this.lib.alert(result.error.message)
                         }
                     }
                 },
                 async init() {
                     try {
                         // 설정값
-                        let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/plugin/innopay/api.php",{});
+                        let res = await this.lib.ajax("innopay",{},"/JayDream/plugin/innopay/api.php",{});
                         this.row.mid = res.mid;
                         this.merchantKey = res.merchantKey;
 
                         await this.payRequest();
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 },
                 async pay() {
                     if(!this.pay_data.payMethod) {
-                        await this.$jd.lib.alert("결제 타입이 없습니다.");
+                        await this.lib.alert("결제 타입이 없습니다.");
                         return false;
                     }
                     if(!this.pay_data.goodsName) {
-                        await this.$jd.lib.alert("상품명이 없습니다");
+                        await this.lib.alert("상품명이 없습니다");
                         return false;
                     }
                     if(!this.pay_data.amt) {
-                        await this.$jd.lib.alert("상품금액이 없습니다.");
+                        await this.lib.alert("상품금액이 없습니다.");
                         return false;
                     }
                     if(!this.pay_data.buyerName) {
-                        await this.$jd.lib.alert("구매자명이 없습니다.");
+                        await this.lib.alert("구매자명이 없습니다.");
                         return false;
                     }
                     if(!this.pay_data.buyerTel) {
-                        await this.$jd.lib.alert("구매자연락처가 없습니다.");
+                        await this.lib.alert("구매자연락처가 없습니다.");
                         return false;
                     }
                     if(!this.pay_data.buyerEmail) {
-                        await this.$jd.lib.alert("구매자이메일이 없습니다");
+                        await this.lib.alert("구매자이메일이 없습니다");
                         return false;
                     }
 
                     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailPattern.test(this.pay_data.buyerEmail)) {
-                        await this.$jd.lib.alert("올바른 이메일 형식이 아닙니다.");
+                        await this.lib.alert("올바른 이메일 형식이 아닙니다.");
                         return false;
                     }
 

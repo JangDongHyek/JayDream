@@ -37,7 +37,7 @@
                 if(this.modelValue.id) {
                     this.component_id = this.modelValue.id
                 }else {
-                    this.component_idx = this.$jd.lib.generateUniqueId();
+                    this.component_idx = this.lib.generateUniqueId();
                 }
 
             },

@@ -25,7 +25,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
                 await this.getInfo();
@@ -45,7 +45,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
             methods: {
                 async goUri() {
                     if (!window.Kakao || !Kakao.Auth) {
-                        await this.$jd.lib.alert("카카오 SDK가 로드되지 않았습니다.");
+                        await this.lib.alert("카카오 SDK가 로드되지 않았습니다.");
                         return;
                     }
 
@@ -55,20 +55,20 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 },
                 async getLoginUri() {
                     try {
-                        let res = await this.$jd.lib.ajax("redirect_uri",{},"/JayDream/plugin/kakao/api.php",{});
+                        let res = await this.lib.ajax("redirect_uri",{},"/JayDream/plugin/kakao/api.php",{});
                         this.redirect_uri = res.uri;
 
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 },
                 async getInfo() {
                     try {
-                        let res = await this.$jd.lib.ajax("info",{},"/JayDream/plugin/kakao/api.php",{});
+                        let res = await this.lib.ajax("info",{},"/JayDream/plugin/kakao/api.php",{});
                         this.info = res.info;
 
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 },
             },

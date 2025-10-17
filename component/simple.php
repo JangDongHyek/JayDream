@@ -26,11 +26,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
-                //this.row = await this.$getData(this.filtering);
-                //await this.$getsData(this.filtering,this.rows);
+                //this.row = await this.api.get(this.filtering);
+                //await this.api.gets(this.filtering,this.rows);
 
                 this.load = true;
 

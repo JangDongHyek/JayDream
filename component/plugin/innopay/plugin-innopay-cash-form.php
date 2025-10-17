@@ -116,20 +116,20 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
                 if(!this.tid) {
-                    await this.$jd.lib.alert("주문번호가 존재하지않습니다.");
+                    await this.lib.alert("주문번호가 존재하지않습니다.");
                     history.back();
                 }
             },
             async mounted() {
                 this.row = await this.$getData(this.filter);
                 if(!this.row) {
-                    await this.$jd.lib.alert("주문데이터가 존재하지않습니다.");
+                    await this.lib.alert("주문데이터가 존재하지않습니다.");
                     history.back();
                 }
                 if(this.row.cashReceipt) {
-                    await this.$jd.lib.alert("이미 현금 영수증을 발행한 주문데이터입니다.");
+                    await this.lib.alert("이미 현금 영수증을 발행한 주문데이터입니다.");
                     history.back();
                 }
 
@@ -148,12 +148,12 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 async cashRequest() {
                     if(!this.form.receiptIdentity) {
                         let type = this.form.receiptType == '1' ? "휴대폰번호" : "사업자번호"
-                        await this.$jd.lib.alert(`${type}를 입력해주세요.`);
+                        await this.lib.alert(`${type}를 입력해주세요.`);
                         return false;
                     }
 
                     let obj = Object.assign({},this.cash,this.form);
-                    obj.moid = this.$jd.lib.generateUniqueId();
+                    obj.moid = this.lib.generateUniqueId();
                     obj.goodsName = this.row['goods'].name;
                     obj.amt = this.row.amt;
                     obj.dutyFreeAmt = this.row.taxFreeAmt;
@@ -187,10 +187,10 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                             await this.$postData(this.row,{table : "jd_plugin_innopay", return : true});
 
-                            await this.$jd.lib.alert("완료되었습니다.");
+                            await this.lib.alert("완료되었습니다.");
                             history.back();
                         } else {
-                            await this.$jd.lib.alert("에러 발생: " + data.resultMsg);
+                            await this.lib.alert("에러 발생: " + data.resultMsg);
                         }
                     } catch (e) {
                         console.error(e);
@@ -200,11 +200,11 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 async init() {
                     try {
                         // 설정값
-                        let res = await this.$jd.lib.ajax("innopay",{},"/JayDream/plugin/innopay/api.php",{});
+                        let res = await this.lib.ajax("innopay",{},"/JayDream/plugin/innopay/api.php",{});
                         this.cash.mid = res.mid;
 
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 },
                 getPayType() {

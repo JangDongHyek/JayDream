@@ -21,7 +21,7 @@
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             mounted() {
                 this.$nextTick(() => {

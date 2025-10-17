@@ -23,7 +23,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
                 let component = this;
@@ -88,9 +88,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
                         table : "summernote"
                     };
                     try {
-                        let res = await this.$jd.lib.ajax(method,data,"/JayDream/api.php",options);
+                        let res = await this.lib.ajax(method,data,"/JayDream/api.php",options);
 
-                        $(editor).summernote('insertImage', `${this.$jd.url}/${res.file.src}`);
+                        $(editor).summernote('insertImage', `${this.url}/${res.file.src}`);
                     }catch (e) {
                         alert(e.message)
                     }

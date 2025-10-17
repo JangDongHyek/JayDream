@@ -39,7 +39,10 @@ function vueLoad(app_name) {
     JayDream.api_iv = JayDream_api_iv;
     JayDream.plugin = new JayDreamPlugin(JayDream);
     JayDream.lib = new JayDreamLib(JayDream);
+    JayDream.api = new JayDreamAPI(JayDream);
+    JayDream.session = new JayDreamSession(JayDream);
     JayDream.vue = new JayDreamVue();
+    JayDream.route = new JayDreamRoute();
 
     //디렉티브
     app.directive('price', {
@@ -81,181 +84,50 @@ function vueLoad(app_name) {
 
     // Vue 내부에서만 접근 가능하게 설정
     app.config.globalProperties.$jd = JayDream;
-
-    app.config.globalProperties.$postData = async function(data,options = {}) {
-        let method = data.primary ? 'update' : 'insert';
-        let url = "/JayDream/api.php";
-        options.component_name = this.component_name;
-        try {
-            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
-            if(data['$table'] && !options.table) options.table = data['$table'];
+    app.config.globalProperties.lib = JayDream.lib;
+    app.config.globalProperties.route = JayDream.route;
+    app.config.globalProperties.api = JayDream.api;
+    app.config.globalProperties.vue = JayDream.vue;
+    app.config.globalProperties.plugin = JayDream.plugin;
+    app.config.globalProperties.session = JayDream.session;
 
 
-            if("confirm" in options) {
-                if(!await this.$jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
-                        return false;
+    // JayDream 예약어 목록
+    const reservedKeys = ['lib', 'route', 'api','vue','plugin','session'];
+
+    // 예약어 변수 등록시 에러
+    const protectMixin = {
+        beforeCreate() {
+            const name = this.$options.name || '(Anonymous Component)';
+
+            // data 속성 검사
+            if (typeof this.$options.data === 'function') {
+                const data = this.$options.data.call(this);
+                for (const key of Object.keys(data)) {
+                    if (reservedKeys.includes(key)) {
+                        JayDream.lib.alert(`[JayDream] 컴포넌트 "${name}"의 data()에서 "${key}"는 예약된 이름입니다.`)
+                        throw new Error(`[JayDream] 컴포넌트 "${name}"의 data()에서 "${key}"는 예약된 이름입니다.`);
                     }
                 }
             }
 
-            if(options.url) url = options.url;
-            if(options.method) method = options.method;
-
-            let res = await this.$jd.lib.ajax(method, data, url,options);
-
-            if(options.return) return res
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                let message = options.message ? options.message : "완료되었습니다.";
-                await this.$jd.plugin.alert(message);
-
-                if(options.href) window.location.href = JayDream.url + options.href;
-                else window.location.reload();
-            }
-        }catch (e) {
-            await this.$jd.plugin.alert(e.message)
-        }
-    }
-
-    app.config.globalProperties.$getsData = async function(filter,arrays,options = {}) {
-        options.component_name = this.component_name;
-        try {
-            if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
-
-            let res = await this.$jd.lib.ajax("get", filter, "/JayDream/api.php",options);
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                if(filter.paging) filter.paging.count = res.count;
-                arrays.splice(0, arrays.length, ...res.data); // vue가 인식을 못할수도 있으므로 splice후 배열 복제
-            }
-        } catch (e) {
-            await this.$jd.plugin.alert(e.message)
-        }
-    }
-
-    app.config.globalProperties.$getData = async function(filter,options = {}) {
-        options.component_name = this.component_name;
-        try {
-            if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
-
-            let res = await this.$jd.lib.ajax("get", filter, "/JayDream/api.php",options);
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                return res.data[0];
-            }
-        } catch (e) {
-            await this.$jd.plugin.alert(e.message)
-        }
-    }
-
-    app.config.globalProperties.$deleteData = async function(data,options = {}) {
-        options.component_name = this.component_name;
-        let message = "정말 삭제하시겠습니까?";
-        if(options.message) message = options.message;
-
-        if(!options.return) {
-            if(! await this.$jd.plugin.confirm(message)) return false;
-        }
-
-        try {
-            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
-            options.table = data['$table'];
-            let res = await this.$jd.lib.ajax("remove",data,"/JayDream/api.php",options);
-
-            if(options.return) return res
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                await this.$jd.plugin.alert("완료되었습니다.");
-                if(options.href) window.location.href = JayDream.url + options.href;
-                else window.location.reload();
-            }
-        }catch (e) {
-            await this.$jd.plugin.alert(e.message)
-        }
-    }
-
-    app.config.globalProperties.$whereUpdate = async function(update_column,options = {}) {
-        let url = "/JayDream/api.php";
-        options.component_name = this.component_name;
-        try {
-            if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
-
-            if("confirm" in options) {
-                if(!await this.$jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
-                        return false;
+            // methods, computed 등도 체크
+            const sections = ['methods', 'computed', 'props'];
+            for (const section of sections) {
+                const obj = this.$options[section];
+                if (!obj) continue;
+                for (const key of Object.keys(obj)) {
+                    if (reservedKeys.includes(key)) {
+                        JayDream.lib.alert(`[JayDream] "${name}"의 ${section}에 "${key}"는 사용할 수 없습니다.`)
+                        throw new Error(`[JayDream] "${name}"의 ${section}에 "${key}"는 사용할 수 없습니다.`);
                     }
                 }
             }
-
-            if(options.url) url = options.url;
-
-            let res = await this.$jd.lib.ajax("where_update", update_column, url,options);
-
-            if(options.return) return res
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                await this.$jd.plugin.alert("완료되었습니다.");
-
-                if(options.href) window.location.href = JayDream.url + options.href;
-                else window.location.reload();
-            }
-        }catch (e) {
-            await this.$jd.plugin.alert(e.message)
         }
-    }
-
-    app.config.globalProperties.$whereDelete = async function(filter,options = {}) {
-        let url = "/JayDream/api.php";
-        options.component_name = this.component_name;
-        try {
-            if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
-
-            if("confirm" in options) {
-                if(!await this.$jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
-                        return false;
-                    }
-                }
-            }
-
-            if(options.url) url = options.url;
-
-            let res = await this.$jd.lib.ajax("where_delete", filter, url,options);
-
-            if(options.return) return res
-
-            if(options.callback) {
-                await options.callback(res)
-            }else {
-                await this.$jd.plugin.alert("완료되었습니다.");
-
-                if(options.href) window.location.href = JayDream.url + options.href;
-                else window.location.reload();
-            }
-        }catch (e) {
-            await this.$jd.plugin.alert(e.message)
-        }
-    }
+    };
 
 
+    app.mixin(protectMixin);
     app.mount(`#${app_name}`); // 특정 DOM에 마운트
     JayDream_vue.push({ app_name, app }); // 배열에 앱 인스턴스 저장
 }

@@ -45,7 +45,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
                 this.load = true;
@@ -67,7 +67,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 async "modelValue.status"(value, old_value) {
                     if (value) {
                         if(this.modelValue.primary || this.modelValue.row) {
-                            this.row = await this.$getData({
+                            this.row = await this.api.get({
                                 table : this.modelValue.primary && this.modelValue.table || this.modelValue.row?.$table,
                                 file_db: true,
 

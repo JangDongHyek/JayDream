@@ -63,9 +63,9 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
                 if (!this.tid) {
-                    await this.$jd.lib.alert("주문번호가 존재하지않습니다.");
+                    await this.lib.alert("주문번호가 존재하지않습니다.");
                     history.back();
                     return false;
                 }
@@ -74,7 +74,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 this.row = await this.$getData(this.filter);
 
                 if (!this.row) {
-                    await this.$jd.lib.alert("주문데이터가 존재하지않습니다.");
+                    await this.lib.alert("주문데이터가 존재하지않습니다.");
                     history.back();
                     return false;
                 }

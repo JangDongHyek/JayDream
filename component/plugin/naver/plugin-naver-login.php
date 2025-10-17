@@ -24,7 +24,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 };
             },
             async created() {
-                this.component_idx = this.$jd.lib.generateUniqueId();
+                this.component_idx = this.lib.generateUniqueId();
             },
             async mounted() {
 
@@ -44,11 +44,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 },
                 async getLoginUri() {
                     try {
-                        let res = await this.$jd.lib.ajax("login_uri",{},"/JayDream/plugin/naver/api.php",{});
+                        let res = await this.lib.ajax("login_uri",{},"/JayDream/plugin/naver/api.php",{});
                         this.redirect_uri = res.uri;
 
                     }catch (e) {
-                        await this.$jd.lib.alert(e.message)
+                        await this.lib.alert(e.message)
                     }
                 }
             },
