@@ -6,8 +6,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <input type="file" @change="vue.changeFile($event,row,'key_name')" name="names[]">
         <input type="text" @input="vue.inputNumber" @keyup.enter=""> <!-- 숫자만 입력가능하게 -->
 
-        <button @click="$postData(row,options)">테스트</button>
-        <button @click="$deleteData(row,options)">삭제</button>
+        <button @click="api.post(row,options)">테스트</button>
+        <button @click="api.delete(row,options)">삭제</button>
 
         <!-- plugin -->
         <plugin-innopay ref="pluginInnopay" :pay_core="pay_core" @paySuccess="paySuccess" redirect_url="/index.php">
@@ -53,7 +53,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <external-summernote :row="row" field="content"></external-summernote>
 
         <!--  item  -->
-        <item-paging :paging="paging" @change="$getsData(this.filtering,this.rows)"></item-paging>
+        <item-paging :paging="paging" @change="api.gets(this.filtering,this.rows)"></item-paging>
 
         <!-- Vue -->
         <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,ArrayObject)" tag="ul">
@@ -264,7 +264,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 //session 가져오기
                 this.exam = await this.session.get("exam") // string,array,object
 
-                await this.$whereDelete({
+                //조건 삭제
+                this.api.whereDelete({
                     where: [
                         {
                             column: "",             // join 조건시 user.idx
@@ -276,7 +277,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     ],
                 },{
                     table : "",
-                });
+                })
             },
             updated() {
 
@@ -341,12 +342,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 }
             },
             computed: {
-                options() {
-                    let options =
-
-                    return options
-                },
-
                 pay_core() {
                     return {
                         payMethod: this.payMethod,
@@ -358,6 +353,13 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         // 주문데이터에 해당 값이 있어야 미리 주문을 만듬 * 결제리턴시 새로고침되어 유지되어있는값이 초기화되는형상떄문에 데이터를 만든후 업데이트로 작업해야함
                         moid : this.order.moid,
                     }
+                },
+
+                filtering() {
+                    // let filter = {table : ""}
+
+                    let merge = { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
+                    return merge
                 }
             },
             watch: {

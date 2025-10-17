@@ -47,7 +47,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
             computed: {
                 filtering() {
                     // let filter = {table : ""}
-                    return { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
+
+                    let merge = { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
+                    return merge
                 }
             },
             watch: {
