@@ -47,8 +47,6 @@
 
 ---
 
----
-
 ## 📦 설치 (Installation)
 
 PHP 프로젝트 루트에 JayDream 폴더를 복사한 후, 777권한과 아래 한 줄만 추가하면 됩니다.
@@ -56,6 +54,8 @@ PHP 프로젝트 루트에 JayDream 폴더를 복사한 후, 777권한과 아래
 ```php
 <?php include_once "./JayDream/init.php"; ?>
 ```
+
+---
 
 ## ⚙️ 기본 설정 (Configuration)
 
@@ -89,6 +89,8 @@ class Config
 }
 ```
 
+---
+
 ## 사용 예시
 ```php
 <?php
@@ -109,6 +111,7 @@ $jd->componentLoad("/exam");
 ?>
 ```
 
+---
 ## component 사용법
 해당 파일에 더 상세한 사용법이 적혀있습니다.
 > 📄 `JayDream/component/detail.php`
