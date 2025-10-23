@@ -112,6 +112,42 @@ $jd->componentLoad("/exam");
 ```
 
 ---
+
+## 간단통신
+```
+// ✅ 데이터 조회
+await this.api.table("users").where("status", "active").get();
+
+// ✅ 특정 구간 조건
+await this.api.table("logs").between("created_at", "20250101", "20250131").get();
+
+// ✅ 데이터 등록
+await this.api.table("users").post({name: "홍길동"});
+
+// ✅ 데이터 단일수정 (pk 필수)
+await this.api.table("users").post({ primary : 1, name: "홍길동2"});
+
+// ✅ 데이터 조건수정
+await this.api.table("users").where("idx", 1).update({ name: "홍길동2" });
+
+// ✅ 데이터 단일삭제(pk 필수)
+await this.api.table("users").delete({ primary : 1, });
+
+// ✅ 데이터 조건삭제
+await this.api.table("users").where("idx", 1).delete();
+
+// ✅ session 가져오기
+await this.session.get('user_idx')
+
+// ✅ session 수정
+await this.session.set('user_idx',"1")
+
+// ✅ session 삭제
+await this.session.remove('user_idx')
+```
+
+---
+
 ## component 사용법
 해당 파일에 더 상세한 사용법이 적혀있습니다.
 > 📄 `JayDream/component/detail.php`

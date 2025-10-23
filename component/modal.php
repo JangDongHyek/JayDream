@@ -17,7 +17,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             <template v-slot:footer>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                <button type="button" class="btn btn-primary" @click="$postData(row)">저장</button>
+                <button type="button" class="btn btn-primary" @click="api.post(row)">저장</button>
             </template>
         </external-bs-modal>
     </div>

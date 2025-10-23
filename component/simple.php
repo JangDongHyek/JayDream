@@ -27,10 +27,10 @@ $componentName = str_replace(".php","",basename(__FILE__));
             },
             async created() {
                 this.component_idx = this.lib.generateUniqueId();
+                this.api.component_name = this.component_name
             },
             async mounted() {
-                //this.row = await this.api.get(this.filtering);
-                //await this.api.gets(this.filtering,this.rows);
+                //await this.api.table("exam").get(rows)
 
                 this.load = true;
 
@@ -45,12 +45,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             computed: {
-                filtering() {
-                    // let filter = {table : ""}
 
-                    let merge = { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
-                    return merge
-                }
             },
             watch: {
 

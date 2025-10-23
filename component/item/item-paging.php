@@ -4,22 +4,22 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <nav v-if="parseInt(count)" aria-label="Page navigation">
         <ul class="pagination justify-content-center mb-0">
-            <li class="page-item" :class="{ disabled: page <= 1 }">
+            <li class="page-item" :class="{ disabled: this.localPaging.page <= 1 }">
                 <a class="page-link" href="javascript:;" @click="setPage(1)">«</a>
             </li>
-            <li class="page-item" :class="{ disabled: page <= 1 }">
-                <a class="page-link" href="javascript:;" @click="setPage(page-1)">‹</a>
+            <li class="page-item" :class="{ disabled: this.localPaging.page <= 1 }">
+                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.page-1)">‹</a>
             </li>
 
-            <li v-for="index in getPages()" class="page-item" :class="{ active: index == page }" :key="index">
+            <li v-for="index in getPages()" class="page-item" :class="{ active: index == this.localPaging.page }" :key="index">
                 <a class="page-link" href="javascript:;" @click="setPage(index)">{{ index }}</a>
             </li>
 
-            <li class="page-item" :class="{ disabled: page >= last }">
-                <a class="page-link" href="javascript:;" @click="setPage(page+1)">›</a>
+            <li class="page-item" :class="{ disabled: this.localPaging.page >= this.localPaging.last }">
+                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.page+1)">›</a>
             </li>
-            <li class="page-item" :class="{ disabled: page >= last }">
-                <a class="page-link" href="javascript:;" @click="setPage(last)">»</a>
+            <li class="page-item" :class="{ disabled: this.localPaging.page >= this.localPaging.last }">
+                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.last)">»</a>
             </li>
         </ul>
     </nav>
@@ -30,12 +30,16 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         name: "<?= $componentName ?>", object: {
             template: "#<?= $componentName ?>-template",
             props: {
-                paging: { type: Object, default: null },
+                filter : { type: Object, default: null },
+            },
+            setup(props) {
+                const localPaging = Vue.toRef(props.filter, 'paging')
+                return { localPaging };
             },
             methods: {
                 getPages() {
-                    let current = this.current;
-                    let last = this.last;
+                    let current = this.localPaging.page;
+                    let last = this.filter.paging.last;
                     let min = current - 2;
                     let max = current + 2;
 
@@ -50,17 +54,14 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 },
                 setPage(page) {
                     if (page < 1) page = 1;
-                    if (page > this.last) page = this.last;
-                    this.paging.page = page;
+                    if (page > this.filter.paging.last) page = this.filter.paging.last;
+                    this.filter.paging.page = page;
                     this.$emit("change", page);
                 }
             },
             computed: {
-                count() { return this.paging.count },
-                limit() { return this.paging.limit },
-                page() { return this.paging.page },
-                current() { return parseInt(this.page) },
-                last() { return Math.ceil(this.count / this.limit) }
+                count() { return this.localPaging?.count ?? 0 },
+                limit() { return this.localPaging?.limit },
             }
         }
     });
