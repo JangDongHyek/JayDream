@@ -65,21 +65,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
             },
             watch: {
                 async "modelValue.status"(value, old_value) {
-                    if (value) {
-                        if(this.modelValue.primary || this.modelValue.row) {
-                            this.row = await this.api.get({
-                                table : this.modelValue.primary && this.modelValue.table || this.modelValue.row?.$table,
-                                file_db: true,
-
-                                where: [
-                                    {column: "primary",value: this.modelValue.primary || this.modelValue.row.primary },
-                                ],
-                            });
-                        }else {
-                            this.row = this.temp;
-                        }
+                    if(this.modelValue.primary || this.modelValue.row) {
+                        let table = this.modelValue.primary && this.modelValue.table || this.modelValue.row?.$table
+                        await this.api.table(table).where("primary",this.modelValue.primary || this.modelValue.row.primary).get(this.row)
                     }else {
-                        // this.modelValue.parent = null;
+                        this.row = this.lib.copyObject(this.temp);
                     }
                 }
             }

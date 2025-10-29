@@ -109,12 +109,7 @@ class JayDreamAPI {
         return this
     }
 
-    async get(options = {}) {
-        // ✅ 매개변수가 배열이거나 null이면 자동 변환
-        if (Array.isArray(options) || options === null) {
-            options = { bind: options };
-        }
-
+    async get(bind,options = {}) {
         options.component_name = this.component_name;
 
         try {
@@ -131,13 +126,13 @@ class JayDreamAPI {
             }
 
             // ✅ Vue 반응성 대응 (배열 / 객체 자동 갱신)
-            if (options.bind) {
-                if (Array.isArray(options.bind)) {
+            if (bind) {
+                if (Array.isArray(bind)) {
                     // 배열이면 splice로 갱신
-                    options.bind.splice(0, options.bind.length, ...data);
-                } else if (typeof options.bind === "object" && options.bind !== null) {
+                    bind.splice(0, bind.length, ...data);
+                } else if (typeof bind === "object" && bind !== null) {
                     // 객체면 Object.assign으로 병합
-                    Object.assign(options.bind, data[0] || {});
+                    Object.assign(bind, data[0] || {});
                 }
             }
 
