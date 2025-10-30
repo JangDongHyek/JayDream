@@ -201,6 +201,7 @@ class Model {
             $row['primary'] = $row[$this->primary];
             foreach ($row as $key => $value) {
                 if($this->primary == $key) continue;
+                if (!isset($this->schema[$this->table]['columns_info'][$key])) continue;
 
                 $info = $this->schema[$this->table]['columns_info'][$key];
 
