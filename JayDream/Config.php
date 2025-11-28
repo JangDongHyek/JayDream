@@ -12,7 +12,7 @@ class Config
     public static $connect = null;
     public static $framework = "";
 
-    private static $DEV_IPS = [];
+    private static $DEV_IPS = ["127.0.0.1"];
 
     const HOSTNAME = "localhost";
     const DATABASE = "exam";
@@ -32,6 +32,9 @@ class Config
         // DB 체크
         self::initConnect();
 
+        // 프레임워크 환경 체크
+        self::getFramework();
+
         // 루트 및 URL 설정
         if(self::$framework == "ci3" || self::$framework == "ci4") {
             self::$ROOT = FCPATH;
@@ -45,9 +48,6 @@ class Config
                 $host = preg_replace('/:[0-9]+$/', '', $host);
             self::$URL = $http . $host . $user;
         }
-
-        // 프레임워크 환경 체크
-        self::getFramework();
 
         //폴더 권한체크
         //if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");

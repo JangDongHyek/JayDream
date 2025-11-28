@@ -10,6 +10,8 @@
     jd.api_iv = JayDream_api_iv;
     jd.plugin = new JayDreamPlugin(jd);
     jd.lib = new JayDreamLib(jd);
+    jd.api = new JayDreamAPI(jd);
+    jd.session = new JayDreamSession(jd);
 
     async function getData() {
         try {

@@ -1,0 +1,15 @@
+********************************************************
+ci3 환경
+application/libraries 밑에 JayDream 복사 777필수
+js,resource 폴더는 필요없음
+
+루트디렉토리 바로밑에 JayDream 복사 777 필수 * application 폴더와 동일선상에 두면됌
+js,resource 폴더만 필요함
+
+controller 생성자 함수 안에 밑에 코드 추가
+include_once(APPPATH . 'libraries/JayDream/require.php');
+$this->app = new JayDream\App();
+
+routes에 통신 추가해주기
+// 공통 rest API
+$route['JayDream/api']['post'] = "JayDreamController/method";
