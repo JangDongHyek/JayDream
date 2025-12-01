@@ -46,7 +46,16 @@ class Lib {
 
     //jsonEncode 한글깨짐 방지설정넣은
     public static function jsonEncode($data) {
-        $value = json_encode($data,JSON_UNESCAPED_UNICODE);
+        $value = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_IGNORE);
+
+        // 2) JSON 인코딩 실패 체크
+        if ($value === false || json_last_error() !== JSON_ERROR_NONE) {
+            Lib::error("JSON 인코딩 실패: " . json_last_error_msg());
+        }
+
+        if ($value === "") {
+            Lib::error("JSON 출력 오류 (응답 생성 실패)");
+        }
 
         return str_replace('\\/', '/', $value);
 
