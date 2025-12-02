@@ -11,13 +11,14 @@ class Config
     public static $URL = "";
     public static $connect = null;
     public static $framework = "";
+    public static $csrf = false;
 
-    private static $DEV_IPS = ["127.0.0.1"];
+    private static $DEV_IPS = ['127.0.0.1'];
 
     const HOSTNAME = "localhost";
     const DATABASE = "exam";
     const USERNAME = "exam";
-    const PASSWORD = "pass";
+    const PASSWORD = "password";
 
     const COOKIE_TIME = 7200;
 
@@ -35,6 +36,9 @@ class Config
         // 프레임워크 환경 체크
         self::getFramework();
 
+        //CI csrf 체크
+        self::detectCSRF();
+
         // 루트 및 URL 설정
         if(self::$framework == "ci3" || self::$framework == "ci4") {
             self::$ROOT = FCPATH;
@@ -48,6 +52,8 @@ class Config
                 $host = preg_replace('/:[0-9]+$/', '', $host);
             self::$URL = $http . $host . $user;
         }
+
+
 
         //폴더 권한체크
         //if(Lib::getPermission(self::$ROOT."/JayDream") != "777") Lib::error("JayDream 폴더가 777이 아닙니다.");
@@ -185,6 +191,51 @@ class Config
         }
 
         return self::$framework;
+    }
+
+    private static function detectCSRF() {
+        if(self::$framework == "ci3") {
+            $CI =& get_instance();
+            $config = $CI->config->item('csrf_protection');
+            self::$csrf = ($config === TRUE);
+        }else if(self::$framework == "ci4") {
+            $filters = config('Filters');
+            $globalBefore = $filters->globals['before'] ?? [];
+            if (in_array('csrf', $globalBefore)) {
+                self::$csrf = true;
+            }
+
+            $security = config('Security');
+            self::$csrf = ($security->csrfProtection !== false);
+        }else {
+            self::$csrf = false;
+        }
+    }
+
+    public static function getCSRF() {
+        if(self::$csrf) {
+            if(self::$framework == "ci3") {
+                $CI =& get_instance();
+                $tokenName  = $CI->security->get_csrf_token_name();
+                $tokenValue = $CI->security->get_csrf_hash();
+            }else if(self::$framework == "ci4") {
+                $security = \Config\Services::security();
+                $tokenName  = $security->getCSRFTokenName();
+                $tokenValue = $security->getCSRFHash();
+            }else {
+                $tokenName  = "미개발";
+                $tokenValue = "미개발";
+            }
+        }else {
+            $tokenName  = "사용안함";
+            $tokenValue = "";
+        }
+
+
+        return array(
+            "name" => $tokenName,
+            "value" => $tokenValue
+        );
     }
 }
 

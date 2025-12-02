@@ -129,6 +129,7 @@ class JayDreamLib {
             }
 
             let objects = {_method : method};
+            if(this.jd.csrf_value) objects[this.jd.csrf_name] = this.jd.csrf_value;
             objects = this.processObject(objects,object,'obj');
             objects = this.processObject(objects,options,'options');
 

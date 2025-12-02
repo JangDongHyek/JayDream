@@ -66,6 +66,10 @@ class App {
             $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
             echo Lib::js_obfuscate("var JayDream_api_key = CryptoJS.enc.Utf8.parse('".$key."');");
             echo Lib::js_obfuscate("var JayDream_api_iv = CryptoJS.enc.Utf8.parse('".$iv."');");
+            // CSRF
+            $csrf = Config::getCsrf();
+            echo Lib::js_obfuscate("var JayDream_csrf_name = '". $csrf['name'] ."';");
+            echo Lib::js_obfuscate("var JayDream_csrf_value = '". $csrf['value'] ."';");
 
             echo "</script>";
             echo "<script src='".Config::$URL."/JayDream/js/init.js'></script>";

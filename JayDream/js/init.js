@@ -37,6 +37,8 @@ function vueLoad(app_name) {
     JayDream.alert = JayDream_alert;
     JayDream.api_key = JayDream_api_key;
     JayDream.api_iv = JayDream_api_iv;
+    JayDream.csrf_name = JayDream_csrf_name;
+    JayDream.csrf_value = JayDream_csrf_value;
     JayDream.plugin = new JayDreamPlugin(JayDream);
     JayDream.lib = new JayDreamLib(JayDream);
     JayDream.api = new JayDreamAPI(JayDream);
