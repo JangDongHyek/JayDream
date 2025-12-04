@@ -4,7 +4,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <div v-if="load">
         <input type="file" @change="vue.changeFile($event,row,'key_name')" name="names[]">
-        <input type="text" @input="vue.inputNumber" @keyup.enter=""> <!-- 숫자만 입력가능하게 -->
+        <input type="text" v-number v-price v-phone v-where="{table,column : 'name'}" v-enter="{table,rows}">
+        <select v-where="{table,column : 'name'}"></select>
 
         <button @click="api.post(row,options)">테스트</button>
         <button @click="api.delete(row,options)">삭제</button>
