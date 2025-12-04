@@ -21,6 +21,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     component_name : "<?=$componentName?>",
                     component_idx: "",
 
+                    table : null,
                     row: {},
                     rows : [],
                 };
@@ -30,7 +31,8 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 this.api.component_name = this.component_name
             },
             async mounted() {
-                //await this.api.table("exam").get(this.rows)
+                // this.table = await this.api.table("exam");
+                // await this.table.get(this.rows)
 
                 this.load = true;
 

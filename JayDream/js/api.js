@@ -39,8 +39,13 @@ class JayDreamAPI {
             };
         }
 
-        this.currentTable = name;
-        return this;
+        const instance = Object.create(Object.getPrototypeOf(this));
+        instance.jd = this.jd;
+        instance.filters = this.filters;  // 같은 filters 참조
+        instance.component_name = this.component_name;
+        instance.currentTable = name;  // 이 인스턴스는 항상 이 테이블만 참조
+
+        return instance;
     }
 
     get filter() {
@@ -58,25 +63,37 @@ class JayDreamAPI {
         this.filters[this.currentTable] = newFilter
     }
 
-    where(column,value,logical = "AND", operator = "=", encrypt = false) {
-        // LIKE 처리
+    where(column, value, logical = "AND", operator = "=", encrypt = false) {
+        // LIKE 자동 처리
         if (operator.toLowerCase() === "like") {
-            if (value &&!value.includes("%")) {
+            if (value && !value.includes("%")) {
                 value = `%${value}%`;
             }
         }
 
-        this.filter.where.push(
-            {
-                column: column,             // join 조건시 user.idx
-                value: value,               // LIKE일시 %% 필수 || relations일시  $parent.idx , 공백일경우 __null__ , null 값인경우 null
-                logical: logical,           // AND,OR,AND NOT
-                operator: operator,         // = ,!= >= <=, LIKE,
-                encrypt: encrypt,           // true시 벨류가 암호화된 값으로 들어감
-            }
-        )
+        // 기존 동일 컬럼 where가 있는지 확인
+        let existing = this.filter.where.find(w => w.column === column);
 
-        return this
+        if (existing) {
+            // 🔥 기존 요소 업데이트
+            existing.value = value;
+            existing.logical = logical;
+            existing.operator = operator;
+            existing.encrypt = encrypt;
+
+            return this; // push 안 함
+        }
+
+        // 기존 없으면 새로 추가
+        this.filter.where.push({
+            column: column,
+            value: value,
+            logical: logical,
+            operator: operator,
+            encrypt: encrypt,
+        });
+
+        return this;
     }
 
     between(column,start,end,logical = "and") {
@@ -109,6 +126,10 @@ class JayDreamAPI {
         return this
     }
 
+    orderBy(column,value = "DESC") {
+        this.filter.order_by.push({column: column, value: value});
+    }
+
     async get(bind,options = {}) {
         options.component_name = this.component_name;
 
@@ -117,7 +138,7 @@ class JayDreamAPI {
             if (options.page) this.filter.paging.page = options.page;
             if (options.file) this.filter.file_db = options.file;
 
-            const res = await this.jd.lib.ajax("get", this.filter, "/JayDream/api.php", options);
+            const res = await this.jd.lib.ajax("get", this.filter, "/JayDream/api", options);
             const data = Array.isArray(res.data) ? res.data : [];
 
             if (this.filter.paging) {
@@ -138,7 +159,7 @@ class JayDreamAPI {
 
             if (options.callback) await options.callback(res);
 
-            this.filter.where = [];
+
             this.filter.between = [];
             this.filter.in = [];
             this.filter.joins = [];
@@ -152,7 +173,7 @@ class JayDreamAPI {
 
     async post(data,options = {}) {
         let method = data.primary ? 'update' : 'insert';
-        let url = "/JayDream/api.php";
+        let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
             if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
@@ -202,7 +223,7 @@ class JayDreamAPI {
         try {
             if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
             options.table = data['$table'];
-            let res = await this.jd.lib.ajax("remove",data,"/JayDream/api.php",options);
+            let res = await this.jd.lib.ajax("remove",data,"/JayDream/api",options);
 
             if(options.return) return res
 
@@ -219,7 +240,7 @@ class JayDreamAPI {
     }
 
     async whereUpdate(update_column,options = {}) {
-        let url = "/JayDream/api.php";
+        let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
             if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
@@ -254,7 +275,7 @@ class JayDreamAPI {
     }
 
     async whereDelete(filter,options = {}) {
-        let url = "/JayDream/api.php";
+        let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
             if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");

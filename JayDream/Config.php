@@ -89,6 +89,26 @@ class Config
             if (self::$connect->connect_error) {
                 Lib::error("❌ DB 연결 실패: " . self::$connect->connect_error);
             }
+
+            $support_utf8mb4 = false;
+            $result = self::$connect->query("SHOW CHARACTER SET LIKE 'utf8mb4'");
+            if ($result && $result->num_rows > 0) {
+                $support_utf8mb4 = true;
+            }
+
+            if ($support_utf8mb4) {
+                $charset = "utf8mb4";
+                $collation = "utf8mb4_general_ci";
+            } else {
+                $charset = "utf8";
+                $collation = "utf8_general_ci";
+            }
+
+            self::$connect->set_charset($charset);
+
+            self::$connect->query("SET NAMES {$charset} COLLATE {$collation}");
+            self::$connect->query("SET CHARACTER SET {$charset}");
+            self::$connect->query("SET collation_connection = '{$collation}'");
         }
     }
 

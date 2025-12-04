@@ -4,22 +4,22 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 <script type="text/x-template" id="<?= $componentName ?>-template">
     <nav v-if="parseInt(count)" aria-label="Page navigation">
         <ul class="pagination justify-content-center mb-0">
-            <li class="page-item" :class="{ disabled: this.localPaging.page <= 1 }">
+            <li class="page-item" :class="{ disabled: table.filter.paging.page <= 1 }">
                 <a class="page-link" href="javascript:;" @click="setPage(1)">«</a>
             </li>
-            <li class="page-item" :class="{ disabled: this.localPaging.page <= 1 }">
-                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.page-1)">‹</a>
+            <li class="page-item" :class="{ disabled: table.filter.paging.page <= 1 }">
+                <a class="page-link" href="javascript:;" @click="setPage(table.filter.paging.page-1)">‹</a>
             </li>
 
-            <li v-for="index in getPages()" class="page-item" :class="{ active: index == this.localPaging.page }" :key="index">
+            <li v-for="index in getPages()" class="page-item" :class="{ active: index == table.filter.paging.page }" :key="index">
                 <a class="page-link" href="javascript:;" @click="setPage(index)">{{ index }}</a>
             </li>
 
-            <li class="page-item" :class="{ disabled: this.localPaging.page >= this.localPaging.last }">
-                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.page+1)">›</a>
+            <li class="page-item" :class="{ disabled: table.filter.paging.page >= table.filter.paging.last }">
+                <a class="page-link" href="javascript:;" @click="setPage(table.filter.paging.page+1)">›</a>
             </li>
-            <li class="page-item" :class="{ disabled: this.localPaging.page >= this.localPaging.last }">
-                <a class="page-link" href="javascript:;" @click="setPage(this.localPaging.last)">»</a>
+            <li class="page-item" :class="{ disabled: table.filter.paging.page >= table.filter.paging.last }">
+                <a class="page-link" href="javascript:;" @click="setPage(table.filter.paging.last)">»</a>
             </li>
         </ul>
     </nav>
@@ -30,16 +30,13 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         name: "<?= $componentName ?>", object: {
             template: "#<?= $componentName ?>-template",
             props: {
-                filter : { type: Object, default: null },
-            },
-            setup(props) {
-                const localPaging = Vue.toRef(props.filter, 'paging')
-                return { localPaging };
+                rows : { type: Array, default: [] },
+                table : { type: String, default: "" },
             },
             methods: {
                 getPages() {
-                    let current = this.localPaging.page;
-                    let last = this.filter.paging.last;
+                    let current = this.table.filter.paging.page;
+                    let last = this.table.filter.paging.last;
                     let min = current - 2;
                     let max = current + 2;
 
@@ -52,16 +49,30 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                     }
                     return pages;
                 },
-                setPage(page) {
+                async setPage(page) {
                     if (page < 1) page = 1;
-                    if (page > this.filter.paging.last) page = this.filter.paging.last;
-                    this.filter.paging.page = page;
-                    this.$emit("change", page);
+                    if (page > this.table.filter.paging.last) page = this.table.filter.paging.last;
+                    this.table.filter.paging.page = page;
+                    // this.$emit("change", page);
+                    // this.rows = [];
+                    await this.table.get(this.rows);
+
+                    this.$forceUpdate();
+                },
+            },
+            watch: {
+                // rows가 변경될 때마다 filter 업데이트
+                rows: {
+                    handler() {
+                        this.$forceUpdate();
+                    },
+                    deep: true
                 }
             },
             computed: {
-                count() { return this.localPaging?.count ?? 0 },
-                limit() { return this.localPaging?.limit },
+                count() { return this.table.filter.paging.count ?? 0 },
+                limit() { return this.table.filter.paging.limit },
+                filter() { return this.table.filter },
             }
         }
     });

@@ -84,6 +84,30 @@ function vueLoad(app_name) {
         }
     });
 
+    app.directive('where', {
+        mounted(el, binding, vnode) {  // ✅ bind → mounted
+            const { table, column, logical = 'AND', operator = '=', encrypt = false } = binding.value;
+
+            const eventType = el.tagName === 'SELECT' ? 'change' : 'keyup';
+
+            el.addEventListener(eventType, (e) => {
+                table.where(column, e.target.value, logical, operator, encrypt);
+            });
+        }
+    });
+
+    app.directive('enter', {
+        mounted(el, binding, vnode) {
+            const { table, rows } = binding.value;
+
+            el.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    table.get(rows, { page: 1 });
+                }
+            });
+        }
+    });
+
     // Vue 내부에서만 접근 가능하게 설정
     app.config.globalProperties.$jd = JayDream;
     app.config.globalProperties.lib = JayDream.lib;

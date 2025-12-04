@@ -53,7 +53,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
         <external-summernote :row="row" field="content"></external-summernote>
 
         <!--  item  -->
-        <item-paging :paging="paging" @change="api.gets(this.filtering,this.rows)"></item-paging>
+        <item-paging :rows :table></item-paging>
 
         <!-- Vue -->
         <draggable v-model="ArrayObject" item-key="primary" @end="(e) => onDragEnd(e,ArrayObject)" tag="ul">
@@ -76,6 +76,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             },
             data: function () {
                 return {
+                    table : null,
                     row: {},
                     rows: [],
 
@@ -87,12 +88,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         table : "",
                         primary : "",
                         row : null,
-                    },
-
-                    paging : {
-                        page: 1,
-                        limit: 1, // 해당 값 수정시 페이지에 노출되는 게시글 갯수가 바뀜
-                        count: 0,
                     },
 
                     filter: {
@@ -255,8 +250,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             },
             async mounted() {
-                this.row = await this.$getData(this.filter); // 단일 데이터 가져오기
-                await this.$getsData(this.filter, this.rows); // 조건에 해당하는 데이터 가져오기
+                this.table = await this.api.table("theme");
+                await this.table.get(this.rows,{paging : 10})
 
                 //session 등록하기
                 await this.session.set("exam",'value') // string,array,object
