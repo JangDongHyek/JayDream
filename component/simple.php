@@ -32,7 +32,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
             },
             async mounted() {
                 // this.table = await this.api.table("exam");
-                // await this.table.get(this.rows)
+                // await this.table.get(this.rows,{paging : 10})
 
                 this.load = true;
 

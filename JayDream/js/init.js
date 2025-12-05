@@ -33,6 +33,7 @@ function vueLoad(app_name) {
 
     JayDream.app = app_name;
     JayDream.url = JayDream_url;
+    JayDream.domain = JayDream_domain;
     JayDream.dev = JayDream_dev;
     JayDream.alert = JayDream_alert;
     JayDream.api_key = JayDream_api_key;
@@ -116,10 +117,11 @@ function vueLoad(app_name) {
     app.config.globalProperties.vue = JayDream.vue;
     app.config.globalProperties.plugin = JayDream.plugin;
     app.config.globalProperties.session = JayDream.session;
+    app.config.globalProperties.protocol = window.location.protocol.replace(':', '');
 
 
     // JayDream 예약어 목록
-    const reservedKeys = ['lib', 'route', 'api','vue','plugin','session'];
+    const reservedKeys = ['lib', 'route', 'api','vue','plugin','session',"protocol"];
 
     // 예약어 변수 등록시 에러
     const protectMixin = {

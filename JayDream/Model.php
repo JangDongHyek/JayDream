@@ -134,6 +134,11 @@ class Model {
 
         if(isset($obj['blocks'])) {
             foreach($obj['blocks'] as $item) {
+
+                if (!isset($item['where']) || count($item['where']) < 1) {
+                    continue; // 조건 없으면 block 자체를 건너뛰기 * 쿼리문 이상해짐
+                }
+
                 $this->blockStart($item['logical']);
                 $this->setFilter($item,$parent);
                 $this->blockEnd();

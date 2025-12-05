@@ -2,7 +2,7 @@
 $componentName = str_replace(".php", "", basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?= $componentName ?>-template">
-    <nav v-if="parseInt(count)" aria-label="Page navigation">
+    <nav v-if="parseInt(count)" aria-label="Page navigation" class="text-center">
         <ul class="pagination justify-content-center mb-0">
             <li class="page-item" :class="{ disabled: table.filter.paging.page <= 1 }">
                 <a class="page-link" href="javascript:;" @click="setPage(1)">«</a>

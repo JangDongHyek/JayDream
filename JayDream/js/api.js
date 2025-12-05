@@ -5,6 +5,7 @@ class JayDreamAPI {
         this.filters = {}; // 테이블별 filter 저장소
         this.component_name = "";
         this.currentTable = null;
+        this.currentBlock = null;
 
         return new Proxy(this, {
             get(target, prop) {
@@ -63,7 +64,7 @@ class JayDreamAPI {
         this.filters[this.currentTable] = newFilter
     }
 
-    where(column, value, logical = "AND", operator = "=", encrypt = false) {
+    where_set(column, value, logical = "AND", operator = "=", encrypt = false) {
         // LIKE 자동 처리
         if (operator.toLowerCase() === "like") {
             if (value && !value.includes("%")) {
@@ -71,28 +72,117 @@ class JayDreamAPI {
             }
         }
 
-        // 기존 동일 컬럼 where가 있는지 확인
-        let existing = this.filter.where.find(w => w.column === column);
+        let existing = null;
+        let target = null;
 
+        if (this.currentBlock) {
+            existing = this.currentBlock.where.find(w => w.column === column);
+            target = this.currentBlock.where;
+        }
+        else {
+            existing = this.filter.where.find(w => w.column === column);
+            target = this.filter.where;
+        }
+
+        // 🔥 CASE 1: value가 빈값이고 기존 조건이 있음 → 삭제
+        if (!value && existing) {
+            const idx = target.indexOf(existing);
+            if (idx !== -1) target.splice(idx, 1);
+            return false; // 추가 안 함
+        }
+
+        // 🔥 CASE 2: value가 빈값이고 기존도 없음 → 아무것도 하지 않음
+        if (!value && !existing) {
+            return false;
+        }
+
+        // 🔥 CASE 3: 기존 조건이 있으므로 업데이트
         if (existing) {
-            // 🔥 기존 요소 업데이트
             existing.value = value;
             existing.logical = logical;
             existing.operator = operator;
             existing.encrypt = encrypt;
-
-            return this; // push 안 함
+            return false;
         }
 
-        // 기존 없으면 새로 추가
-        this.filter.where.push({
-            column: column,
-            value: value,
-            logical: logical,
-            operator: operator,
-            encrypt: encrypt,
-        });
+        // 🔥 CASE 4: 새로운 조건 추가
+        return {
+            column,
+            value,
+            logical,
+            operator,
+            encrypt,
+        };
+    }
 
+    where(column, value, logical = "AND", operator = "=", encrypt = false) {
+        let obj = this.where_set(column, value, logical, operator, encrypt);
+
+        if(!obj) return this;
+
+        // currentBlock이 있으면 block의 where에 추가
+        if (this.currentBlock) {
+            this.currentBlock.where.push(obj);
+        } else {
+            // 없으면 기존처럼 filter.where에 추가
+            this.filter.where.push(obj);
+        }
+
+        return this;
+    }
+
+    async blockStart(keyword, logical = "AND") {
+        if(this.currentBlock) {
+            await this.jd.lib.alert('api.js blockStart가 중복되었습니다.');
+            return false;
+        }
+        // 1. keyword가 같은 block 찾기
+        let block = this.filter.blocks.find(b => b.keyword === keyword);
+
+        // 2. 없으면 새로 만들어서 추가
+        if (!block) {
+            block = {
+                keyword: keyword,
+                logical: logical,
+                where: []
+            };
+            this.filter.blocks.push(block);
+        }
+
+        // 3. 현재 작업 중인 block으로 설정
+        this.currentBlock = block;
+
+        return this;
+    }
+
+    blockEnd() {
+        this.currentBlock = null;
+        return this;
+    }
+
+    blockWhere(keyword,column, value, logical = "AND", operator = "=", encrypt = false) {
+        // 1. keyword가 같은 block 찾기
+        let block = this.filter.blocks.find(b => b.keyword === keyword);
+
+        // 2. 없으면 새로 만들어서 추가
+        if (!block) {
+            block = {
+                keyword: keyword,
+                logical: "AND",
+                where: []
+            };
+
+            this.filter.blocks.push(block);
+        }
+
+        let where_obj = this.where_set(column, value, logical, operator, encrypt);
+
+        if(!where_obj) return this;
+
+        block.where.push(where_obj);
+
+
+        // 3. 해당 block 반환
         return this;
     }
 
@@ -159,10 +249,6 @@ class JayDreamAPI {
 
             if (options.callback) await options.callback(res);
 
-
-            this.filter.between = [];
-            this.filter.in = [];
-            this.filter.joins = [];
 
             return data;
         } catch (e) {

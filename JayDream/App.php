@@ -52,6 +52,7 @@ class App {
             echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>';
             echo "<script>";
             echo Lib::js_obfuscate("var JayDream_url = '".Config::$URL."';");
+            echo Lib::js_obfuscate("var JayDream_domain = '".Config::$DOMAIN."';");
             echo Lib::js_obfuscate("var JayDream_dev = ".json_encode(Config::$DEV).";");     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
             echo Lib::js_obfuscate("var JayDream_alert = '".Config::ALERT."';");
             //Vue 데이터 연동을 위한 변수

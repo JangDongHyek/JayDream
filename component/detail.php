@@ -185,6 +185,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                         blocks: [
                             { // filter 형식으로 넣어주면된다 , 객체 하나당 () 괄호 조건문이 꾸며진다
+                                keyword : "",   // api 에서 사용하는 키값 사용안해두 문제없음
                                 logical: "AND", // 괄호 전 어떤 논리 연사자가 들어갈지
                                 where: [],
                             },
@@ -253,6 +254,14 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             async mounted() {
                 this.table = await this.api.table("theme");
                 await this.table.get(this.rows,{paging : 10})
+
+                // 그룹 조건
+                // this.table.blockWhere("main_search","name",value);
+                // this.table.blockWhere("main_search","sub_url",$event.target.value,"OR","LIKE");
+                this.table.blockStart("main_search")
+                this.table.where("name",$event.target.value,"OR","LIKE")
+                this.table.where("sub_url",$event.target.value,"OR","LIKE")
+                this.table.blockEnd()
 
                 //session 등록하기
                 await this.session.set("exam",'value') // string,array,object

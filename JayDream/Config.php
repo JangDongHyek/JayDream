@@ -9,6 +9,7 @@ class Config
     public static $DEV = false;
     public static $ROOT = "";
     public static $URL = "";
+    public static $DOMAIN = "";
     public static $connect = null;
     public static $framework = "";
     public static $csrf = false;
@@ -52,6 +53,9 @@ class Config
                 $host = preg_replace('/:[0-9]+$/', '', $host);
             self::$URL = $http . $host . $user;
         }
+
+        // 도메인 구하기
+        self::$DOMAIN = parse_url(self::$URL, PHP_URL_HOST);
 
 
 
