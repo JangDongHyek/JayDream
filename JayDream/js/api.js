@@ -216,8 +216,9 @@ class JayDreamAPI {
         return this
     }
 
-    orderBy(column,value = "DESC") {
-        this.filter.order_by.push({column: column, value: value});
+    orderBy(column, value = "DESC", priority = 0) {
+        this.filter.order_by[priority] = {column: column, value: value};
+        this.filter.order_by = this.filter.order_by.filter(item => item != null);
     }
 
     async get(bind,options = {}) {
