@@ -50,6 +50,7 @@ class App {
     function jsLoad($plugin = array()) {
         if(!self::$JS_LOAD) {
             echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>';
+            //echo '<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>';
             echo "<script>";
             echo Lib::js_obfuscate("var JayDream_url = '".Config::$URL."';");
             echo Lib::js_obfuscate("var JayDream_domain = '".Config::$DOMAIN."';");
