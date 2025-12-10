@@ -100,11 +100,26 @@ class Service {
         $file_model = new Model("jd_file");
         $response = $model->insert($obj);
 
+        $file_primaries = [];
         foreach (File::normalize($_FILES) as  $file) {
             $file_response = File::save($file,$options['table'],$response['primary']);
             $file_response['keyword'] = $file['keyword'];
-            $file_model->insert($file_response);
+            $file_response = $file_model->insert($file_response);
+            $file_primaries[] = $file_response['primary'];
         }
+
+        foreach ($obj as $key => $value) {
+            if ($value == 'jd_file_primary_all') {
+                $newObj = array("primary" => $response['primary'],$key => $file_primaries);
+                $model->update($newObj);
+            }
+            if ($value == 'jd_file_primary_get') {
+                $newObj = array("primary" => $response['primary'],$key => $file_response['primary']);
+                $model->update($newObj);
+            }
+        }
+
+
 
         $response['success'] = true;
         $response['trace'] = true;

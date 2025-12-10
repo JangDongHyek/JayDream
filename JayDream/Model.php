@@ -310,6 +310,11 @@ class Model {
         if(!in_array($object['table'], $this->schema['tables'])) Lib::error("Model setJoins() : {$object['table']} 테이블을 찾을수 없습니다.");
 
         $this->schema[$object['table']]['columns'] = $this->getColumns($object['table']);
+
+        if(empty($object['foreign'])) {
+            $object['foreign'] = $this->getPrimary($object['table'])['COLUMN_NAME'];
+        }
+
         array_push($this->joins,$object);
     }
 

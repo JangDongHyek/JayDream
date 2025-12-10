@@ -199,7 +199,7 @@ class JayDreamAPI {
         return this
     }
 
-    join(table,base,foreign,type = "LEFT",select_column = "*",as = "",on = null) {
+    join(table,base,foreign = "",type = "LEFT",select_column = "*",as = "",on = null) {
         let obj = {
             table: table,
             base: base,                     // filter 테이블의 연결 key
@@ -263,8 +263,10 @@ class JayDreamAPI {
         let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
+            if (this.currentTable && !options.table) options.table = this.currentTable;
             if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
             if(data['$table'] && !options.table) options.table = data['$table'];
+
 
 
             if("confirm" in options) {
@@ -308,6 +310,7 @@ class JayDreamAPI {
         }
 
         try {
+            if (this.currentTable && !options.table) options.table = this.currentTable;
             if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
             options.table = data['$table'];
             let res = await this.jd.lib.ajax("remove",data,"/JayDream/api",options);
@@ -330,6 +333,7 @@ class JayDreamAPI {
         let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
+            if (this.currentTable && !options.table) options.table = this.currentTable;
             if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
 
             if("confirm" in options) {
@@ -365,6 +369,7 @@ class JayDreamAPI {
         let url = "/JayDream/api";
         options.component_name = this.component_name;
         try {
+            if (this.currentTable && !options.table) options.table = this.currentTable;
             if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
 
             if("confirm" in options) {

@@ -43,6 +43,8 @@
             },
             mounted: function () {
                 document.getElementById(this.component_idx).addEventListener('hide.bs.modal', this.hideModal);
+                // Bootstrap 3 방식도 추가 (보험용)
+                $('#' + this.component_idx).on('hide.bs.modal', this.hideModal);
 
                 this.$nextTick(() => {
 
@@ -50,6 +52,7 @@
             },
             methods: {
                 hideModal() {
+                    console.log(1133);
                     let copy = Object.assign({}, this.modelValue);
                     copy.status = false;
                     copy.primary = "";
@@ -62,12 +65,25 @@
             watch: {
                 "modelValue.status"(value) {
                     const modalEl = document.getElementById(this.component_idx);
-                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
 
                     if (value) {
-                        modal.show();
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.show();
+                        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                            $('#' + this.component_idx).modal('show');
+                        }
+
+                        // 열릴 때 실행할 로직
                     } else {
-                        modal.hide();
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.hide();
+                        } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                            $('#' + this.component_idx).modal('hide');
+                        }
+
+                        // 닫힐 때 실행할 로직
                     }
                 }
             }

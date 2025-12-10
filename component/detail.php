@@ -79,7 +79,11 @@ $componentName = str_replace(".php", "", basename(__FILE__));
             data: function () {
                 return {
                     table : null,
-                    row: {},
+                    row: {
+                        // jd_file_idx_get : 파일의 primary 값으로 해당 컬럼 자동으로 업데이트
+                        // jd_file_idx_all : 파일의 primary 값들을 배열 형태로 해당 컬럼 자동으로 업데이트
+                        exam_file_idx : ""
+                    },
                     rows: [],
 
                     modal: {
@@ -132,7 +136,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                             {
                                 table: "table",
                                 base: "idx",               // filter 테이블의 연결 key
-                                foreign: "idx",            // join 테이블의 연결 key
+                                foreign: "",            // join 테이블의 연결 key 빈값이면 연결 테이블의 primary로 자동으로 들어간다
                                 type: "LEFT",             // INNER, LEFT, RIGHT
                                 select_column: ["column"], // 조회할 컬럼 $table__column 식으로 as되서 들어간다 || "*"
                                 as : "", // 값이 있을경우 $as__column 해당방식으로 들어감

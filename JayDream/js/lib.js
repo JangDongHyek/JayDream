@@ -339,4 +339,16 @@ class JayDreamLib {
         }
     }
 
+    createModalObject(id = "",class_1 = "",class_2 = "") {
+        return {
+                id : id, // modal의 id값을 설정합니다 빈값이라면 고유값을 랜덤으로 생성해 지정합니다
+                class_1: class_1, // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
+                class_2: class_2, // modal-dialog 부분에 클래스를 추가합니다
+                status: false,
+                table : "",
+                primary : "",
+                row : null,
+        };
+    }
+
 }
