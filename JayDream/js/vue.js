@@ -48,12 +48,20 @@ class JayDreamVue {
         }
     }
 
-    commonFile(files,obj,key,permission) {
+    commonFile(files, obj, key, permission, callback) {
         if (files.length > 1 && !Array.isArray(obj[key])) {
             obj[key] = [];
         }
 
         if(Array.isArray(obj[key])) {
+            let loadedCount = 0;
+            const totalFiles = files.length;
+
+            // 이미지 정보 저장할 배열
+            if(!obj[key + '_info']) {
+                obj[key + '_info'] = [];
+            }
+
             for (let i = 0; i < files.length; i++) {
                 var file = files[i];
                 if(!file.type) {
@@ -67,21 +75,44 @@ class JayDreamVue {
                 }
 
                 if(file.type.startsWith('image/')) {
-                    //이미지 미리보기 파일 데이터에 추가
                     const reader = new FileReader();
                     reader.onload = (function(f) {
                         return function(e) {
-                            f.src = e.target.result;
-                            obj[key].push(f); // 비동기로 파일을 읽는 중이라 onload 안에 넣어줘야 파일을 다 읽고 데이터가 완벽하게 들어간다
+                            const img = new Image();
+                            img.onload = function() {
+                                f.src = e.target.result;
+                                f.width = this.naturalWidth;
+                                f.height = this.naturalHeight;
+                                obj[key].push(f);
+
+                                // 파일명을 키로 사용 (tmp_name은 JS에서 알 수 없으니 원본 파일명 사용)
+                                if(!obj[key + '_info']) {
+                                    obj[key + '_info'] = {};
+                                }
+
+                                const uniqueKey = btoa(encodeURIComponent(`${f.name}_${f.size}`));
+                                obj[uniqueKey] = {
+                                    width: this.naturalWidth,
+                                    height: this.naturalHeight
+                                };
+
+                                loadedCount++;
+                                if(loadedCount === totalFiles && callback) {
+                                    callback();
+                                }
+                            };
+                            img.src = e.target.result;
                         };
-                    })(file); // 클로저 사용
+                    })(file);
                     reader.readAsDataURL(file);
                 }else {
                     obj[key] = file;
+                    loadedCount++;
+                    if(loadedCount === totalFiles && callback) {
+                        callback();
+                    }
                 }
             }
-
-
         }else {
             file = files[0]
             if (file) {
@@ -99,27 +130,48 @@ class JayDreamVue {
                     const reader = new FileReader();
                     reader.onload = (function(f) {
                         return function(e) {
-                            f.src = e.target.result;
-                            obj[key] = (f); // 비동기로 파일을 읽는 중이라 onload 안에 넣어줘야 파일을 다 읽고 데이터가 완벽하게 들어간다
+                            const img = new Image();
+                            img.onload = function() {
+                                f.src = e.target.result;
+                                f.width = this.naturalWidth;
+                                f.height = this.naturalHeight;
+                                obj[key] = f;
+
+                                // 단일 파일도 객체로 저장
+                                const uniqueKey = btoa(encodeURIComponent(`${f.name}_${f.size}`));
+                                obj[uniqueKey] = {
+                                    width: this.naturalWidth,
+                                    height: this.naturalHeight
+                                };
+
+                                if(callback) {
+                                    callback();
+                                }
+                            };
+                            img.src = e.target.result;
                         };
-                    })(file); // 클로저 사용
+                    })(file);
                     reader.readAsDataURL(file);
                 }else {
                     obj[key] = file;
+                    if(callback) {
+                        callback();
+                    }
                 }
-
             } else {
-                obj[key]  = '';
+                obj[key] = '';
+                if(callback) {
+                    callback();
+                }
             }
         }
     }
 
-    dropFile(event,obj,key,permission = []) {
-        this.commonFile(event.dataTransfer.files,obj,key,permission);
+    dropFile(event, obj, key, permission = [], callback = null) {
+        this.commonFile(event.dataTransfer.files, obj, key, permission, callback);
     }
 
-    // vue에서 파일업로드시 지정된 오브젝트 key에 파일 데이터 반환해주는 함수
-    changeFile(event,obj,key,permission = []) {
-        this.commonFile(event.target.files,obj,key,permission)
+    changeFile(event, obj, key, permission = [], callback = null) {
+        this.commonFile(event.target.files, obj, key, permission, callback);
     }
 }

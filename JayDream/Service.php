@@ -102,7 +102,7 @@ class Service {
 
         $file_primaries = [];
         foreach (File::normalize($_FILES) as  $file) {
-            $file_response = File::save($file,$options['table'],$response['primary']);
+            $file_response = File::save($file,$options['table'],$obj,$response['primary']);
             $file_response['keyword'] = $file['keyword'];
             $file_response = $file_model->insert($file_response);
             $file_primaries[] = $file_response['primary'];
@@ -133,7 +133,7 @@ class Service {
         $response = $model->update($obj);
 
         foreach (File::normalize($_FILES) as  $file) {
-            $file_response = File::save($file,$options['table'],$response['primary']);
+            $file_response = File::save($file,$options['table'],$obj,$response['primary']);
             $file_response['keyword'] = $file['keyword'];
             $file_model->insert($file_response);
         }
@@ -205,7 +205,7 @@ class Service {
     public static function fileSave($obj,$options) {
         $file_model = new Model("jd_file");
         foreach (File::normalize($_FILES) as  $file) {
-            $file_response = File::save($file,$options['table']);
+            $file_response = File::save($file,$options['table'],$obj);
             $file_response['keyword'] = $file['keyword'];
             $file_model->insert($file_response);
         }

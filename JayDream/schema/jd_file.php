@@ -47,6 +47,16 @@ return [
         "nullable" => false,
         "comment" => "src사용시 사용하는 필드"
     ],
+    "height" => [
+        "type" => "INT",
+        "nullable" => false,
+        "comment" => "이미지의 높이"
+    ],
+    "width" => [
+        "type" => "INT",
+        "nullable" => false,
+        "comment" => "이미지의 너비"
+    ],
     "path" => [
         "type" => "VARCHAR",
         "length" => 255,

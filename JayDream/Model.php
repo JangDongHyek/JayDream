@@ -578,7 +578,7 @@ class Model {
                 }
             }
 
-            if ($info['IS_NULLABLE'] == "YES" && !$value) {
+            if ($info['IS_NULLABLE'] == "YES" && $value == '') {
                 continue;
             }
 

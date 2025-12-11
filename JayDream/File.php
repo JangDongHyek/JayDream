@@ -5,7 +5,7 @@ use JayDream\Lib;
 use JayDream\Config;
 
 class File {
-    public static function save($file, $table, $primary = "") {
+    public static function save($file, $table,$obj, $primary = "") {
         // 유효성 체크
         if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
             Lib::error("업로드된 파일이 유효하지 않습니다.");
@@ -37,12 +37,18 @@ class File {
             Lib::error("파일 저장 실패");
         }
 
+        //파일에 대한 정보를 따로 담은 변수
+        $uniqueKey = base64_encode(urlencode($file['name'] . '_' . $file['size']));
+        $info = isset($obj[$uniqueKey]) ? $obj[$uniqueKey] : null;
+
         // 저장 정보 반환
         return [
             'table_name'    => $table,
             'table_primary' => $primary,
             'name'          => $originalName,
             'size'          => $file['size'],
+            'height'        => $info['height'] ?? null,
+            'width'         => $info['width'] ?? null,
             'ext'           => $ext,
             'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
             'path'          => $targetPath,
