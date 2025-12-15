@@ -240,13 +240,28 @@ class JayDreamLib {
         console.groupEnd();
     }
 
-    href(url,obj = null) {
-        // 앞뒤 슬래시 정리
+    href(url,target = '_self', obj = null) {
         url = url.trim();
-        const base = this.jd.url.replace(/\/+$/, ''); // 끝 슬래시 제거
-        const path = url.replace(/^\/+/, '');         // 앞 슬래시 제거
-        const fullUrl = `${base}/${path}`;
-        window.location.href = this.normalizeUrl(fullUrl,obj);
+
+        // 프로토콜 포함 여부 확인 (http://, https://, ftp:// 등)
+        const hasProtocol = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+
+        let finalUrl;
+        if (hasProtocol) {
+            // 외부 URL - 그대로 사용
+            finalUrl = this.normalizeUrl(url, obj);
+        } else {
+            // 내부 URL - 풀 경로 생성
+            const base = this.jd.url.replace(/\/+$/, '');
+            const path = url.replace(/^\/+/, '');
+            finalUrl = this.normalizeUrl(`${base}/${path}`, obj);
+        }
+
+        if (target === '_blank') {
+            window.open(finalUrl, target);
+        } else {
+            window.location.href = finalUrl;
+        }
     }
 
     decryptAES(cipherText) {

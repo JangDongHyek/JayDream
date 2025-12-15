@@ -55,7 +55,7 @@ class Config
         }
 
         // 도메인 구하기
-        self::$DOMAIN = parse_url(self::$URL, PHP_URL_HOST);
+        self::$DOMAIN = preg_replace('/^www\./i', '', parse_url(self::$URL, PHP_URL_HOST));
 
 
 
