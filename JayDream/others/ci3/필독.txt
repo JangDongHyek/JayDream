@@ -13,7 +13,7 @@ routes에 통신 추가해주기
 $route['JayDream/api'] = "JayDreamController/method";
 
 
-다른 컨트롤러에서 JayDream 불러와서 사용하고싶은경우 생성자 함수내
+다른 컨트롤러에서 JayDream 불러와서 사용하고싶은경우 __construct() 함수내
 include_once(APPPATH . 'libraries/JayDream/require.php');
 $this->app = new JayDream\App();
 추가하여 전역 변수로 사용 가능

@@ -33,6 +33,10 @@ class App {
             else {
                 echo '<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>';
             }
+
+            echo "<script>";
+            echo Lib::js_obfuscate("window.JAYDREAM_VUE_GLOBAL = Vue.reactive({});");
+            echo "</script>";
             $this->jsLoad($plugin);
             self::$VUE_LOAD = true;
         }

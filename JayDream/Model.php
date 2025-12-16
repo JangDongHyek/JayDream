@@ -708,6 +708,8 @@ class Model {
             Lib::error($e->getMessage() . "\n$sql");
         }
 
+        $this->init();
+
         return array("sql" => $sql,"primary" => $param[$this->primary]);
     }
 
@@ -740,6 +742,8 @@ class Model {
         }catch (\Exception $e) {
             Lib::error($e->getMessage() . "\n$sql");
         }
+
+        $this->init();
 
         return array("sql" => $sql);
     }

@@ -199,17 +199,17 @@ class JayDreamAPI {
         return this
     }
 
-    join(table,base,foreign = "",type = "LEFT",select_column = "*",as = "",on = null) {
+    join(table, base, options = {}) {
         let obj = {
             table: table,
-            base: base,                     // filter 테이블의 연결 key
-            foreign: foreign,               // join 테이블의 연결 key
-            type: type,                     // INNER, LEFT, RIGHT
-            select_column: select_column,   // 조회할 컬럼 $table__column 식으로 as되서 들어간다 || "*"
-            as :as,                         // 값이 있을경우 $as__column 해당방식으로 들어감
+            base: base,
+            foreign: options.foreign || "",
+            type: options.type || "LEFT",
+            select_column: options.select_column || "*",
+            as: options.as || "",
         }
 
-        if(on) obj.on = on;
+        if(options.on) obj.on = options.on;
 
         this.filter.joins.push(obj)
 

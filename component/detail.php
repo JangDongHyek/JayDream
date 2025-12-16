@@ -80,8 +80,8 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 return {
                     table : null,
                     row: {
-                        // jd_file_idx_get : 파일의 primary 값으로 해당 컬럼 자동으로 업데이트
-                        // jd_file_idx_all : 파일의 primary 값들을 배열 형태로 해당 컬럼 자동으로 업데이트
+                        // jd_file_primary_{$keyword} : 해당하는 키워드 파일의 primary 값으로 해당 컬럼 자동으로 업데이트
+                        // jd_file_primary : 파일의 primary 값들을 배열 형태로 해당 컬럼 자동으로 업데이트
                         exam_file_idx : ""
                     },
                     rows: [],
@@ -364,15 +364,17 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         moid : this.order.moid,
                     }
                 },
-
-                filtering() {
-                    // let filter = {table : ""}
-
-                    let merge = { ...((typeof filter !== 'undefined' ? filter : this.filter) || {}), ...(this.paging ? { paging: this.paging } : {}) }
-                    return merge
+                global() { // 내 앱의 글로벌 변수 접근하는 변수
+                    return window.JAYDREAM_VUE_GLOBAL[this.$jd.app];
                 }
             },
             watch: {
+                global : {
+                    async handler(newVal) {
+                        console.log('내 앱 상태가 바뀜', newVal);
+                    },
+                    deep: true
+                },
                 async "object.key"(value, old_value) {
 
                 }

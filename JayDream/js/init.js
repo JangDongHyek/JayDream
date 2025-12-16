@@ -154,6 +154,12 @@ function vueLoad(app_name) {
         }
     };
 
+    if (!window.JAYDREAM_VUE_GLOBAL[app_name]) {
+        window.JAYDREAM_VUE_GLOBAL[app_name] = Vue.reactive({
+            mounted: true,
+        });
+    }
+
 
     app.mixin(protectMixin);
     app.mount(`#${app_name}`); // 특정 DOM에 마운트
