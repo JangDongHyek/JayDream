@@ -273,6 +273,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
                 //session 가져오기
                 this.exam = await this.session.get("exam") // string,array,object
+                this.exam = await this.session.all()
 
                 //조건 삭제
                 this.api.whereDelete({

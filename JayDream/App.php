@@ -17,11 +17,11 @@ class App {
                 "iss" => Config::$URL,
                 "sub" => "api:access",
                 "iat" => time(),
-                "exp" => time() + Config::COOKIE_TIME,
+                "exp" => time() + Config::$COOKIE_TIME,
             );
 
-            $jwt = JWT::encode($payload, Config::PASSWORD);
-            setcookie("jd_jwt_token",$jwt,time() + Config::COOKIE_TIME,"/","",false,true);
+            $jwt = JWT::encode($payload, Config::$PASSWORD);
+            setcookie("jd_jwt_token",$jwt,time() + Config::$COOKIE_TIME,"/","",false,true);
         }
     }
 
@@ -59,7 +59,8 @@ class App {
             echo Lib::js_obfuscate("var JayDream_url = '".Config::$URL."';");
             echo Lib::js_obfuscate("var JayDream_domain = '".Config::$DOMAIN."';");
             echo Lib::js_obfuscate("var JayDream_dev = ".json_encode(Config::$DEV).";");     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
-            echo Lib::js_obfuscate("var JayDream_alert = '".Config::ALERT."';");
+            echo Lib::js_obfuscate("var JayDream_alert = '".Config::$ALERT."';");
+
             //Vue 데이터 연동을 위한 변수
             echo Lib::js_obfuscate("var JayDream_data = {};");
             echo Lib::js_obfuscate("var JayDream_methods = {};");
@@ -68,8 +69,8 @@ class App {
             //Vue3 데이터 연동을 위한 변수
             echo Lib::js_obfuscate("var JayDream_vue = [];");
             //통신 복호화 키
-            $key = substr(hash('sha256', Config::USERNAME), 0, 32); // 32바이트 = AES-256 키
-            $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
+            $key = substr(hash('sha256', Config::$USERNAME), 0, 32); // 32바이트 = AES-256 키
+            $iv  = substr(hash('sha256', Config::$PASSWORD), 0, 16); // 16바이트 = IV
             echo Lib::js_obfuscate("var JayDream_api_key = CryptoJS.enc.Utf8.parse('".$key."');");
             echo Lib::js_obfuscate("var JayDream_api_iv = CryptoJS.enc.Utf8.parse('".$iv."');");
             // CSRF
@@ -88,7 +89,25 @@ class App {
             echo "<script src='".Config::$URL."/JayDream/js/session.js'></script>";
 
             self::$JS_LOAD = true;
+
             echo "<script>";
+            echo Lib::js_obfuscate("var JayDream = {};");
+
+            echo Lib::js_obfuscate("JayDream.url = JayDream_url;");
+            echo Lib::js_obfuscate("JayDream.domain = JayDream_domain;");
+            echo Lib::js_obfuscate("JayDream.dev = JayDream_dev;");
+            echo Lib::js_obfuscate("JayDream.alert = JayDream_alert;");
+            echo Lib::js_obfuscate("JayDream.api_key = JayDream_api_key;");
+            echo Lib::js_obfuscate("JayDream.api_iv = JayDream_api_iv;");
+            echo Lib::js_obfuscate("JayDream.csrf_name = JayDream_csrf_name;");
+            echo Lib::js_obfuscate("JayDream.csrf_value = JayDream_csrf_value;");
+            echo Lib::js_obfuscate("JayDream.api_url = '". Config::$REWRITE ? 'api' : 'api.php' . "'");
+            echo Lib::js_obfuscate("JayDream.plugin = new JayDreamPlugin(JayDream);");
+            echo Lib::js_obfuscate("JayDream.lib = new JayDreamLib(JayDream);");
+            echo Lib::js_obfuscate("JayDream.api = new JayDreamAPI(JayDream);");
+            echo Lib::js_obfuscate("JayDream.session = new JayDreamSession(JayDream);");
+            echo Lib::js_obfuscate("JayDream.vue = new JayDreamVue();");
+            echo Lib::js_obfuscate("JayDream.route = new JayDreamRoute();");
             echo "</script>";
         }
 

@@ -1,67 +1,37 @@
 class JayDreamAPI {
-
     constructor(jd) {
         this.jd = jd;
-        this.filters = {}; // 테이블별 filter 저장소
-        this.component_name = "";
-        this.currentTable = null;
+    }
+
+    table(name,component_name = null) {
+        return new JayDreamTableAPI(this.jd, name,component_name);
+    }
+}
+
+class JayDreamTableAPI {
+    constructor(jd, tableName,component_name) {
+        this.jd = jd;
+        this.currentTable = tableName;
         this.currentBlock = null;
+        this.component_name = component_name;
 
-        return new Proxy(this, {
-            get(target, prop) {
-                // 실제 존재하는 속성 (예: get(), post() 등)이면 그대로 반환
-                if (prop in target) return target[prop];
-
-                // 존재하지 않는 속성을 접근하면 → table(prop) 자동 실행
-                return target.table(prop);
-            },
-        });
-    }
-
-    table(name) {
-        // 테이블별 filter 없으면 새로 생성
-        if (!this.filters[name]) {
-            this.filters[name] = {
-                table: name,
-                where: [],
-                joins: [],
-                between: [],
-                order_by: [],
-                in: [],
-                relations: [],
-                blocks: [],
-
-                paging : {
-                    page: 1,
-                    limit: 99999,
-                    count: 0,
-                    last : 0,
-                }
-            };
-        }
-
-        const instance = Object.create(Object.getPrototypeOf(this));
-        instance.jd = this.jd;
-        instance.filters = this.filters;  // 같은 filters 참조
-        instance.component_name = this.component_name;
-        instance.currentTable = name;  // 이 인스턴스는 항상 이 테이블만 참조
-
-        return instance;
-    }
-
-    get filter() {
-        // 현재 테이블 기준으로 filter 반환
-        if (!this.currentTable) throw new Error("table()이 먼저 호출되어야 합니다.");
-        return this.filters[this.currentTable];
-    }
-
-    set filter(newFilter) {
-        // 현재 테이블 기준으로 filter 교체
-        if (!this.currentTable)
-            throw new Error("table()이 먼저 호출되어야 합니다.");
-
-        // 기본 형태가 유지되도록 최소 구조 보장
-        this.filters[this.currentTable] = newFilter
+        // 🔥 완전 독립 필터
+        this.filter = {
+            table: tableName,
+            where: [],
+            joins: [],
+            between: [],
+            order_by: [],
+            in: [],
+            relations: [],
+            blocks: [],
+            paging: {
+                page: 1,
+                limit: 99999,
+                count: 0,
+                last: 0,
+            }
+        };
     }
 
     where_set(column, value, logical = "AND", operator = "=", encrypt = false) {
@@ -78,8 +48,7 @@ class JayDreamAPI {
         if (this.currentBlock) {
             existing = this.currentBlock.where.find(w => w.column === column);
             target = this.currentBlock.where;
-        }
-        else {
+        } else {
             existing = this.filter.where.find(w => w.column === column);
             target = this.filter.where;
         }
@@ -118,7 +87,7 @@ class JayDreamAPI {
     where(column, value, logical = "AND", operator = "=", encrypt = false) {
         let obj = this.where_set(column, value, logical, operator, encrypt);
 
-        if(!obj) return this;
+        if (!obj) return this;
 
         // currentBlock이 있으면 block의 where에 추가
         if (this.currentBlock) {
@@ -132,7 +101,7 @@ class JayDreamAPI {
     }
 
     async blockStart(keyword, logical = "AND") {
-        if(this.currentBlock) {
+        if (this.currentBlock) {
             await this.jd.lib.alert('api.js blockStart가 중복되었습니다.');
             return false;
         }
@@ -160,7 +129,7 @@ class JayDreamAPI {
         return this;
     }
 
-    blockWhere(keyword,column, value, logical = "AND", operator = "=", encrypt = false) {
+    blockWhere(keyword, column, value, logical = "AND", operator = "=", encrypt = false) {
         // 1. keyword가 같은 block 찾기
         let block = this.filter.blocks.find(b => b.keyword === keyword);
 
@@ -177,16 +146,15 @@ class JayDreamAPI {
 
         let where_obj = this.where_set(column, value, logical, operator, encrypt);
 
-        if(!where_obj) return this;
+        if (!where_obj) return this;
 
         block.where.push(where_obj);
-
 
         // 3. 해당 block 반환
         return this;
     }
 
-    between(column,start,end,logical = "and") {
+    between(column, start, end, logical = "and") {
         this.filter.between.push({
             column: column,     // 컬럼 || 함수
             start: start,       // 시간 || 컬럼
@@ -194,9 +162,7 @@ class JayDreamAPI {
             logical: logical,
         });
 
-        console.log(this.filter)
-
-        return this
+        return this;
     }
 
     join(table, base, options = {}) {
@@ -209,19 +175,20 @@ class JayDreamAPI {
             as: options.as || "",
         }
 
-        if(options.on) obj.on = options.on;
+        if (options.on) obj.on = options.on;
 
-        this.filter.joins.push(obj)
+        this.filter.joins.push(obj);
 
-        return this
+        return this;
     }
 
     orderBy(column, value = "DESC", priority = 0) {
-        this.filter.order_by[priority] = {column: column, value: value};
+        this.filter.order_by[priority] = { column: column, value: value };
         this.filter.order_by = this.filter.order_by.filter(item => item != null);
+        return this;
     }
 
-    async get(bind,options = {}) {
+    async get(bind, options = {}) {
         options.component_name = this.component_name;
 
         try {
@@ -229,12 +196,12 @@ class JayDreamAPI {
             if (options.page) this.filter.paging.page = options.page;
             if (options.file) this.filter.file_db = options.file;
 
-            const res = await this.jd.lib.ajax("get", this.filter, "/JayDream/api", options);
+            const res = await this.jd.lib.ajax("get", this.filter, `/JayDream/${this.jd.api_url}`, options);
             const data = Array.isArray(res.data) ? res.data : [];
 
             if (this.filter.paging) {
                 this.filter.paging.count = res.count;
-                this.filter.paging.last = Math.ceil(this.filter.paging.count / this.filter.paging.limit)
+                this.filter.paging.last = Math.ceil(this.filter.paging.count / this.filter.paging.limit);
             }
 
             // ✅ Vue 반응성 대응 (배열 / 객체 자동 갱신)
@@ -250,7 +217,6 @@ class JayDreamAPI {
 
             if (options.callback) await options.callback(res);
 
-
             return data;
         } catch (e) {
             await this.jd.plugin.alert(e.message);
@@ -258,146 +224,148 @@ class JayDreamAPI {
         }
     }
 
-    async post(data,options = {}) {
+    async post(data, options = {}) {
         let method = data.primary ? 'update' : 'insert';
-        let url = "/JayDream/api";
+        let url = `/JayDream/${this.jd.api_url}`;
         options.component_name = this.component_name;
+
         try {
             if (this.currentTable && !options.table) options.table = this.currentTable;
-            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
-            if(data['$table'] && !options.table) options.table = data['$table'];
+            if (!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if (data['$table'] && !options.table) options.table = data['$table'];
 
-
-
-            if("confirm" in options) {
-                if(!await this.jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
+            if ("confirm" in options) {
+                if (!await this.jd.plugin.confirm(options.confirm.message)) {
+                    if (options.confirm.callback) {
+                        await options.confirm.callback();
+                    } else {
                         return false;
                     }
                 }
             }
 
-            if(options.url) url = options.url;
-            if(options.method) method = options.method;
+            if (options.url) url = options.url;
+            if (options.method) method = options.method;
 
-            let res = await this.jd.lib.ajax(method, data, url,options);
+            let res = await this.jd.lib.ajax(method, data, url, options);
 
-            if(options.return) return res
+            if (options.return) return res;
 
-            if(options.callback) {
-                await options.callback(res)
-            }else {
+            if (options.callback) {
+                await options.callback(res);
+            } else {
                 let message = options.message ? options.message : "완료되었습니다.";
                 await this.jd.plugin.alert(message);
 
-                if(options.href) window.location.href = JayDream.url + options.href;
+                if (options.href) window.location.href = this.jd.url + options.href;
                 else window.location.reload();
             }
-        }catch (e) {
-            await this.jd.plugin.alert(e.message)
+        } catch (e) {
+            await this.jd.plugin.alert(e.message);
         }
     }
 
-    async delete(data,options = {}) {
+    async delete(data, options = {}) {
         options.component_name = this.component_name;
         let message = "정말 삭제하시겠습니까?";
-        if(options.message) message = options.message;
+        if (options.message) message = options.message;
 
-        if(!options.return) {
-            if(! await this.jd.plugin.confirm(message)) return false;
+        if (!options.return) {
+            if (!await this.jd.plugin.confirm(message)) return false;
         }
 
         try {
             if (this.currentTable && !options.table) options.table = this.currentTable;
-            if(!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if (!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
             options.table = data['$table'];
-            let res = await this.jd.lib.ajax("remove",data,"/JayDream/api",options);
 
-            if(options.return) return res
+            let res = await this.jd.lib.ajax("remove", data, `/JayDream/${this.jd.api_url}`, options);
 
-            if(options.callback) {
-                await options.callback(res)
-            }else {
+            if (options.return) return res;
+
+            if (options.callback) {
+                await options.callback(res);
+            } else {
                 await this.jd.plugin.alert("완료되었습니다.");
-                if(options.href) window.location.href = JayDream.url + options.href;
+                if (options.href) window.location.href = this.jd.url + options.href;
                 else window.location.reload();
             }
-        }catch (e) {
-            await this.jd.plugin.alert(e.message)
+        } catch (e) {
+            await this.jd.plugin.alert(e.message);
         }
     }
 
-    async whereUpdate(update_column,options = {}) {
-        let url = "/JayDream/api";
+    async whereUpdate(update_column, options = {}) {
+        let url = `/JayDream/${this.jd.api_url}`;
         options.component_name = this.component_name;
+
         try {
             if (this.currentTable && !options.table) options.table = this.currentTable;
-            if(!options.table) throw new Error("테이블값이 존재하지않습니다.");
+            if (!options.table) throw new Error("테이블값이 존재하지않습니다.");
 
-            if("confirm" in options) {
-                if(!await this.jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
+            if ("confirm" in options) {
+                if (!await this.jd.plugin.confirm(options.confirm.message)) {
+                    if (options.confirm.callback) {
+                        await options.confirm.callback();
+                    } else {
                         return false;
                     }
                 }
             }
 
-            if(options.url) url = options.url;
+            if (options.url) url = options.url;
 
-            let res = await this.jd.lib.ajax("where_update", update_column, url,options);
+            let res = await this.jd.lib.ajax("where_update", update_column, url, options);
 
-            if(options.return) return res
+            if (options.return) return res;
 
-            if(options.callback) {
-                await options.callback(res)
-            }else {
+            if (options.callback) {
+                await options.callback(res);
+            } else {
                 await this.jd.plugin.alert("완료되었습니다.");
 
-                if(options.href) window.location.href = JayDream.url + options.href;
+                if (options.href) window.location.href = this.jd.url + options.href;
                 else window.location.reload();
             }
-        }catch (e) {
-            await this.jd.plugin.alert(e.message)
+        } catch (e) {
+            await this.jd.plugin.alert(e.message);
         }
     }
 
-    async whereDelete(filter,options = {}) {
-        let url = "/JayDream/api";
+    async whereDelete(filter, options = {}) {
+        let url = `/JayDream/${this.jd.api_url}`;
         options.component_name = this.component_name;
+
         try {
             if (this.currentTable && !options.table) options.table = this.currentTable;
-            if(!filter.table) throw new Error("테이블값이 존재하지않습니다.");
+            if (!filter.table) throw new Error("테이블값이 존재하지않습니다.");
 
-            if("confirm" in options) {
-                if(!await this.jd.plugin.confirm(options.confirm.message)) {
-                    if(options.confirm.callback) {
-                        await options.confirm.callback()
-                    }else {
+            if ("confirm" in options) {
+                if (!await this.jd.plugin.confirm(options.confirm.message)) {
+                    if (options.confirm.callback) {
+                        await options.confirm.callback();
+                    } else {
                         return false;
                     }
                 }
             }
 
-            if(options.url) url = options.url;
+            if (options.url) url = options.url;
 
-            let res = await this.jd.lib.ajax("where_delete", filter, url,options);
+            let res = await this.jd.lib.ajax("where_delete", filter, url, options);
 
-            if(options.return) return res
+            if (options.return) return res;
 
-            if(options.callback) {
-                await options.callback(res)
-            }else {
+            if (options.callback) {
+                await options.callback(res);
+            } else {
                 await this.jd.plugin.alert("완료되었습니다.");
 
-                if(options.href) window.location.href = JayDream.url + options.href;
+                if (options.href) window.location.href = this.jd.url + options.href;
                 else window.location.reload();
             }
-        }catch (e) {
-            await this.jd.plugin.alert(e.message)
+        } catch (e) {
+            await this.jd.plugin.alert(e.message);
         }
     }
 }

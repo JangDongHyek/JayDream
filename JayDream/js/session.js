@@ -22,7 +22,7 @@ class JayDreamSession {
         const res = await this.jd.lib.ajax(
             "session_get",
             payload,
-            "/JayDream/api.php"
+            `/JayDream/${this.jd.api_url}`
         );
 
         return res.sessions;
@@ -56,8 +56,18 @@ class JayDreamSession {
         }
 
         // 통신
-        await this.jd.lib.ajax("session_set", payload, "/JayDream/api.php");
+        await this.jd.lib.ajax("session_set", payload, `/JayDream/${this.jd.api_url}`);
 
         return true; // 성공 시 true 반환
+    }
+
+    async all() {
+        const res = await this.jd.lib.ajax(
+            "session_all",
+            {},
+            `/JayDream/${this.jd.api_url}`
+        );
+
+        return res.sessions;
     }
 }

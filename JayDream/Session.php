@@ -52,4 +52,17 @@ class Session {
             Lib::error("세션 프레임워크 미지원");
         }
     }
+
+    public static function getAll() {
+        if (Config::$framework == "ci3") {
+            $CI =& get_instance();
+            return $CI->session->userdata();
+        } else if (Config::$framework == "ci4") {
+            return \CodeIgniter\Config\Services::session()->get();
+        } else if (in_array(Config::$framework, ["gnuboard", "legacy"])) {
+            return $_SESSION;
+        } else {
+            Lib::error("세션 프레임워크 미지원");
+        }
+    }
 }

@@ -43,12 +43,13 @@ class File {
 
         // 저장 정보 반환
         return [
+            'user_idx'        => $obj['user_idx'] ? $obj['user_idx'] : null,
             'table_name'    => $table,
             'table_primary' => $primary,
             'name'          => $originalName,
             'size'          => $file['size'],
-            'height'        => $info['height'] ?? null,
-            'width'         => $info['width'] ?? null,
+            'height'        => $info['height'] ? $info['height'] : null,
+            'width'         => $info['width'] ? $info['width'] : null,
             'ext'           => $ext,
             'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
             'path'          => $targetPath,

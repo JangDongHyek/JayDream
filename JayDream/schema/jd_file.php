@@ -6,6 +6,11 @@ return [
         "nullable" => false,
         "comment" => "고유값"
     ],
+    "user_idx" => [
+        "type" => "INT",
+        "nullable" => true,
+        "comment" => "유저 고유값"
+    ],
     "table_name" => [
         "type" => "VARCHAR",
         "length" => 50,
@@ -49,12 +54,12 @@ return [
     ],
     "height" => [
         "type" => "INT",
-        "nullable" => false,
+        "nullable" => true,
         "comment" => "이미지의 높이"
     ],
     "width" => [
         "type" => "INT",
-        "nullable" => false,
+        "nullable" => true,
         "comment" => "이미지의 너비"
     ],
     "path" => [

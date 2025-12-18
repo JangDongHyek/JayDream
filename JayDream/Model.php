@@ -39,7 +39,7 @@ class Model {
         $this->table =$object["table"];
 
         // 테이블 확인
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".Config::DATABASE."'";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".Config::$DATABASE."'";
         $result = @mysqli_query(Config::$connect, $sql);
         if(!$result) Lib::error(mysqli_error(Config::$connect));
 
@@ -753,7 +753,7 @@ class Model {
     }
 
     function getPrimary($table) {
-        $sql = "SELECT COLUMN_NAME, EXTRA,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".Config::DATABASE."' AND TABLE_NAME = '{$table}' AND COLUMN_KEY = 'PRI';";
+        $sql = "SELECT COLUMN_NAME, EXTRA,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".Config::$DATABASE."' AND TABLE_NAME = '{$table}' AND COLUMN_KEY = 'PRI';";
         $result = @mysqli_query(Config::$connect, $sql);
         if(!$result) Lib::error(mysqli_error(Config::$connect));
 
@@ -763,7 +763,7 @@ class Model {
     }
 
     function getColumnsInfo($table) {
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::DATABASE."' ";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::$DATABASE."' ";
         $array = array();
 
         $result = @mysqli_query(Config::$connect, $sql);
@@ -778,7 +778,7 @@ class Model {
     }
 
     function getColumns($table) {
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::DATABASE."' ";
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::$DATABASE."' ";
         $array = array();
 
         $result = @mysqli_query(Config::$connect, $sql);

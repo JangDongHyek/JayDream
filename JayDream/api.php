@@ -85,6 +85,12 @@ switch ($method) {
         $response['message'] = "";
         break;
 
+    case "session_all" :
+        $response['sessions'] = Session::getAll();
+        $response['success'] = true;
+        $response['message'] = "";
+        break;
+
     case "get_ip" :
         $response['ip'] = Lib::getClientIP();
         $response['success'] = true;

@@ -1,6 +1,6 @@
 function vueLoad(app_name) {
     if (JayDream_vue.some(item => item.app_name == app_name)) {
-        alert("중복되는 앱이 있습니다.")
+        // alert("중복되는 앱이 있습니다.")
         return false;
     }
 
@@ -29,23 +29,6 @@ function vueLoad(app_name) {
         app.component(component.name,component.object)
     }
 
-    let JayDream = {};
-
-    JayDream.app = app_name;
-    JayDream.url = JayDream_url;
-    JayDream.domain = JayDream_domain;
-    JayDream.dev = JayDream_dev;
-    JayDream.alert = JayDream_alert;
-    JayDream.api_key = JayDream_api_key;
-    JayDream.api_iv = JayDream_api_iv;
-    JayDream.csrf_name = JayDream_csrf_name;
-    JayDream.csrf_value = JayDream_csrf_value;
-    JayDream.plugin = new JayDreamPlugin(JayDream);
-    JayDream.lib = new JayDreamLib(JayDream);
-    JayDream.api = new JayDreamAPI(JayDream);
-    JayDream.session = new JayDreamSession(JayDream);
-    JayDream.vue = new JayDreamVue();
-    JayDream.route = new JayDreamRoute();
 
     //디렉티브
     app.directive('price', {
@@ -110,6 +93,7 @@ function vueLoad(app_name) {
     });
 
     // Vue 내부에서만 접근 가능하게 설정
+    app.config.globalProperties.$app_name = app_name;
     app.config.globalProperties.$jd = JayDream;
     app.config.globalProperties.lib = JayDream.lib;
     app.config.globalProperties.route = JayDream.route;
@@ -154,6 +138,26 @@ function vueLoad(app_name) {
         }
     };
 
+    const apiContextMixin = {
+        beforeCreate() {
+            // JayDream이 없으면 스킵
+            if (!this.$jd || !this.$jd.api) return;
+
+            // 컴포넌트 이름 결정 (우선순위 중요)
+            const componentName =
+                this.component_name ||
+                this.$options.name ||
+                null;
+
+            // 🔥 핵심: this.api 를 컴포넌트 전용 래퍼로 덮어씀
+            this.api = {
+                table: (name) => {
+                    return this.$jd.api.table(name, componentName);
+                }
+            };
+        }
+    };
+
     if (!window.JAYDREAM_VUE_GLOBAL[app_name]) {
         window.JAYDREAM_VUE_GLOBAL[app_name] = Vue.reactive({
             mounted: true,
@@ -162,6 +166,7 @@ function vueLoad(app_name) {
 
 
     app.mixin(protectMixin);
+    app.mixin(apiContextMixin);
     app.mount(`#${app_name}`); // 특정 DOM에 마운트
     JayDream_vue.push({ app_name, app }); // 배열에 앱 인스턴스 저장
 }

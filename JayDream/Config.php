@@ -14,20 +14,35 @@ class Config
     public static $framework = "";
     public static $csrf = false;
 
-    private static $DEV_IPS = ['127.0.0.1'];
+    //_env.php 에 설정하는 변수
+    public static $REWRITE;
+    public static $DEV_IPS;
+    public static $HOSTNAME;
+    public static $DATABASE;
+    public static $USERNAME;
+    public static $PASSWORD;
+    public static $COOKIE_TIME;
+    public static $ALERT;
+    public static $ENCRYPT;
 
-    const HOSTNAME = "localhost";
-    const DATABASE = "exam";
-    const USERNAME = "exam";
-    const PASSWORD = "password";
-
-    const COOKIE_TIME = 7200;
-
-    const ALERT = "origin"; // origin , swal
-    const ENCRYPT = "md5"; // md5,sha256,sha512,hmac,gnuboard,ci4;
 
     public static function init()
     {
+        // 사용자 입력 변수 할당
+        $envFile = __DIR__ . '/_env.php';
+        if (!file_exists($envFile)) Lib::error("_env.php 파일이 존재하지않습니다.");
+        $env = require $envFile;
+        self::$REWRITE = $env['REWRITE'];
+        self::$DEV_IPS = $env['DEV_IPS'];
+        self::$HOSTNAME = $env['HOSTNAME'];
+        self::$DATABASE = $env['DATABASE'];
+        self::$USERNAME = $env['USERNAME'];
+        self::$PASSWORD = $env['PASSWORD'];
+        self::$COOKIE_TIME = $env['COOKIE_TIME'];
+        self::$ALERT = $env['ALERT'];
+        self::$ENCRYPT = $env['ENCRYPT'];
+
+
         // 개발환경체크
         if (in_array(Lib::getClientIP(), self::$DEV_IPS)) self::$DEV = true;
 
@@ -68,7 +83,10 @@ class Config
             self::createTableFromSchema("jd_file",$schema);
         }
 
-
+        // api 주소 관련 라우팅 및 rewrite 체크
+        if (self::$REWRITE === null) {
+            self::$REWRITE = in_array(self::$framework, ['ci3', 'ci4']);
+        }
     }
 
     public static function resourcePath()
@@ -78,16 +96,16 @@ class Config
 
     private static function initConnect()
     {
-        if (self::DATABASE == "exam") Lib::error("DB 정보를 입력해주세요.");
-        if (self::USERNAME == "exam") Lib::error("DB 정보를 입력해주세요.");
-        if (self::PASSWORD == "password") Lib::error("DB 정보를 입력해주세요.");
+        if (self::$DATABASE == "exam") Lib::error("DB 정보를 입력해주세요.");
+        if (self::$USERNAME == "exam") Lib::error("DB 정보를 입력해주세요.");
+        if (self::$PASSWORD == "password") Lib::error("DB 정보를 입력해주세요.");
 
         if (!self::$connect) {
             self::$connect = new \mysqli(
-                self::HOSTNAME,
-                self::USERNAME,
-                self::PASSWORD,
-                self::DATABASE
+                self::$HOSTNAME,
+                self::$USERNAME,
+                self::$PASSWORD,
+                self::$DATABASE
             );
 
             if (self::$connect->connect_error) {

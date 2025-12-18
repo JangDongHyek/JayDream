@@ -100,23 +100,23 @@ class Lib {
 
     public static function jwtDecode($token) {
         try {
-            $jwt = JWT::decode($token, Config::PASSWORD, array('HS256'));
+            $jwt = JWT::decode($token, Config::$PASSWORD, array('HS256'));
             if ($jwt->iss !== Config::$URL) {
-                setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
+                setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
                 Lib::error("JWT 발급자가 동일하지않습니다.");
             }
             return $jwt;
         }catch (ExpiredException $e) {
-            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
+            setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
             Lib::error("JWT 만료됐습니다\n새로고침을 해주세요.");
         } catch (SignatureInvalidException $e) {
-            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
+            setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
             Lib::error("JWT 서명 오류");
         } catch (BeforeValidException $e) {
-            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
+            setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
             Lib::error("JWT 사용 가능 시간 전");
         } catch (\Exception $e) {
-            setcookie("jd_jwt_token", "", time() - (Config::COOKIE_TIME +100), "/");
+            setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
             Lib::error("JWT 디코딩 오류: " . $e->getMessage());
         }
     }
@@ -238,13 +238,13 @@ class Lib {
     }
 
     public static function encrypt($value) {
-        switch (Config::ENCRYPT) {
+        switch (Config::$ENCRYPT) {
             case 'sha256':
                 return hash('sha256', $value);
             case 'sha512':
                 return hash('sha512', $value);
             case 'hmac':
-                $secret = Config::PASSWORD;
+                $secret = Config::$PASSWORD;
                 return hash_hmac('sha256', $value, $secret);
             case 'md5' :
                 return md5($value);
@@ -259,13 +259,13 @@ class Lib {
 
     public static function verify($value, $hash)
     {
-        switch (Config::ENCRYPT) {
+        switch (Config::$ENCRYPT) {
             case 'sha256':
                 return hash('sha256', $value) == $hash;
             case 'sha512':
                 return hash('sha512', $value) == $hash;
             case 'hmac':
-                $secret = Config::PASSWORD;
+                $secret = Config::$PASSWORD;
                 return hash_hmac('sha256', $value, $secret) == $hash;
             case 'md5':
                 return md5($value) == $hash;
@@ -280,8 +280,8 @@ class Lib {
     }
 
     public static function encryptAPI($value) {
-        $key = substr(hash('sha256', Config::USERNAME), 0, 32); // 32바이트 = AES-256 키
-        $iv  = substr(hash('sha256', Config::PASSWORD), 0, 16); // 16바이트 = IV
+        $key = substr(hash('sha256', Config::$USERNAME), 0, 32); // 32바이트 = AES-256 키
+        $iv  = substr(hash('sha256', Config::$PASSWORD), 0, 16); // 16바이트 = IV
 
         return base64_encode(openssl_encrypt(Lib::jsonEncode($value), 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv));
     }
