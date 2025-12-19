@@ -103,6 +103,13 @@ function vueLoad(app_name) {
     app.config.globalProperties.session = JayDream.session;
     app.config.globalProperties.protocol = window.location.protocol.replace(':', '');
 
+    app.config.globalProperties.$openModal = async function (modal) {
+        if (!modal) {
+            await this.lib.alert("modal 매개 변수가 없습니다.");
+        }
+        modal.status = true;
+    };
+
 
     // JayDream 예약어 목록
     const reservedKeys = ['lib', 'route', 'api','vue','plugin','session',"protocol"];
@@ -142,10 +149,9 @@ function vueLoad(app_name) {
         beforeCreate() {
             // JayDream이 없으면 스킵
             if (!this.$jd || !this.$jd.api) return;
-
             // 컴포넌트 이름 결정 (우선순위 중요)
             const componentName =
-                this.component_name ||
+                this.$app_name ||
                 this.$options.name ||
                 null;
 

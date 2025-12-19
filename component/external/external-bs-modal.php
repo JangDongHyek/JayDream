@@ -52,7 +52,6 @@
             },
             methods: {
                 hideModal() {
-                    console.log(1133);
                     let copy = Object.assign({}, this.modelValue);
                     copy.status = false;
                     copy.primary = "";
