@@ -7,7 +7,8 @@ return [
         "comment" => "고유값"
     ],
     "user_idx" => [
-        "type" => "INT",
+        "type" => "VARCHAR",
+        "length" => 50,
         "nullable" => true,
         "comment" => "유저 고유값"
     ],

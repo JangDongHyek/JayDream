@@ -108,7 +108,7 @@ class Service {
             $file_primaries[] = $file_response['primary'];
 
             foreach ($obj as $key => $value) {
-                if ($value == "jd_file_primary_{$file['keyword']}") {
+                if ($value === "jd_file_primary_{$file['keyword']}") {
                     $newObj = array("primary" => $response['primary'],$key => $file_response['primary']);
                     $model->update($newObj);
                 }
@@ -116,7 +116,7 @@ class Service {
         }
 
         foreach ($obj as $key => $value) {
-            if ($value == 'jd_file_primary') {
+            if ($value === 'jd_file_primary') {
                 $newObj = array("primary" => $response['primary'],$key => $file_primaries);
                 $model->update($newObj);
             }
@@ -143,16 +143,15 @@ class Service {
             $file_primaries[] = $file_response['primary'];
 
             foreach ($obj as $key => $value) {
-                if ($value == "jd_file_primary_{$file['keyword']}") {
+                if ($value === "jd_file_primary_{$file['keyword']}") {
                     $newObj = array("primary" => $response['primary'],$key => $file_response['primary']);
-
                     $model->update($newObj);
                 }
             }
         }
 
         foreach ($obj as $key => $value) {
-            if ($value == 'jd_file_primary') {
+            if ($value === 'jd_file_primary') {
                 $newObj = array("primary" => $response['primary'],$key => $file_primaries);
                 $model->update($newObj);
             }

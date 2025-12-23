@@ -103,11 +103,20 @@ function vueLoad(app_name) {
     app.config.globalProperties.session = JayDream.session;
     app.config.globalProperties.protocol = window.location.protocol.replace(':', '');
 
-    app.config.globalProperties.$openModal = async function (modal) {
+    app.config.globalProperties.$openModal = async function (modal,options = {}) {
         if (!modal) {
             await this.lib.alert("modal 매개 변수가 없습니다.");
         }
+
+        Object.assign(modal, options);
         modal.status = true;
+    };
+
+    app.config.globalProperties.$closeModal = async function (modal) {
+        if (!modal) {
+            await this.lib.alert("modal 매개 변수가 없습니다.");
+        }
+        modal.status = false;
     };
 
 

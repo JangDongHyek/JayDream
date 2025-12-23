@@ -224,6 +224,42 @@ class JayDreamTableAPI {
         }
     }
 
+    getFire(bind, options = {}) {
+        options.component_name = this.component_name;
+
+        try {
+            if (options.paging) this.filter.paging.limit = options.paging;
+            if (options.page) this.filter.paging.page = options.page;
+            if (options.file) this.filter.file_db = options.file;
+
+            const res = this.jd.lib.ajax("get", this.filter, `/JayDream/${this.jd.api_url}`, options);
+            const data = Array.isArray(res.data) ? res.data : [];
+
+            if (this.filter.paging) {
+                this.filter.paging.count = res.count;
+                this.filter.paging.last = Math.ceil(this.filter.paging.count / this.filter.paging.limit);
+            }
+
+            // ✅ Vue 반응성 대응 (배열 / 객체 자동 갱신)
+            if (bind) {
+                if (Array.isArray(bind)) {
+                    // 배열이면 splice로 갱신
+                    bind.splice(0, bind.length, ...data);
+                } else if (typeof bind === "object" && bind !== null) {
+                    // 객체면 Object.assign으로 병합
+                    Object.assign(bind, data[0] || {});
+                }
+            }
+
+            if (options.callback) options.callback(res);
+
+            return data;
+        } catch (e) {
+            this.jd.plugin.alert(e.message);
+            return [];
+        }
+    }
+
     async post(data, options = {}) {
         let method = data.primary ? 'update' : 'insert';
         let url = `/JayDream/${this.jd.api_url}`;
