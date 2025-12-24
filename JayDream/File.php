@@ -53,7 +53,8 @@ class File {
             'ext'           => $ext,
             'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
             'path'          => $targetPath,
-            'rename'        => $savedName
+            'rename'        => $savedName,
+            'memo'          => $obj['memo'] ? $obj['memo'] : null
         ];
     }
 

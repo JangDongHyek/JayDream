@@ -77,8 +77,10 @@ class JayDreamLib {
         return obj;
     }
 
-    ajax(method,obj,url,options = {}) {
+    ajax(method,obj = {},url = "",options = {}) {
         if(!obj) new Error("obj 가 존재하지않습니다.");
+
+        if(!url) url = `/JayDream/${this.jd.api_url}`
 
         return new Promise((resolve, reject) => {
             var object = this.copyObject(obj);

@@ -40,7 +40,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             <!-- body -->
             <template v-slot:default>
-                <external-daum-postcode v-model="row" field1="Addr1" field1="zipcode"
+                <external-daum-postcode v-model="row" address="Addr1" zipcode="zipcode"
                                         @close="modal.status = false;"></external-daum-postcode>
             </template>
 

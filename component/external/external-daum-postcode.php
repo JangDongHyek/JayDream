@@ -11,8 +11,8 @@
             template: "#<?=$componentName?>-template",
             props: {
                 modelValue : {type: Object, default: {}},
-                field1 : {type: String, default: ""},
-                field2 : {type: String, default: ""},
+                address : {type: String, default: ""},
+                zipcode : {type: String, default: ""},
             },
             data: function () {
                 return {
@@ -41,8 +41,8 @@
                             this.postcode = data.zonecode;
 
                             let copy = Object.assign({}, this.modelValue);
-                            if(this.field1) copy[this.field1] = data.roadAddress || data.jibunAddress;
-                            if(this.field2) copy[this.field2] = data.zonecode;
+                            if(this.address) copy[this.address] = data.roadAddress || data.jibunAddress;
+                            if(this.zipcode) copy[this.zipcode] = data.zonecode;
                             this.$emit("update:modelValue", copy);
                             this.$emit("close");
                         },

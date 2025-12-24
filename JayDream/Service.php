@@ -226,7 +226,7 @@ class Service {
         foreach (File::normalize($_FILES) as  $file) {
             $file_response = File::save($file,$options['table'],$obj);
             $file_response['keyword'] = $file['keyword'];
-            $file_model->insert($file_response);
+            $file_response['primary'] = $file_model->insert($file_response)['primary'];
         }
         $response['file'] = $file_response;
         $response['success'] = true;
