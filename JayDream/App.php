@@ -101,7 +101,8 @@ class App {
             echo Lib::js_obfuscate("JayDream.api_iv = JayDream_api_iv;");
             echo Lib::js_obfuscate("JayDream.csrf_name = JayDream_csrf_name;");
             echo Lib::js_obfuscate("JayDream.csrf_value = JayDream_csrf_value;");
-            echo Lib::js_obfuscate("JayDream.api_url = '". Config::$REWRITE ? 'api' : 'api.php' . "'");
+            $apiUrl = Config::$REWRITE ? 'api' : 'api.php';
+            echo Lib::js_obfuscate("JayDream.api_url = '{$apiUrl}';");
             echo Lib::js_obfuscate("JayDream.plugin = new JayDreamPlugin(JayDream);");
             echo Lib::js_obfuscate("JayDream.lib = new JayDreamLib(JayDream);");
             echo Lib::js_obfuscate("JayDream.api = new JayDreamAPI(JayDream);");

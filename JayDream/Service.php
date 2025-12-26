@@ -177,9 +177,14 @@ class Service {
         $model = new Model($options['table']);
         $file_model = new Model("jd_file");
 
-        $response = $model->delete($obj);
 
-        $file_data = $file_model->where("table_name",$options['table'])->where("table_primary",$response['primary'])->get()['data'];
+        if($options['table'] === "jd_file") {
+            $file_data = $file_model->where("primary",$obj['primary'])->get()['data'];
+        }else {
+            $response = $model->delete($obj);
+
+            $file_data = $file_model->where("table_name",$options['table'])->where("table_primary",$response['primary'])->get()['data'];
+        }
         foreach ($file_data as $d) {
             File::delete($d);
             $file_model->delete($d);

@@ -40,22 +40,24 @@ class File {
         //파일에 대한 정보를 따로 담은 변수
         $uniqueKey = base64_encode(urlencode($file['name'] . '_' . $file['size']));
         $info = isset($obj[$uniqueKey]) ? $obj[$uniqueKey] : null;
-
-        // 저장 정보 반환
-        return [
-            'user_idx'        => $obj['user_idx'] ? $obj['user_idx'] : null,
-            'table_name'    => $table,
-            'table_primary' => $primary,
-            'name'          => $originalName,
-            'size'          => $file['size'],
-            'height'        => $info['height'] ? $info['height'] : null,
-            'width'         => $info['width'] ? $info['width'] : null,
-            'ext'           => $ext,
-            'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
-            'path'          => $targetPath,
-            'rename'        => $savedName,
-            'memo'          => $obj['memo'] ? $obj['memo'] : null
+        
+        //고정 저장 정보
+        $fixed = [
+            'table_name'      => $table,
+            'table_primary'   => $primary,
+            'name'            => $originalName,
+            'size'            => $file['size'],
+            'height'          => $info['height'] ?? null,
+            'width'           => $info['width'] ?? null,
+            'ext'             => $ext,
+            'src'             => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
+            'path'            => $targetPath,
+            'rename'          => $savedName,
         ];
+
+
+        // $obj 랑 합쳐서 저장 정보 반환
+        return array_merge($obj, $fixed);
     }
 
     public static function delete($data) {
