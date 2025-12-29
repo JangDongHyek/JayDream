@@ -242,6 +242,21 @@ class JayDreamLib {
         console.groupEnd();
     }
 
+    console(message,data = null, options = {}) {
+        if(!this.jd.dev) return false;
+
+        const { background = "#42b983", color = "white" } = options;
+
+        console.log(
+            `%c${message}`,
+            `background: ${background}; color: ${color}; font-weight: bold; font-size: 12px; padding: 5px 10px; border-radius: 3px;`
+        );
+
+        if(data !== null) {
+            console.log(data);
+        }
+    }
+
     href(url,target = '_self', obj = null) {
         url = url.trim();
 

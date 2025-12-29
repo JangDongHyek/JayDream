@@ -42,18 +42,20 @@ class File {
         $info = isset($obj[$uniqueKey]) ? $obj[$uniqueKey] : null;
         
         //고정 저장 정보
-        $fixed = [
-            'table_name'      => $table,
-            'table_primary'   => $primary,
-            'name'            => $originalName,
-            'size'            => $file['size'],
-            'height'          => $info['height'] ?? null,
-            'width'           => $info['width'] ?? null,
-            'ext'             => $ext,
-            'src'             => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
-            'path'            => $targetPath,
-            'rename'          => $savedName,
-        ];
+        $fixed = array(
+            'table_name'    => $table,
+            'table_primary' => $primary,
+            'name'          => $originalName,
+            'size'          => $file['size'],
+            'height'        => isset($info['height']) ? $info['height']
+                : (isset($obj['height']) ? $obj['height'] : null),
+            'width'         => isset($info['width']) ? $info['width']
+                : (isset($obj['width']) ? $obj['width'] : null),
+            'ext'           => $ext,
+            'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
+            'path'          => $targetPath,
+            'rename'        => $savedName,
+        );
 
 
         // $obj 랑 합쳐서 저장 정보 반환

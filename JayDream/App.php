@@ -53,8 +53,9 @@ class App {
 
     function jsLoad($plugin = array()) {
         if(!self::$JS_LOAD) {
-            echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>';
-            //echo '<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>';
+            //echo '<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>'; // 난독화 클라우드 플레어 터졌을떄 예비용
+            echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>'; // 난독화
+            echo '<script src="https://unpkg.com/pica@9.0.1/dist/pica.min.js"></script>'; // 이미지 리사이징
             echo "<script>";
             echo Lib::js_obfuscate("var JayDream_url = '".Config::$URL."';");
             echo Lib::js_obfuscate("var JayDream_domain = '".Config::$DOMAIN."';");
@@ -79,14 +80,15 @@ class App {
             echo Lib::js_obfuscate("var JayDream_csrf_value = '". $csrf['value'] ."';");
 
             echo "</script>";
-            echo "<script src='".Config::$URL."/JayDream/js/init.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/prototypes.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/lib.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/plugin.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/vue.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/route.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/api.js'></script>";
-            echo "<script src='".Config::$URL."/JayDream/js/session.js'></script>";
+            $ver = Config::$VERSION;
+            echo "<script src='".Config::$URL."/JayDream/js/init.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/prototypes.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/lib.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/plugin.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/vue.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/route.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/api.js?v={$ver}'></script>";
+            echo "<script src='".Config::$URL."/JayDream/js/session.js?v={$ver}'></script>";
 
             self::$JS_LOAD = true;
 
@@ -107,7 +109,7 @@ class App {
             echo Lib::js_obfuscate("JayDream.lib = new JayDreamLib(JayDream);");
             echo Lib::js_obfuscate("JayDream.api = new JayDreamAPI(JayDream);");
             echo Lib::js_obfuscate("JayDream.session = new JayDreamSession(JayDream);");
-            echo Lib::js_obfuscate("JayDream.vue = new JayDreamVue();");
+            echo Lib::js_obfuscate("JayDream.vue = new JayDreamVue(JayDream);");
             echo Lib::js_obfuscate("JayDream.route = new JayDreamRoute();");
             echo "</script>";
         }
@@ -117,6 +119,8 @@ class App {
 
     function pluginLoad($plugin = array()) {
         $plugins = Lib::convertToArray($plugin);
+
+
 
         if(in_array('drag',$plugins)) {
             if(!in_array("drag",self::$PLUGINS)) {

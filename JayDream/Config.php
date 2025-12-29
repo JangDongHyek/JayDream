@@ -6,6 +6,7 @@ use JayDream\Lib;
 
 class Config
 {
+    public static $VERSION = "1";
     public static $DEV = false;
     public static $ROOT = "";
     public static $URL = "";
