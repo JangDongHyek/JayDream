@@ -81,7 +81,7 @@ class JayDreamVue {
 
                 if(file.type.startsWith('image/')) {
                     let after_file = file;
-                    if(resize) {
+                    if(resize && file.type !== 'image/gif') {
                         after_file = await this.resizeWithPica(file);
                         this.jd.lib.console(`업로드파일 리사이징 : `,after_file)
                     }
@@ -139,7 +139,7 @@ class JayDreamVue {
 
                 if(file.type.startsWith('image/')) {
                     let after_file = file;
-                    if(resize) {
+                    if(resize && file.type !== 'image/gif') {
                         after_file = await this.resizeWithPica(file);
                         this.jd.lib.console(`업로드파일 리사이징 : `,after_file)
                     }
