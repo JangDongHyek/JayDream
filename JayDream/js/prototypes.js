@@ -1,126 +1,94 @@
-// int일경우 자동으로 컴마가 붙는 프로토타입
-Number.prototype.format = function (n, x) {
-    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\.' : '$') + ')';
-    return this.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,');
-};
-
-
-
-//배열을 튜플형식으로 변환하는
-Array.prototype.tuple = function () {
-    return `('${this.join("','")}')`;
-};
-
-/**
- * 숫자(바이트 단위)를 읽기 쉬운 크기 단위로 변환하는 프로토타입
- * @param {number} decimals - 소수점 자릿수 (기본값: 2)
- * @returns {string} 읽기 쉬운 크기 단위 (예: "408 KB", "3.5 MB")
- */
-Number.prototype.formatBytes = function (decimals = 2) {
-    if (this === 0) return '0 Bytes';
-
-    const k = 1024; // 1 KB = 1024 Bytes
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const dm = decimals < 0 ? 0 : decimals;
-
-    // 단위 결정
-    const i = Math.floor(Math.log(this) / Math.log(k));
-    const size = parseFloat((this / Math.pow(k, i)).toFixed(dm));
-
-    return `${size} ${sizes[i]}`;
-};
-
-
-
-/**
- * 문자열에서 숫자만 추출하는 프로토타입
- * 예: "010-1234-1234" → "01012341234"
- */
-String.prototype.formatOnlyNumber = function () {
-    return this.replace(/\D/g, '');
-};
-
-// DATE
-Date.prototype.format = function(fmt = 'yyyy-mm-dd') {
-    const yyyy = this.getFullYear();
-    const yy = String(yyyy).slice(-2);
-    const mm = String(this.getMonth() + 1).padStart(2, '0');
-    const dd = String(this.getDate()).padStart(2, '0');
-    const hh = String(this.getHours()).padStart(2, '0');
-    const mi = String(this.getMinutes()).padStart(2, '0');
-    const ss = String(this.getSeconds()).padStart(2, '0');
-
-    return fmt
-        .replace(/yyyy/g, yyyy)
-        .replace(/yy/g, yy)
-        .replace(/mm/g, mm)
-        .replace(/dd/g, dd)
-        .replace(/hh/g, hh)
-        .replace(/mi/g, mi)
-        .replace(/ss/g, ss);
-};
-
-Date.prototype.lastDay = function () {
-    const nextMonth = new Date(this.getFullYear(), this.getMonth() + 1, 1);
-    nextMonth.setDate(0);
-
-    const yyyy = nextMonth.getFullYear();
-    const mm = String(nextMonth.getMonth() + 1).padStart(2, '0');
-    const dd = String(nextMonth.getDate()).padStart(2, '0');
-
-    return `${yyyy}-${mm}-${dd}`;
-};
-
-String.prototype.lastDay = function () {
-    const date = new Date(this);
-    if (isNaN(date)) {
-        throw new Error(`Invalid date string: ${this}`);
-    }
-    return date.lastDay();
-};
-
-Date.prototype.firstDay = function () {
-    const yyyy = this.getFullYear();
-    const mm = String(this.getMonth() + 1).padStart(2, '0');
-    return `${yyyy}-${mm}-01`;
-};
-
-String.prototype.firstDay = function () {
-    const date = new Date(this);
-    if (isNaN(date)) {
-        throw new Error(`Invalid date string: ${this}`);
-    }
-    return date.firstDay();
-};
-
-String.prototype.formatDate = function(fmt = 'yyyy-mm-dd') {
-    const date = new Date(this);
-    if (isNaN(date.getTime())) {
-        throw new Error(`Invalid date string: "${this}"`);
-    }
-    return date.format(fmt);
-};
-
-String.prototype.korDate = function() {
-    let str = this.trim();
-
-    // 시간 분리
-    let [datePart, timePart] = str.split(' ');
-    let parts = datePart.split(/[-/.]/).map(p => p.replace(/^0+/, '')); // 0 제거
-
-    let year = parts[0] || '';
-    let month = parts[1] || '';
-    let day = parts[2] || '';
-
-    let result = '';
-
-    if (year) result += `${year}년`;
-    if (month) result += ` ${month}월`;
-    if (day) result += ` ${day}일`;
-
-    if (timePart) {
-        result += ` ${timePart}`;
+class JayDreamPrototype {
+    constructor(jd) {
+        this.jd = jd;
     }
 
-    return result.trim();
-};
+    format(n) {
+        if (!/^-?\d+(\.\d+)?$/.test(String(n))) {
+            throw new Error('formatNumber: 숫자만 입력 가능합니다.');
+        }
+
+        const number = Number(n);
+        const re = '\\d(?=(\\d{3})+$)';
+        return number.toFixed(0).replace(new RegExp(re, 'g'), '$&,');
+    }
+
+    formatBytes(n,...args) {
+        if (!/^-?\d+(\.\d+)?$/.test(String(n))) {
+            throw new Error('formatNumber: 숫자만 입력 가능합니다.');
+        }
+
+        let defaults = {decimals: 2, inputUnit: 'byte'};
+        let {decimals, inputUnit} = this.jd.lib.args(defaults,...args);
+
+        // 입력 단위를 바이트로 변환하는 배율
+        const units = {
+            'byte': 1,
+            'bytes': 1,
+            'kb': 1024,
+            'mb': 1024 * 1024,
+            'gb': 1024 * 1024 * 1024,
+            'tb': 1024 * 1024 * 1024 * 1024
+        };
+
+        const unitKey = inputUnit.toLowerCase();
+        if (!units[unitKey]) {
+            throw new Error('formatBytes: 지원하지 않는 단위입니다. (byte, kb, mb, gb, tb)');
+        }
+
+        // 입력값을 바이트로 변환
+        const bytes = value * units[unitKey];
+
+        if (bytes === 0) return '0 Bytes';
+
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const dm = decimals < 0 ? 0 : decimals;
+
+        // 적절한 단위 결정
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        const size = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+
+        return `${size} ${sizes[i]}`;
+    }
+
+    formatDate(...args) {
+        const def = {date: new Date(), format: 'yyyy-mm-dd'};
+        const {date, format} = this.jd.lib.args(def, ...args);
+
+        let dateObj;
+
+        // Date 객체 변환
+        if (date instanceof Date) {
+            dateObj = date;
+        } else if (typeof date === 'string' || typeof date === 'number') {
+            // 문자열이나 숫자(timestamp)를 Date로 변환
+            dateObj = new Date(date);
+        } else {
+            throw new Error('formatDate: Date 객체, 문자열, timestamp만 입력 가능합니다.');
+        }
+
+        // 유효한 날짜인지 확인
+        if (isNaN(dateObj.getTime())) {
+            throw new Error('formatDate: 유효하지 않은 날짜입니다.');
+        }
+
+        const yyyy = dateObj.getFullYear();
+        const yy = String(yyyy).slice(-2);
+        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateObj.getDate()).padStart(2, '0');
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const mi = String(dateObj.getMinutes()).padStart(2, '0');
+        const ss = String(dateObj.getSeconds()).padStart(2, '0');
+
+        return format
+            .replace(/yyyy/g, yyyy)
+            .replace(/yy/g, yy)
+            .replace(/mm/g, mm)
+            .replace(/dd/g, dd)
+            .replace(/hh/g, hh)
+            .replace(/mi/g, mi)
+            .replace(/ss/g, ss);
+    }
+
+}

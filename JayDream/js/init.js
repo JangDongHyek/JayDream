@@ -101,6 +101,7 @@ function vueLoad(app_name) {
     app.config.globalProperties.vue = JayDream.vue;
     app.config.globalProperties.plugin = JayDream.plugin;
     app.config.globalProperties.session = JayDream.session;
+    app.config.globalProperties.prototype = JayDream.prototype;
     app.config.globalProperties.protocol = window.location.protocol.replace(':', '');
 
     app.config.globalProperties.$openModal = async function (modal,options = {}) {
@@ -121,7 +122,7 @@ function vueLoad(app_name) {
 
 
     // JayDream 예약어 목록
-    const reservedKeys = ['lib', 'route', 'api','vue','plugin','session',"protocol"];
+    const reservedKeys = ['lib', 'route', 'api','vue','plugin','session',"protocol","prototype"];
 
     // 예약어 변수 등록시 에러
     const protectMixin = {

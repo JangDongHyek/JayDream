@@ -110,6 +110,7 @@ class App {
             echo Lib::js_obfuscate("JayDream.api = new JayDreamAPI(JayDream);");
             echo Lib::js_obfuscate("JayDream.session = new JayDreamSession(JayDream);");
             echo Lib::js_obfuscate("JayDream.vue = new JayDreamVue(JayDream);");
+            echo Lib::js_obfuscate("JayDream.prototype = new JayDreamPrototype(JayDream);");
             echo Lib::js_obfuscate("JayDream.route = new JayDreamRoute();");
             echo "</script>";
         }

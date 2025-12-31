@@ -383,4 +383,49 @@ class JayDreamLib {
         };
     }
 
+    args(defaults, ...args) {
+        let options;
+
+        // 인자가 없으면 기본값
+        if (args.length === 0) {
+            return {...defaults};
+        }
+
+        // 인자가 1개이고 객체나 배열이면 그대로 사용
+        if (args.length === 1) {
+            if (Array.isArray(args[0]) || (typeof args[0] === 'object' && args[0] !== null)) {
+                options = args[0];
+            } else {
+                options = args;
+            }
+        } else {
+            // 인자가 여러 개면 배열로 처리
+            options = args;
+        }
+
+        if (Array.isArray(options)) {
+            // 배열 방식: 순서대로 매칭 (undefined, null, '' 일 경우 기본값 사용)
+            const keys = Object.keys(defaults);
+            const result = {...defaults};
+            keys.forEach((key, index) => {
+                const value = options[index];
+                // undefined, null, 빈 문자열이 아닐 때만 할당
+                if (value !== undefined && value !== null && value !== '') {
+                    result[key] = value;
+                }
+            });
+            return result;
+        } else {
+            // 객체 방식: key로 매칭 (undefined, null, '' 제거)
+            const result = {...defaults};
+            Object.keys(options).forEach(key => {
+                const value = options[key];
+                if (value !== undefined && value !== null && value !== '') {
+                    result[key] = value;
+                }
+            });
+            return result;
+        }
+    }
+
 }

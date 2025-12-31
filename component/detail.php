@@ -294,6 +294,14 @@ $componentName = str_replace(".php", "", basename(__FILE__));
 
             },
             methods: {
+                exam(...args) {
+                    let defaults = {
+                        name : "",
+                        age : 10,
+                    }
+
+                    let {name,age} = this.lib.args(defaults,...args);
+                },
                 async onDragEnd(evt,array) {
                     if (evt.oldIndex === evt.newIndex) return;
 
@@ -336,21 +344,6 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                         await this.lib.alert(e.message)
                     }
                 },
-                async restApi() {
-                    let row = {};
-
-                    let options = {
-                        table: ""
-                    }
-
-                    try {
-                        let res = await this.lib.ajax("method", row, "/JayDream/api.php", options);
-
-
-                    } catch (e) {
-                        await this.lib.alert(e.message)
-                    }
-                }
             },
             computed: {
                 pay_core() {
