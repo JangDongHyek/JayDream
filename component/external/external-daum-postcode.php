@@ -13,6 +13,7 @@
                 modelValue : {type: Object, default: {}},
                 address : {type: String, default: ""},
                 zipcode : {type: String, default: ""},
+                jibun : {type: String, default: ""},
             },
             data: function () {
                 return {
@@ -41,10 +42,12 @@
                             this.postcode = data.zonecode;
 
                             let copy = Object.assign({}, this.modelValue);
-                            if(this.address) copy[this.address] = data.roadAddress || data.jibunAddress;
-                            if(this.zipcode) copy[this.zipcode] = data.zonecode;
+                            copy[this.address || 'address'] = data.roadAddress || data.jibunAddress;
+                            copy[this.zipcode || 'zipcode'] = data.zonecode;
+                            copy[this.jibun   || 'jibun']   = data.jibunAddress;
                             this.$emit("update:modelValue", copy);
                             this.$emit("close");
+
                         },
                         onresize: (size) => {
                             container.style.height = size.height + "px";
