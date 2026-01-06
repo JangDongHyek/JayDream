@@ -46,11 +46,23 @@
                 // Bootstrap 3 방식도 추가 (보험용)
                 $('#' + this.component_idx).on('hide.bs.modal', this.hideModal);
 
+                $('#' + this.component_idx).on('hidden.bs.modal', this.onModalHidden);
+
                 this.$nextTick(() => {
 
                 });
             },
             methods: {
+                onModalHidden() {
+                    // display: block 스타일이 있는 모달 찾기 (실제로 보이는 모달)
+                    const openModals = $('.modal').filter(function() {
+                        return $(this).css('display') === 'block';
+                    }).length;
+
+                    if (openModals > 0) {
+                        $('body').addClass('modal-open');
+                    }
+                },
                 hideModal() {
                     let copy = Object.assign({}, this.modelValue);
                     copy.status = false;

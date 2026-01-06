@@ -235,18 +235,21 @@ class JayDreamVue {
 
         await picaInstance.resize(srcCanvas, dstCanvas);
 
+        // 원본 파일 형식 유지
+        const outputType = originalFile.type;
+
         return new Promise(resolve => {
             dstCanvas.toBlob(blob => {
                 const resizedFile = new File(
                     [blob],
                     originalFile.name,
                     {
-                        type: 'image/jpeg',
+                        type: outputType,
                         lastModified: Date.now()
                     }
                 );
                 resolve(resizedFile);
-            }, 'image/jpeg', quality);
+            }, outputType, quality);
         });
     }
 }
