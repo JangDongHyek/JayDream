@@ -8,7 +8,7 @@ use JayDream\Config;
 use JayDream\Kakao;
 
 include_once(APPPATH . 'Libraries/JayDream/require.php');
-include_once(APPPATH . 'Libraries/JayDream/plugin/kakao/Kakao.php');
+include_once(APPPATH . 'Libraries/JayDream/provider/kakao/Kakao.php');
 
 class JayDreamKakaoController extends BaseController
 {

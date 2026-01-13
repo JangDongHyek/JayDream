@@ -33,12 +33,12 @@ switch ($method) {
         break;
 
     case "RegistAndIssueTaxInvoice" :
-        if (!Config::existsTable("jd_plugin_barobill_tax_invoice")) {
-            $schema = require __DIR__ . '/../../schema/jd_plugin_barobill_tax_invoice.php';
-            Config::createTableFromSchema("jd_plugin_barobill_tax_invoice",$schema);
+        if (!Config::existsTable("jd_provider_barobill_tax_invoice")) {
+            $schema = require __DIR__ . '/../../schema/jd_provider_barobill_tax_invoice.php';
+            Config::createTableFromSchema("jd_provider_barobill_tax_invoice",$schema);
         }
 
-        $model = new Model("jd_plugin_barobill_tax_invoice");
+        $model = new Model("jd_provider_barobill_tax_invoice");
         $row = $model->where("table_primary",$options['primary'])->get();
         if($row['count']) Lib::error("이미 신청한 주문건입니다.");
 

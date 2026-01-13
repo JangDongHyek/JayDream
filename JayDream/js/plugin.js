@@ -107,7 +107,7 @@ class JayDreamPlugin {
 
     /*
        this.$nextTick(() =>{
-            this.$jd.plugin.imageViewer('main_image',{
+            this.$jd.provider.imageViewer('main_image',{
                 zIndex:9999,
                 toolbar : false,
                 title : (image) => {return this.data.main_image_array[i].name}

@@ -8,7 +8,7 @@ use JayDream\Config;
 use JayDream\Naver;
 
 include_once(APPPATH . 'Libraries/JayDream/require.php');
-include_once(APPPATH . 'Libraries/JayDream/plugin/naver/Naver.php');
+include_once(APPPATH . 'Libraries/JayDream/provider/naver/Naver.php');
 
 class JayDreamNaverController extends BaseController
 {

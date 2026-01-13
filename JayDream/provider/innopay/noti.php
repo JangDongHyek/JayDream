@@ -4,7 +4,7 @@ use JayDream\Config;
 use JayDream\Model;
 
 if (!Config::existsTable("jd_plugin_innopay_noti")) {
-    $schema = require __DIR__ . '/../../schema/jd_plugin_innopay_noti.php';
+    $schema = require __DIR__ . '/../../schema/jd_provider_innopay_noti.php';
     Config::createTableFromSchema("jd_plugin_innopay_noti",$schema);
 }
 /*******************************************************************************

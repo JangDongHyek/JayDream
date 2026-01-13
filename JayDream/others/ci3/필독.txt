@@ -1,19 +1,20 @@
-********************************************************
-ci3 환경
-application/libraries 밑에 JayDream 복사 777필수
-js,resource 폴더는 필요없음
+루트디렉토리 (application 폴더와 동일선상)에 JayDream 폴더 삽입
 
-루트디렉토리 바로밑에 JayDream 복사 777 필수 * application 폴더와 동일선상에 두면됌
-js,resource 폴더만 필요함
+*1
+apache 일경우 JayDream 폴더 예외 추가
+RewriteRule ^JayDream/ - [L]
 
-controller 추가  JayDreamController
+Nginx 일경우 서버블락에 해당 블락 추가
+왠만하면 /etc/nginx/sites-available/default.conf 파일임
+location ^~ /JayDream/ {
+    try_files $uri $uri/ =404;
 
-routes에 통신 추가해주기
-// 공통 rest API
-$route['JayDream/api'] = "JayDreamController/method";
+    location ~ \.php$ {
+        # 해당부분은 php 블락을 복사해서 그대로 붙이면 됌
+    }
+}
 
-
-다른 컨트롤러에서 JayDream 불러와서 사용하고싶은경우 __construct() 함수내
-include_once(APPPATH . 'libraries/JayDream/require.php');
+*2
+컨트롤러에서 사용시 밑에 구문으로 사용하면 된다
+require_once FCPATH . 'JayDream/require.php';
 $this->app = new JayDream\App();
-추가하여 전역 변수로 사용 가능

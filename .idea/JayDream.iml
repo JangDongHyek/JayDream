@@ -3,9 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/JayDream/lib" isTestSource="false" packagePrefix="Firebase" />
-      <sourceFolder url="file://$MODULE_DIR$/JayDream/plugin/barobill" isTestSource="false" packagePrefix="JayDream" />
-      <sourceFolder url="file://$MODULE_DIR$/JayDream/plugin/kakao" isTestSource="false" packagePrefix="JayDream" />
-      <sourceFolder url="file://$MODULE_DIR$/JayDream/plugin/naver" isTestSource="false" packagePrefix="JayDream" />
+      <sourceFolder url="file://$MODULE_DIR$/JayDream/provider/barobill" isTestSource="false" packagePrefix="JayDream" />
+      <sourceFolder url="file://$MODULE_DIR$/JayDream/provider/kakao" isTestSource="false" packagePrefix="JayDream" />
+      <sourceFolder url="file://$MODULE_DIR$/JayDream/provider/naver" isTestSource="false" packagePrefix="JayDream" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
