@@ -1,5 +1,6 @@
 <?php
 return [
+    'VERSION' => '4',
     // DB
     'HOSTNAME' => 'localhost',
     'DATABASE' => 'exam',

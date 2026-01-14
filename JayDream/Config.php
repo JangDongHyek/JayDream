@@ -6,7 +6,7 @@ use JayDream\Lib;
 
 class Config
 {
-    public static $VERSION = "3";
+    public static $VERSION = "";
     public static $DEV = false;
     public static $ROOT = "";
     public static $URL = "";
@@ -33,6 +33,7 @@ class Config
         $envFile = __DIR__ . '/_env.php';
         if (!file_exists($envFile)) Lib::error("_env.php 파일이 존재하지않습니다.");
         $env = require $envFile;
+        self::$VERSION = $env['VERSION'];
         self::$REWRITE = $env['REWRITE'];
         self::$DEV_IPS = $env['DEV_IPS'];
         self::$HOSTNAME = $env['HOSTNAME'];

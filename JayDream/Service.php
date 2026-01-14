@@ -10,7 +10,9 @@ class Service {
         $model = new Model($filter['table']);
 
         //연관된 파일 가져오는
-        if($filter['file_db'] == "true") self::injectFileRelation($filter);
+        if (isset($filter['file_db']) && $filter['file_db'] === "true") {
+            self::injectFileRelation($filter);
+        }
 
         $object = $model->setFilter($filter)->get($filter);
         $ref = &$object;
@@ -227,6 +229,8 @@ class Service {
     }
 
     public static function fileSave($obj,$options) {
+        $options['table'] = (isset($options['table']) && $options['table']) ? $options['table'] : '';
+
         $file_model = new Model("jd_file");
         foreach (File::normalize($_FILES) as  $file) {
             $file_response = File::save($file,$options['table'],$obj);
