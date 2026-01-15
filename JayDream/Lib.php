@@ -513,4 +513,34 @@ class Lib {
         return $scheme . $host . $port . $path . $query;
     }
 
+    public static function writeLog($msg, $title = null) {
+        // 호출한 파일의 디렉토리 경로 가져오기
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $callerFile = isset($trace[0]['file']) ? $trace[0]['file'] : __FILE__;
+        $callerDir  = dirname($callerFile);
+
+        // 로그 파일명 생성 (오늘 날짜 기반)
+        $date = date("Y-m-d");
+        $logFileName = $title ? "{$title}_{$date}.log" : "log_{$date}.log";
+        $logFile = $callerDir . "/" . $logFileName;
+
+        // 로그 내용 생성
+        $timestamp = date("Y-m-d H:i:s");
+        $logContent = "[{$timestamp}] ";
+
+        // $msg가 배열이나 객체인 경우 JSON으로 변환
+        if (is_array($msg) || is_object($msg)) {
+            $logContent .= json_encode($msg, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        } else {
+            $logContent .= $msg;
+        }
+
+        $logContent .= "\n" . str_repeat("-", 80) . "\n";
+
+        // 로그 파일에 추가
+        file_put_contents($logFile, $logContent, FILE_APPEND);
+
+        return $logFile; // 로그 파일 경로 반환
+    }
+
 }

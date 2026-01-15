@@ -24,8 +24,18 @@ $options = Lib::jsonDecode($_POST['options'],false);
 Portone::init();
 
 switch ($method) {
-    case "get_ip" :
-        $response['ip'] = Lib::getClientIP();
+    case "init" :
+        $info = array(
+            "mid" => Portone::$mid,
+            "store_id" => Portone::$store_id,
+            "secret_key" => Portone::$secret_key,
+            "channel_key" => Portone::$channel_key,
+            "v1_code" => Portone::$v1_code,
+            "v1_api_key" => Portone::$v1_api_key,
+            "v1_api_secret" => Portone::$v1_api_secret,
+        );
+
+        $response['info'] = $info;
         $response['success'] = true;
         $response['message'] = "";
         break;
