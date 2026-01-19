@@ -154,11 +154,17 @@ class App {
             }
         }
 
-        if(in_array('bootstrap',$plugins)) {
-            if(!in_array("bootstrap",self::$PLUGINS)) {
+        if (in_array('bootstrap', $plugins) || in_array('bootstrap_css', $plugins)) {
+            if (!in_array('bootstrap_css', self::$PLUGINS)) {
                 echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>';
+                self::$PLUGINS[] = 'bootstrap_css';
+            }
+        }
+
+        if (in_array('bootstrap', $plugins)) {
+            if (!in_array('bootstrap', self::$PLUGINS)) {
                 echo '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>';
-                array_push(self::$PLUGINS,"bootstrap");
+                self::$PLUGINS[] = 'bootstrap';
             }
         }
 

@@ -48,6 +48,7 @@
                             this.$emit("update:modelValue", copy);
                             this.$emit("close");
 
+                            this.$emit("custom",data)
                         },
                         onresize: (size) => {
                             container.style.height = size.height + "px";

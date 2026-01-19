@@ -18,28 +18,60 @@ class JayDreamVue {
 
     formatPhone(el) {
         let raw = el.value.replace(/[^0-9]/g, '');
+        if (!raw) return;
 
-        if (raw.length > 11) {
-            raw = raw.slice(0, 11);
-        }
+        // 최대 길이 제한 (국내 최대 11자리)
+        if (raw.length > 11) raw = raw.slice(0, 11);
 
         let formatted = raw;
 
-        if (raw.length >= 11) {
-            formatted = raw.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
-        } else if (raw.length >= 7) {
-            formatted = raw.replace(/(\d{3})(\d{3,4})/, "$1-$2");
-        } else if (raw.length >= 4) {
-            formatted = raw.replace(/(\d{3})(\d{1,3})/, "$1-$2");
+        // 1️⃣ 서울 (02)
+        if (raw.startsWith('02')) {
+            if (raw.length >= 9) {
+                formatted = raw.replace(/(02)(\d{3,4})(\d{4})/, '$1-$2-$3');
+            } else if (raw.length >= 3) {
+                formatted = raw.replace(/(02)(\d+)/, '$1-$2');
+            }
+
+            // 2️⃣ 휴대폰 (010, 011, 016, 017, 018, 019)
+        } else if (/^01[016789]/.test(raw)) {
+            if (raw.length >= 11) {
+                formatted = raw.replace(/(01[016789])(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (raw.length >= 4) {
+                formatted = raw.replace(/(01[016789])(\d+)/, '$1-$2');
+            }
+
+            // 3️⃣ 인터넷 전화 / 가상번호 (070, 050x)
+        } else if (/^(070|050\d)/.test(raw)) {
+            if (raw.length >= 11) {
+                formatted = raw.replace(/(070|050\d)(\d{4})(\d{4})/, '$1-$2-$3');
+            } else if (raw.length >= 4) {
+                formatted = raw.replace(/(070|050\d)(\d+)/, '$1-$2');
+            }
+
+            // 4️⃣ 특수 대표번호 (1588, 1577, 1644, 1661 등)
+        } else if (/^(15\d\d|16\d\d)/.test(raw)) {
+            if (raw.length >= 8) {
+                formatted = raw.replace(/(\d{4})(\d{4})/, '$1-$2');
+            }
+
+            // 5️⃣ 기타 지역번호 (031~064)
+        } else {
+            if (raw.length >= 10) {
+                formatted = raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+            } else if (raw.length >= 4) {
+                formatted = raw.replace(/(\d{3})(\d+)/, '$1-$2');
+            }
         }
 
+        // 최대 표시 길이 제한
         if (formatted.length > 13) {
             formatted = formatted.slice(0, 13);
         }
 
         if (el.value !== formatted) {
             el.value = formatted;
-            el.dispatchEvent(new Event("input", { bubbles: true }));
+            el.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 
