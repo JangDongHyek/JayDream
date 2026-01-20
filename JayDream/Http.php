@@ -126,15 +126,47 @@ class Http
 
         curl_close($ch);
 
+        $result = array(
+            'success' => false,
+            'code'    => $code,
+            'error'   => null,
+            'data'    => null,
+        );
+
+        // response JSON decode 시도 함수
+        $decodeResponse = function ($response) {
+            if (!is_string($response) || $response === '') {
+                return $response;
+            }
+
+            $decoded = json_decode($response, true);
+
+            if ($decoded !== null || json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+
+            return $response;
+        };
+
+        // 1️⃣ cURL 자체 에러
         if ($error) {
-            Lib::error("cURL Error: {$error}");
+            $result['error'] = 'cURL Error: ' . $error;
+            $result['data']  = $decodeResponse($response);
+            return $result;
         }
 
+        // 2️⃣ HTTP 에러 코드
         if ($code < 200 || $code >= 300) {
-            Lib::error("HTTP {$code}: {$response}");
+            $result['error'] = 'HTTP ' . $code;
+            $result['data']  = $decodeResponse($response);
+            return $result;
         }
 
-        return json_decode($response, true);
+        // 3️⃣ 정상 응답
+        $result['success'] = true;
+        $result['data']    = $decodeResponse($response);
+
+        return $result;
     }
 
     /* -------- reset -------- */
