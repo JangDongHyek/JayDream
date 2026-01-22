@@ -12,6 +12,12 @@ return [
         "nullable" => true,
         "comment" => "유저 고유값"
     ],
+    "save_position" => [
+        "type" => "VARCHAR",
+        "length" => 50,
+        "nullable" => true,
+        "comment" => "유저 고유값"
+    ],
     "table_name" => [
         "type" => "VARCHAR",
         "length" => 50,
@@ -74,6 +80,12 @@ return [
         "length" => 255,
         "nullable" => false,
         "comment" => "변경된 파일 명"
+    ],
+    "cloudflare_image_id" => [
+        "type" => "VARCHAR",
+        "length" => 255,
+        "nullable" => true,
+        "comment" => "클라우드플레어 이미지저장 서비스 고유 아이디"
     ],
     "insert_date" => [
         "type" => "DATETIME",

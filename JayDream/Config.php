@@ -25,6 +25,7 @@ class Config
     public static $COOKIE_TIME;
     public static $ALERT;
     public static $ENCRYPT;
+    public static $Cloudflare_image_server;
 
 
     public static function init()
@@ -43,6 +44,7 @@ class Config
         self::$COOKIE_TIME = $env['COOKIE_TIME'];
         self::$ALERT = $env['ALERT'];
         self::$ENCRYPT = $env['ENCRYPT'];
+        self::$Cloudflare_image_server = $env['Cloudflare_image_server'];
 
 
         // 개발환경체크
@@ -64,11 +66,10 @@ class Config
         }else {
             self::$ROOT = dirname(__DIR__);
             $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-            $user = str_replace(str_replace(self::$ROOT, '', $_SERVER['SCRIPT_FILENAME']), '', $_SERVER['SCRIPT_NAME']);
             $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
             if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
                 $host = preg_replace('/:[0-9]+$/', '', $host);
-            self::$URL = $http . $host . $user;
+            self::$URL = $http . $host . '/';
         }
 
         // 도메인 구하기

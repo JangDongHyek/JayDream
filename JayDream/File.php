@@ -3,14 +3,10 @@ namespace JayDream;
 
 use JayDream\Lib;
 use JayDream\Config;
+use JayDream\Cloudflare;
 
 class File {
-    public static function save($file, $table,$obj, $primary = "") {
-        // 유효성 체크
-        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-            Lib::error("업로드된 파일이 유효하지 않습니다.");
-        }
-
+    public static function local_save($file,$ext,$table,$primary) {
         // 리소스 경로 기반 저장 경로 만들기
         $basePath = Config::resourcePath() . "/{$table}/{$primary}";
 
@@ -20,11 +16,6 @@ class File {
                 Lib::error("디렉토리 생성 실패: {$basePath}");
             }
         }
-
-        // 원본 파일명과 확장자
-        $originalName = $file['name'];
-        $ext = pathinfo($originalName, PATHINFO_EXTENSION);
-        $filename = pathinfo($originalName, PATHINFO_FILENAME);
 
         // 저장 파일명 중복 방지로 고유값 사용
         $savedName = Lib::generateUniqueId() . '.' . $ext;
@@ -37,10 +28,53 @@ class File {
             Lib::error("파일 저장 실패");
         }
 
+        $src = '/' . str_replace(Config::$ROOT . '/', '', $targetPath);
+
+        return array(
+            "src"=>$src,
+            "path"=>$targetPath,
+            'rename'=>$savedName,
+            "save_position" => "local"
+        );
+    }
+
+    public static function cloudflare_save($file) {
+        Cloudflare::init();
+        $res = Cloudflare::saveImage($file);
+
+        if($res['code'] != 200) Lib::error("클라우드플레어 이미지 저장 실패");
+
+        return array(
+            "src" => $res['data']['result']['variants'][0],
+            "cloudflare_image_id" => $res['data']['result']['id'],
+            "save_position" => "cloudflare"
+        );
+    }
+
+    public static function save($file, $table,$obj, $primary = "") {
+        // 유효성 체크
+        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            Lib::error("업로드된 파일이 유효하지 않습니다.");
+        }
+
+        // 원본 파일명과 확장자
+        $originalName = $file['name'];
+        $ext = pathinfo($originalName, PATHINFO_EXTENSION);
+
         //파일에 대한 정보를 따로 담은 변수
         $uniqueKey = base64_encode(urlencode($file['name'] . '_' . $file['size']));
         $info = isset($obj[$uniqueKey]) ? $obj[$uniqueKey] : null;
-        
+
+        // 이미지 파일인지 체크
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+        $isImage = in_array(strtolower($ext), $imageExtensions);
+
+        if(Config::$Cloudflare_image_server && $isImage) {
+            $save_info = self::cloudflare_save($file);
+        }else {
+            $save_info = self::local_save($file,$ext,$table,$primary);
+        }
+
         //고정 저장 정보
         $fixed = array(
             'table_name'    => $table,
@@ -52,33 +86,37 @@ class File {
             'width'         => isset($info['width']) ? $info['width']
                 : (isset($obj['width']) ? $obj['width'] : null),
             'ext'           => $ext,
-            'src'           => '/' . str_replace(Config::$ROOT . '/', '', $targetPath),
-            'path'          => $targetPath,
-            'rename'        => $savedName,
         );
 
+        $fixed = array_merge($fixed, $save_info);
 
         // $obj 랑 합쳐서 저장 정보 반환
         return array_merge($obj, $fixed);
     }
 
     public static function delete($data) {
-        // 파일이 존재하면 삭제
-        if (file_exists($data['path'])) {
-            unlink($data['path']); // 파일 삭제
-        } else {
-            Lib::error("File > delete() : 파일이 존재하지않습니다.");
-        }
+        if($data['save_position'] === "cloudflare") {
+            $res = Cloudflare::deleteImage($data['cloudflare_image_id']);
 
-        $parentDir = dirname($data['path']);
+            if($res['code'] != 200) Lib::error("클라우드플레어 이미지 삭제 실패");
+        }else {
+            // 파일이 존재하면 삭제
+            if (file_exists($data['path'])) {
+                unlink($data['path']); // 파일 삭제
+            } else {
+                Lib::error("File > delete() : 파일이 존재하지않습니다.");
+            }
 
-        // 디렉토리가 비어있는지 확인 후 삭제
-        if (is_dir($parentDir)) {
-            $files = scandir($parentDir);
-            $files = array_diff($files, array('.', '..')); // 현재/상위 디렉토리 제외
+            $parentDir = dirname($data['path']);
 
-            if (empty($files)) {
-                rmdir($parentDir); // 디렉토리 비어있으면 삭제
+            // 디렉토리가 비어있는지 확인 후 삭제
+            if (is_dir($parentDir)) {
+                $files = scandir($parentDir);
+                $files = array_diff($files, array('.', '..')); // 현재/상위 디렉토리 제외
+
+                if (empty($files)) {
+                    rmdir($parentDir); // 디렉토리 비어있으면 삭제
+                }
             }
         }
     }

@@ -13,4 +13,6 @@ return [
     "ALERT"         =>  "origin",       // origin , swal
     'ENCRYPT'       =>  'md5',          // md5,sha256,sha512,hmac,gnuboard,ci4;
     "REWRITE"       =>  null,           // true,false null 일경우 환경에 맞게 자동으로 대응된다 ci = true , 나머지 false
+
+    "Cloudflare_image_server" => false,  // cloudflare 이미지 저장소 api를 사용한다면 true ? 파일 저장로직에 이미지들이 자동으로 cloudflare에 저장된다
 ];
