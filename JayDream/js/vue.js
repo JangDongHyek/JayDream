@@ -227,6 +227,7 @@ class JayDreamVue {
     }
 
     async resizeWithPica(originalFile, options = {}) {
+        if(!this.jd.image_resizing) return originalFile;
         const { scale = 0.7, quality = 0.8, maxFileSize = 50 * 1024 * 1024 } = options;
 
         // 파일 크기 체크

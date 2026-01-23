@@ -11,7 +11,6 @@ class App {
     public static $PLUGINS = array();
 
     function __construct() {
-        // JWT 쿠키 생성
         if(empty($_COOKIE['jd_jwt_token'])) {
             $payload = array(
                 "iss" => Config::$URL,
@@ -61,6 +60,7 @@ class App {
             echo Lib::js_obfuscate("var JayDream_domain = '".Config::$DOMAIN."';");
             echo Lib::js_obfuscate("var JayDream_dev = ".json_encode(Config::$DEV).";");     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
             echo Lib::js_obfuscate("var JayDream_alert = '".Config::$ALERT."';");
+            echo Lib::js_obfuscate("var JayDream_image_resizing = ".json_encode(Config::$JS_image_resizing).";");     // false 일때 빈값으로 들어가 jl 에러가 나와 encode처리
 
             //Vue 데이터 연동을 위한 변수
             echo Lib::js_obfuscate("var JayDream_data = {};");
@@ -103,6 +103,7 @@ class App {
             echo Lib::js_obfuscate("JayDream.api_iv = JayDream_api_iv;");
             echo Lib::js_obfuscate("JayDream.csrf_name = JayDream_csrf_name;");
             echo Lib::js_obfuscate("JayDream.csrf_value = JayDream_csrf_value;");
+            echo Lib::js_obfuscate("JayDream.image_resizing = JayDream_image_resizing;");
             $apiUrl = Config::$REWRITE ? 'api' : 'api.php';
             echo Lib::js_obfuscate("JayDream.api_url = '{$apiUrl}';");
             echo Lib::js_obfuscate("JayDream.plugin = new JayDreamPlugin(JayDream);");

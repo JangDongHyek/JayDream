@@ -130,11 +130,13 @@ class Lib {
 
     public static function jwtDecode($token) {
         try {
-            return true;
+
             $jwt = JWT::decode($token, Config::$PASSWORD, array('HS256'));
-            if ($jwt->iss !== Config::$URL) {
+
+            // 슬래시 제거하고 비교
+            if (rtrim($jwt->iss, '/') !== rtrim(Config::$URL, '/')) {
                 setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
-                Lib::error("JWT 발급자가 동일하지않습니다.");
+                Lib::error("JWT 발급자가 동일하지않습니다.\n새로고침을 해주세요.");
             }
             return $jwt;
         }catch (ExpiredException $e) {

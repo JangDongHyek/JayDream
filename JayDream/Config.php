@@ -26,6 +26,7 @@ class Config
     public static $ALERT;
     public static $ENCRYPT;
     public static $Cloudflare_image_server;
+    public static $JS_image_resizing;
 
 
     public static function init()
@@ -45,6 +46,7 @@ class Config
         self::$ALERT = $env['ALERT'];
         self::$ENCRYPT = $env['ENCRYPT'];
         self::$Cloudflare_image_server = $env['Cloudflare_image_server'];
+        self::$JS_image_resizing = $env['JS_image_resizing'];
 
 
         // 개발환경체크

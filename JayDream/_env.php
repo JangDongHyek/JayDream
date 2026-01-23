@@ -1,6 +1,6 @@
 <?php
 return [
-    'VERSION' => '4',
+    'VERSION' => '5',
     // DB
     'HOSTNAME' => 'localhost',
     'DATABASE' => 'exam',
@@ -15,4 +15,5 @@ return [
     "REWRITE"       =>  null,           // true,false null 일경우 환경에 맞게 자동으로 대응된다 ci = true , 나머지 false
 
     "Cloudflare_image_server" => false,  // cloudflare 이미지 저장소 api를 사용한다면 true ? 파일 저장로직에 이미지들이 자동으로 cloudflare에 저장된다
+    "JS_image_resizing" => false, // true 이면 image 업로드할때 vue.js/resizeWithPica() 함수 실행됌
 ];

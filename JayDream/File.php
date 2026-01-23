@@ -45,7 +45,9 @@ class File {
         if($res['code'] != 200) Lib::error("클라우드플레어 이미지 저장 실패");
 
         return array(
-            "src" => $res['data']['result']['variants'][0],
+            "src" => isset($res['data']['result']['variants'][1])
+                ? $res['data']['result']['variants'][1]
+                : (isset($res['data']['result']['variants'][0]) ? $res['data']['result']['variants'][0] : ''),
             "cloudflare_image_id" => $res['data']['result']['id'],
             "save_position" => "cloudflare"
         );
