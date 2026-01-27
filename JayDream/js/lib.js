@@ -80,7 +80,7 @@ class JayDreamLib {
     ajax(method,obj = {},url = "",options = {}) {
         if(!obj) new Error("obj 가 존재하지않습니다.");
 
-        if(!url) url = `/JayDream/${this.jd.api_url}`
+        if(!url) url = `/JayDream/api.php`
 
         return new Promise((resolve, reject) => {
             var object = this.copyObject(obj);
@@ -131,7 +131,6 @@ class JayDreamLib {
             }
 
             let objects = {_method : method};
-            if(this.jd.csrf_value) objects[this.jd.csrf_name] = this.jd.csrf_value;
             objects = this.processObject(objects,object,'obj');
             objects = this.processObject(objects,options,'options');
 
@@ -373,13 +372,13 @@ class JayDreamLib {
 
     createModalObject(id = "",class_1 = "",class_2 = "") {
         return {
-                id : id, // modal의 id값을 설정합니다 빈값이라면 고유값을 랜덤으로 생성해 지정합니다
-                class_1: class_1, // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
-                class_2: class_2, // modal-dialog 부분에 클래스를 추가합니다
-                status: false,
-                table : "",
-                primary : "",
-                row : null,
+            id : id, // modal의 id값을 설정합니다 빈값이라면 고유값을 랜덤으로 생성해 지정합니다
+            class_1: class_1, // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
+            class_2: class_2, // modal-dialog 부분에 클래스를 추가합니다
+            status: false,
+            table : "",
+            primary : "",
+            row : null,
         };
     }
 

@@ -196,7 +196,7 @@ class JayDreamTableAPI {
             if (options.page) this.filter.paging.page = options.page;
             if (options.file) this.filter.file_db = options.file;
 
-            const res = await this.jd.lib.ajax("get", this.filter, `/JayDream/${this.jd.api_url}`, options);
+            const res = await this.jd.lib.ajax("get", this.filter, `/JayDream/api.php`, options);
             const data = Array.isArray(res.data) ? res.data : [];
 
             if (this.filter.paging) {
@@ -232,7 +232,7 @@ class JayDreamTableAPI {
             if (options.page) this.filter.paging.page = options.page;
             if (options.file) this.filter.file_db = options.file;
 
-            const res = this.jd.lib.ajax("get", this.filter, `/JayDream/${this.jd.api_url}`, options);
+            const res = this.jd.lib.ajax("get", this.filter, `/JayDream/api.php`, options);
             const data = Array.isArray(res.data) ? res.data : [];
 
             if (this.filter.paging) {
@@ -262,7 +262,7 @@ class JayDreamTableAPI {
 
     async post(data, options = {}) {
         let method = data.primary ? 'update' : 'insert';
-        let url = `/JayDream/${this.jd.api_url}`;
+        let url = `/JayDream/api.php`;
         options.component_name = this.component_name;
 
         try {
@@ -315,7 +315,7 @@ class JayDreamTableAPI {
             if (!data['$table'] && !options.table) throw new Error("테이블값이 존재하지않습니다.");
             options.table = data['$table'];
 
-            let res = await this.jd.lib.ajax("remove", data, `/JayDream/${this.jd.api_url}`, options);
+            let res = await this.jd.lib.ajax("remove", data, `/JayDream/api.php`, options);
 
             if (options.return) return res;
 
@@ -332,7 +332,7 @@ class JayDreamTableAPI {
     }
 
     async whereUpdate(update_column, options = {}) {
-        let url = `/JayDream/${this.jd.api_url}`;
+        let url = `/JayDream/api.php`;
         options.component_name = this.component_name;
 
         try {
@@ -369,7 +369,7 @@ class JayDreamTableAPI {
     }
 
     async whereDelete(filter, options = {}) {
-        let url = `/JayDream/${this.jd.api_url}`;
+        let url = `/JayDream/api.php`;
         options.component_name = this.component_name;
 
         try {

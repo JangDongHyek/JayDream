@@ -13,10 +13,8 @@ class Config
     public static $DOMAIN = "";
     public static $connect = null;
     public static $framework = "";
-    public static $csrf = false;
 
     //_env.php 에 설정하는 변수
-    public static $REWRITE;
     public static $DEV_IPS;
     public static $HOSTNAME;
     public static $DATABASE;
@@ -28,6 +26,8 @@ class Config
     public static $Cloudflare_image_server;
     public static $JS_image_resizing;
 
+    public static $ci3_config;
+
 
     public static function init()
     {
@@ -36,7 +36,6 @@ class Config
         if (!file_exists($envFile)) Lib::error("_env.php 파일이 존재하지않습니다.");
         $env = require $envFile;
         self::$VERSION = $env['VERSION'];
-        self::$REWRITE = $env['REWRITE'];
         self::$DEV_IPS = $env['DEV_IPS'];
         self::$HOSTNAME = $env['HOSTNAME'];
         self::$DATABASE = $env['DATABASE'];
@@ -55,27 +54,18 @@ class Config
         // DB 체크
         self::initConnect();
 
-        // 프레임워크 환경 체크
-        self::getFramework();
-
-        //CI csrf 체크
-        self::detectCSRF();
-
-        // 루트 및 URL 설정
-        if(self::$framework == "ci3" || self::$framework == "ci4") {
-            self::$ROOT = FCPATH;
-            self::$URL = base_url();
-        }else {
-            self::$ROOT = dirname(__DIR__);
-            $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
-            $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-            if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
-                $host = preg_replace('/:[0-9]+$/', '', $host);
-            self::$URL = $http . $host . '/';
-        }
+        self::$ROOT = dirname(__DIR__);
+        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+        if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
+            $host = preg_replace('/:[0-9]+$/', '', $host);
+        self::$URL = $http . $host . '/';
 
         // 도메인 구하기
         self::$DOMAIN = preg_replace('/^www\./i', '', parse_url(self::$URL, PHP_URL_HOST));
+
+        // 프레임워크 환경 체크
+        self::getFramework();
 
 
 
@@ -88,10 +78,6 @@ class Config
             self::createTableFromSchema("jd_file",$schema);
         }
 
-        // api 주소 관련 라우팅 및 rewrite 체크
-        if (self::$REWRITE === null) {
-            self::$REWRITE = in_array(self::$framework, ['ci3', 'ci4']);
-        }
     }
 
     public static function resourcePath()
@@ -209,19 +195,21 @@ class Config
     {
         if (self::$framework) return self::$framework;
 
-        // Laravel 감지
-        if (defined('LARAVEL_START') || class_exists('\Illuminate\Foundation\Application')) {
-            self::$framework = 'laravel';
-        }
-
-        // CodeIgniter 4 감지 (네임스페이스 기반)
-        elseif (class_exists('\CodeIgniter\CodeIgniter')) {
+        // CodeIgniter 4 감지 (폴더 구조)
+        if (
+            file_exists(self::$ROOT . '/app/Config/App.php') ||
+            (is_dir(self::$ROOT . '/app') && file_exists(self::$ROOT . '/spark'))
+        ) {
             self::$framework = 'ci4';
         }
 
-        // CodeIgniter 3 감지 (클래식 구조)
-        elseif (defined('BASEPATH') && class_exists('CI_Controller')) {
+        // CodeIgniter 3 감지 (application 폴더 구조로 확인)
+        elseif (
+            file_exists(self::$ROOT . '/application/config/config.php') ||
+            (is_dir(self::$ROOT . '/application') && file_exists(self::$ROOT . '/index.php'))
+        ) {
             self::$framework = 'ci3';
+            self::loadCI3Config(); // 추가
         }
 
         // GNUBoard 감지 (common.php 없이도 구조만 보고 판단)
@@ -240,49 +228,19 @@ class Config
         return self::$framework;
     }
 
-    private static function detectCSRF() {
-        if(self::$framework == "ci3") {
-            $CI =& get_instance();
-            $config = $CI->config->item('csrf_protection');
-            self::$csrf = ($config === TRUE);
-        }else if(self::$framework == "ci4") {
-            $filters = config('Filters');
-            $globalBefore = $filters->globals['before'] ?? [];
-            if (in_array('csrf', $globalBefore)) {
-                self::$csrf = true;
+    private static function loadCI3Config()
+    {
+        $config_path = self::$ROOT . '/application/config/config.php';
+        if (file_exists($config_path)) {
+            // BASEPATH 정의해서 CI3 config 파일 접근 허용
+            if (!defined('BASEPATH')) {
+                define('BASEPATH', self::$ROOT . '/system/');
             }
 
-            $security = config('Security');
-            self::$csrf = ($security->csrfProtection !== false);
-        }else {
-            self::$csrf = false;
+            $config = [];
+            include $config_path;
+            self::$ci3_config = $config;
         }
-    }
-
-    public static function getCSRF() {
-        if(self::$csrf) {
-            if(self::$framework == "ci3") {
-                $CI =& get_instance();
-                $tokenName  = $CI->security->get_csrf_token_name();
-                $tokenValue = $CI->security->get_csrf_hash();
-            }else if(self::$framework == "ci4") {
-                $security = \Config\Services::security();
-                $tokenName  = $security->getCSRFTokenName();
-                $tokenValue = $security->getCSRFHash();
-            }else {
-                $tokenName  = "미개발";
-                $tokenValue = "미개발";
-            }
-        }else {
-            $tokenName  = "사용안함";
-            $tokenValue = "";
-        }
-
-
-        return array(
-            "name" => $tokenName,
-            "value" => $tokenValue
-        );
     }
 }
 

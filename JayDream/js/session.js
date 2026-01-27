@@ -4,6 +4,11 @@ class JayDreamSession {
     }
 
     async get(key) {
+        // key가 없으면 all() 반환
+        if (key === undefined || key === null) {
+            return await this.all();
+        }
+
         let payload = {};
 
         if (Array.isArray(key)) {
@@ -22,7 +27,7 @@ class JayDreamSession {
         const res = await this.jd.lib.ajax(
             "session_get",
             payload,
-            `/JayDream/${this.jd.api_url}`
+            `/JayDream/api.php`
         );
 
         return res.sessions;
@@ -56,7 +61,7 @@ class JayDreamSession {
         }
 
         // 통신
-        await this.jd.lib.ajax("session_set", payload, `/JayDream/${this.jd.api_url}`);
+        await this.jd.lib.ajax("session_set", payload, `/JayDream/api.php`);
 
         return true; // 성공 시 true 반환
     }
@@ -65,7 +70,7 @@ class JayDreamSession {
         const res = await this.jd.lib.ajax(
             "session_all",
             {},
-            `/JayDream/${this.jd.api_url}`
+            `/JayDream/api.php`
         );
 
         return res.sessions;
