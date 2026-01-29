@@ -3,20 +3,144 @@ class JayDreamAPI {
         this.jd = jd;
     }
 
-    table(name,component_name = null) {
-        return new JayDreamTableAPI(this.jd, name,component_name);
+    table(name, component_name = null) {
+        return new JayDreamTableAPI(this.jd, name, component_name);
     }
 }
 
-class JayDreamTableAPI {
-    constructor(jd, tableName,component_name) {
+// 🔥 공통 필터 메서드를 가진 베이스 클래스
+class JayDreamFilterBase {
+    constructor(jd, filter) {
         this.jd = jd;
-        this.currentTable = tableName;
-        this.currentBlock = null;
-        this.component_name = component_name;
+        this.filter = filter;
+    }
 
-        // 🔥 완전 독립 필터
-        this.filter = {
+    where(...args) {
+        const defaults = {
+            column: null,
+            value: null,
+            logical: "AND",
+            operator: "=",
+            encrypt: false,
+            as: null
+        };
+
+        const params = this.jd.lib.args(defaults, ...args);
+        const { column, value, logical, operator, encrypt, as } = params;
+
+        if (!column) return this;
+
+        // LIKE 자동 처리
+        let processedValue = value;
+        if (operator.toLowerCase() === "like") {
+            if (processedValue && !processedValue.includes("%")) {
+                processedValue = `%${processedValue}%`;
+            }
+        }
+
+        // as 기준으로 찾기
+        const searchKey = as || column;
+        let existing = this.filter.where.find(w => (w.as || w.column) === searchKey);
+
+        // value가 빈값이고 기존 조건이 있음 → 삭제
+        if (!processedValue && existing) {
+            const idx = this.filter.where.indexOf(existing);
+            if (idx !== -1) this.filter.where.splice(idx, 1);
+            return this;
+        }
+
+        // value가 빈값이고 기존도 없음 → 아무것도 하지 않음
+        if (!processedValue && !existing) return this;
+
+        // 기존 조건이 있으므로 업데이트
+        if (existing) {
+            existing.column = column;  // 🔥 추가
+            existing.value = processedValue;
+            existing.logical = logical;
+            existing.operator = operator;
+            existing.encrypt = encrypt;
+            if (as) existing.as = as;
+            return this;
+        }
+
+        // 새로운 조건 추가
+        const whereObj = {
+            column,
+            value: processedValue,
+            logical,
+            operator,
+            encrypt
+        };
+
+        if (as) whereObj.as = as;
+        this.filter.where.push(whereObj);
+
+        return this;
+    }
+
+    join(table, base, options = {}) {
+        let obj = {
+            table: table,
+            base: base,
+            foreign: options.foreign || "",
+            type: options.type || "LEFT",
+            select_column: options.select_column || "*",
+            as: options.as || "",
+        };
+
+        if (options.on) obj.on = options.on;
+        this.filter.joins.push(obj);
+        return this;
+    }
+
+    orderBy(column, value = "DESC", priority = 0) {
+        this.filter.order_by[priority] = { column, value };
+        this.filter.order_by = this.filter.order_by.filter(item => item != null);
+        return this;
+    }
+
+    between(column, start, end, logical = "and") {
+        this.filter.between.push({
+            column: column,
+            start: start,
+            end: end,
+            logical: logical,
+        });
+        return this;
+    }
+
+    in(column, values, logical = "AND") {
+        // 빈 배열이면 기존 조건 제거
+        if (!values || values.length === 0) {
+            const index = this.filter.in.findIndex(item => item.column === column);
+            if (index > -1) {
+                this.filter.in.splice(index, 1);
+            }
+            return this;
+        }
+
+        // 기존에 같은 컬럼의 in 조건이 있는지 확인
+        let existing = this.filter.in.find(item => item.column === column);
+
+        if (existing) {
+            existing.value = values;
+            existing.logical = logical;
+        } else {
+            this.filter.in.push({
+                column: column,
+                value: values,
+                logical: logical
+            });
+        }
+
+        return this;
+    }
+}
+
+// 🔥 TableAPI - 베이스 클래스 상속
+class JayDreamTableAPI extends JayDreamFilterBase {
+    constructor(jd, tableName, component_name) {
+        const filter = {
             table: tableName,
             where: [],
             joins: [],
@@ -32,6 +156,12 @@ class JayDreamTableAPI {
                 last: 0,
             }
         };
+
+        super(jd, filter);
+
+        this.currentTable = tableName;
+        this.currentBlock = null;
+        this.component_name = component_name;
     }
 
     where_set(column, value, logical = "AND", operator = "=", encrypt = false) {
@@ -53,19 +183,19 @@ class JayDreamTableAPI {
             target = this.filter.where;
         }
 
-        // 🔥 CASE 1: value가 빈값이고 기존 조건이 있음 → 삭제
+        // CASE 1: value가 빈값이고 기존 조건이 있음 → 삭제
         if (!value && existing) {
             const idx = target.indexOf(existing);
             if (idx !== -1) target.splice(idx, 1);
-            return false; // 추가 안 함
+            return false;
         }
 
-        // 🔥 CASE 2: value가 빈값이고 기존도 없음 → 아무것도 하지 않음
+        // CASE 2: value가 빈값이고 기존도 없음 → 아무것도 하지 않음
         if (!value && !existing) {
             return false;
         }
 
-        // 🔥 CASE 3: 기존 조건이 있으므로 업데이트
+        // CASE 3: 기존 조건이 있으므로 업데이트
         if (existing) {
             existing.value = value;
             existing.logical = logical;
@@ -74,7 +204,7 @@ class JayDreamTableAPI {
             return false;
         }
 
-        // 🔥 CASE 4: 새로운 조건 추가
+        // CASE 4: 새로운 조건 추가
         return {
             column,
             value,
@@ -84,31 +214,14 @@ class JayDreamTableAPI {
         };
     }
 
-    where(column, value, logical = "AND", operator = "=", encrypt = false) {
-        let obj = this.where_set(column, value, logical, operator, encrypt);
-
-        if (!obj) return this;
-
-        // currentBlock이 있으면 block의 where에 추가
-        if (this.currentBlock) {
-            this.currentBlock.where.push(obj);
-        } else {
-            // 없으면 기존처럼 filter.where에 추가
-            this.filter.where.push(obj);
-        }
-
-        return this;
-    }
-
     async blockStart(keyword, logical = "AND") {
         if (this.currentBlock) {
             await this.jd.lib.alert('api.js blockStart가 중복되었습니다.');
             return false;
         }
-        // 1. keyword가 같은 block 찾기
+
         let block = this.filter.blocks.find(b => b.keyword === keyword);
 
-        // 2. 없으면 새로 만들어서 추가
         if (!block) {
             block = {
                 keyword: keyword,
@@ -118,9 +231,7 @@ class JayDreamTableAPI {
             this.filter.blocks.push(block);
         }
 
-        // 3. 현재 작업 중인 block으로 설정
         this.currentBlock = block;
-
         return this;
     }
 
@@ -130,17 +241,14 @@ class JayDreamTableAPI {
     }
 
     blockWhere(keyword, column, value, logical = "AND", operator = "=", encrypt = false) {
-        // 1. keyword가 같은 block 찾기
         let block = this.filter.blocks.find(b => b.keyword === keyword);
 
-        // 2. 없으면 새로 만들어서 추가
         if (!block) {
             block = {
                 keyword: keyword,
                 logical: "AND",
                 where: []
             };
-
             this.filter.blocks.push(block);
         }
 
@@ -149,42 +257,6 @@ class JayDreamTableAPI {
         if (!where_obj) return this;
 
         block.where.push(where_obj);
-
-        // 3. 해당 block 반환
-        return this;
-    }
-
-    between(column, start, end, logical = "and") {
-        this.filter.between.push({
-            column: column,     // 컬럼 || 함수
-            start: start,       // 시간 || 컬럼
-            end: end,           // 시간 || 컬럼
-            logical: logical,
-        });
-
-        return this;
-    }
-
-    join(table, base, options = {}) {
-        let obj = {
-            table: table,
-            base: base,
-            foreign: options.foreign || "",
-            type: options.type || "LEFT",
-            select_column: options.select_column || "*",
-            as: options.as || "",
-        }
-
-        if (options.on) obj.on = options.on;
-
-        this.filter.joins.push(obj);
-
-        return this;
-    }
-
-    orderBy(column, value = "DESC", priority = 0) {
-        this.filter.order_by[priority] = { column: column, value: value };
-        this.filter.order_by = this.filter.order_by.filter(item => item != null);
         return this;
     }
 
@@ -204,13 +276,10 @@ class JayDreamTableAPI {
                 this.filter.paging.last = Math.ceil(this.filter.paging.count / this.filter.paging.limit);
             }
 
-            // ✅ Vue 반응성 대응 (배열 / 객체 자동 갱신)
             if (bind) {
                 if (Array.isArray(bind)) {
-                    // 배열이면 splice로 갱신
                     bind.splice(0, bind.length, ...data);
                 } else if (typeof bind === "object" && bind !== null) {
-                    // 객체면 Object.assign으로 병합
                     Object.assign(bind, data[0] || {});
                 }
             }
@@ -240,13 +309,10 @@ class JayDreamTableAPI {
                 this.filter.paging.last = Math.ceil(this.filter.paging.count / this.filter.paging.limit);
             }
 
-            // ✅ Vue 반응성 대응 (배열 / 객체 자동 갱신)
             if (bind) {
                 if (Array.isArray(bind)) {
-                    // 배열이면 splice로 갱신
                     bind.splice(0, bind.length, ...data);
                 } else if (typeof bind === "object" && bind !== null) {
-                    // 객체면 Object.assign으로 병합
                     Object.assign(bind, data[0] || {});
                 }
             }
@@ -403,5 +469,69 @@ class JayDreamTableAPI {
         } catch (e) {
             await this.jd.plugin.alert(e.message);
         }
+    }
+
+    relations(table, as = '') {
+        if (!table) return null;
+
+        as = as || table;
+
+        if (!Array.isArray(this.filter.relations)) {
+            this.filter.relations = [];
+        }
+
+        let existing = this.filter.relations.find(r => r.as === as);
+
+        if (existing) {
+            return new JayDreamRelationAPI(this, existing);
+        }
+
+        let relation = {
+            table: table,
+            as: as,
+        };
+
+        this.filter.relations.push(relation);
+
+        return new JayDreamRelationAPI(this, relation);
+    }
+}
+
+// 🔥 RelationAPI - 베이스 클래스 상속
+class JayDreamRelationAPI extends JayDreamFilterBase {
+    constructor(parentTableAPI, relation) {
+        // relation 초기화
+        if (!relation.where) relation.where = [];
+        if (!relation.joins) relation.joins = [];
+        if (!relation.order_by) relation.order_by = [];
+        if (!relation.between) relation.between = [];
+        if (!relation.relations) relation.relations = [];
+        if (!relation.in) relation.in = [];
+
+        super(parentTableAPI.jd, relation);
+
+        this.parentTableAPI = parentTableAPI;
+        this.relation = relation;
+    }
+
+    // 재귀적 relations
+    relations(table, as = '') {
+        if (!table) return null;
+        as = as || table;
+
+        let existing = this.relation.relations.find(r => r.as === as);
+
+        if (existing) {
+            return new JayDreamRelationAPI(this.parentTableAPI, existing);
+        }
+
+        let newRelation = {
+            table: table,
+            as: as,
+        };
+
+        this.relation.relations.push(newRelation);
+
+        return new JayDreamRelationAPI(this.parentTableAPI, newRelation);
     }
 }
