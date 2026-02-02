@@ -610,7 +610,10 @@ class Model {
 
     function update($_param){
         $param = $this->escape($_param);
-        if($param['primary']) $param[$this->primary] = $param['primary'];
+
+        if(isset($param['primary']) && $param['primary']) {
+            $param[$this->primary] = $param['primary'];
+        }
 
 
         if(!isset($param[$this->primary])) Lib::error("Model update() : 고유 키 값이 존재하지 않습니다.");
@@ -678,7 +681,9 @@ class Model {
     function whereUpdate($_param){
         $param = $this->escape($_param);
 
-        if($param['primary']) $param[$this->primary] = $param['primary'];
+        if(isset($param['primary']) && $param['primary']) {
+            $param[$this->primary] = $param['primary'];
+        }
 
         $update_sql = "";
         foreach($param as $key => $value){
@@ -712,14 +717,16 @@ class Model {
 
         $this->init();
 
-        return array("sql" => $sql,"primary" => $param[$this->primary]);
+        return array("sql" => $sql);
     }
 
     function delete($_param){
 
         $param = $this->escape($_param);
 
-        if($param['primary']) $param[$this->primary] = $param['primary'];
+        if(isset($param['primary']) && $param['primary']) {
+            $param[$this->primary] = $param['primary'];
+        }
 
         if(!isset($param[$this->primary])) Lib::error("Model delete() : 고유 키 값이 존재하지 않습니다.");
 

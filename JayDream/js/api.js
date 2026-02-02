@@ -417,7 +417,7 @@ class JayDreamTableAPI extends JayDreamFilterBase {
 
             if (options.url) url = options.url;
 
-            let res = await this.jd.lib.ajax("where_update", update_column, url, options);
+            let res = await this.jd.lib.ajax("where_update", update_column, url, this.filter);
 
             if (options.return) return res;
 
