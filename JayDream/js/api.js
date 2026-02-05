@@ -26,7 +26,7 @@ class JayDreamFilterBase {
         };
 
         const params = this.jd.lib.args(defaults, ...args);
-        const { column, value, logical, operator, encrypt, as } = params;
+        let { column, value, logical, operator, encrypt, as } = params;
 
         if (!column) return this;
 
@@ -38,23 +38,54 @@ class JayDreamFilterBase {
             }
         }
 
-        // as 기준으로 찾기
+        // 🔥 currentBlock이 있을 때 처리
+        if (this.currentBlock) {
+            let existing = this.currentBlock.where.find(w => w.column === column);
+
+            // value가 빈값이고 기존 조건이 있음 → 삭제
+            if (!processedValue && existing) {
+                const idx = this.currentBlock.where.indexOf(existing);
+                if (idx !== -1) this.currentBlock.where.splice(idx, 1);
+                return this;
+            }
+
+            // value가 빈값이고 기존도 없음 → 무시
+            if (!processedValue && !existing) return this;
+
+            // 기존 조건이 있으므로 업데이트
+            if (existing) {
+                existing.value = processedValue;
+                existing.logical = logical;
+                existing.operator = operator;
+                existing.encrypt = encrypt;
+                return this;
+            }
+
+            // 새로운 조건 추가
+            this.currentBlock.where.push({
+                column,
+                value: processedValue,
+                logical,
+                operator,
+                encrypt
+            });
+            return this;
+        }
+
+        // 🔥 일반 where 처리 (기존 로직)
         const searchKey = as || column;
         let existing = this.filter.where.find(w => (w.as || w.column) === searchKey);
 
-        // value가 빈값이고 기존 조건이 있음 → 삭제
         if (!processedValue && existing) {
             const idx = this.filter.where.indexOf(existing);
             if (idx !== -1) this.filter.where.splice(idx, 1);
             return this;
         }
 
-        // value가 빈값이고 기존도 없음 → 아무것도 하지 않음
         if (!processedValue && !existing) return this;
 
-        // 기존 조건이 있으므로 업데이트
         if (existing) {
-            existing.column = column;  // 🔥 추가
+            existing.column = column;
             existing.value = processedValue;
             existing.logical = logical;
             existing.operator = operator;
@@ -63,7 +94,6 @@ class JayDreamFilterBase {
             return this;
         }
 
-        // 새로운 조건 추가
         const whereObj = {
             column,
             value: processedValue,
@@ -75,6 +105,36 @@ class JayDreamFilterBase {
         if (as) whereObj.as = as;
         this.filter.where.push(whereObj);
 
+        return this;
+    }
+
+    // 🔥 blockStart 추가
+    async blockStart(keyword, logical = "AND") {
+        if (this.currentBlock) {
+            await this.jd.lib.alert('api.js blockStart가 중복되었습니다.');
+            return false;
+        }
+
+        if (!this.filter.blocks) this.filter.blocks = [];
+
+        let block = this.filter.blocks.find(b => b.keyword === keyword);
+
+        if (!block) {
+            block = {
+                keyword: keyword,
+                logical: logical,
+                where: []
+            };
+            this.filter.blocks.push(block);
+        }
+
+        this.currentBlock = block;
+        return this;
+    }
+
+    // 🔥 blockEnd 추가
+    blockEnd() {
+        this.currentBlock = null;
         return this;
     }
 
@@ -160,104 +220,7 @@ class JayDreamTableAPI extends JayDreamFilterBase {
         super(jd, filter);
 
         this.currentTable = tableName;
-        this.currentBlock = null;
         this.component_name = component_name;
-    }
-
-    where_set(column, value, logical = "AND", operator = "=", encrypt = false) {
-        // LIKE 자동 처리
-        if (operator.toLowerCase() === "like") {
-            if (value && !value.includes("%")) {
-                value = `%${value}%`;
-            }
-        }
-
-        let existing = null;
-        let target = null;
-
-        if (this.currentBlock) {
-            existing = this.currentBlock.where.find(w => w.column === column);
-            target = this.currentBlock.where;
-        } else {
-            existing = this.filter.where.find(w => w.column === column);
-            target = this.filter.where;
-        }
-
-        // CASE 1: value가 빈값이고 기존 조건이 있음 → 삭제
-        if (!value && existing) {
-            const idx = target.indexOf(existing);
-            if (idx !== -1) target.splice(idx, 1);
-            return false;
-        }
-
-        // CASE 2: value가 빈값이고 기존도 없음 → 아무것도 하지 않음
-        if (!value && !existing) {
-            return false;
-        }
-
-        // CASE 3: 기존 조건이 있으므로 업데이트
-        if (existing) {
-            existing.value = value;
-            existing.logical = logical;
-            existing.operator = operator;
-            existing.encrypt = encrypt;
-            return false;
-        }
-
-        // CASE 4: 새로운 조건 추가
-        return {
-            column,
-            value,
-            logical,
-            operator,
-            encrypt,
-        };
-    }
-
-    async blockStart(keyword, logical = "AND") {
-        if (this.currentBlock) {
-            await this.jd.lib.alert('api.js blockStart가 중복되었습니다.');
-            return false;
-        }
-
-        let block = this.filter.blocks.find(b => b.keyword === keyword);
-
-        if (!block) {
-            block = {
-                keyword: keyword,
-                logical: logical,
-                where: []
-            };
-            this.filter.blocks.push(block);
-        }
-
-        this.currentBlock = block;
-        return this;
-    }
-
-    blockEnd() {
-        this.currentBlock = null;
-        return this;
-    }
-
-    blockWhere(keyword, column, value, logical = "AND", operator = "=", encrypt = false) {
-        let block = this.filter.blocks.find(b => b.keyword === keyword);
-
-        if (!block) {
-            block = {
-                keyword: keyword,
-                logical: "AND",
-                where: []
-            };
-            this.filter.blocks.push(block);
-        }
-
-        let where_obj = this.where_set(column, value, logical, operator, encrypt);
-
-        if (!where_obj) return this;
-
-        block.where.push(where_obj);
-        return this;
     }
 
     async get(bind, options = {}) {

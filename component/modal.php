@@ -3,7 +3,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 ?>
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div v-if="load">
-        <external-bs-modal v-model="modelValue" @update:modelValue="value => $emit('update:modelValue', value)">
+        <external-bs-modal v-model="modal">
             <template v-slot:header>
                 <h5 class="modal-title" id="exampleModalLabel">데이터 입력</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -61,7 +61,14 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             computed: {
-
+                modal: {
+                    get() {
+                        return this.modelValue;
+                    },
+                    set(value) {
+                        this.$emit('update:modelValue', value);
+                    }
+                }
             },
             watch: {
                 async "modelValue.status"(value, old_value) {
