@@ -2,7 +2,7 @@
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div>
         <div class="modal fade" :class="modelValue.class_1" :id="component_idx" tabindex="-1" :aria-hidden="!modelValue.status">
-            <div class="modal-dialog modal-dialog-centered" :class="modelValue.class_2">
+            <div class="modal-dialog modal-dialog-centered" :class="modelValue.class_2" :style="modelValue.width ? { width: /[a-z%]/.test(modelValue.width) ? modelValue.width : modelValue.width + 'px' } : {}">
                 <template v-if="modelValue.status">
                     <div class="modal-content">
                         <div class="modal-header" v-if="$slots.header">

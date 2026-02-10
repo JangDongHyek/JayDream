@@ -92,16 +92,16 @@ class JayDreamLib {
 
                     if(typeof object[req.name] === "string") {
                         if(object[req.name].trim() == "") {
-                            reject(new Error(req.message));
+                            this.jd.lib.alert(req.message);
                             return false;
                         }
 
                         if (req.min && object[req.name].length < req.min.length) {
-                            reject(new Error(`${req.min.message}`));
+                            this.jd.lib.alert(`${req.min.message}`);
                             return false;
                         }
                         if (req.max && object[req.name].length > req.max.length) {
-                            reject(new Error(`${req.max.message}`));
+                            this.jd.lib.alert(`${req.max.message}`);
                             return false;
                         }
                     }
@@ -112,18 +112,18 @@ class JayDreamLib {
 
                     if (typeof object[req.name] === "boolean") {
                         if(!object[req.name]) {
-                            reject(new Error(req.message));
+                            this.jd.lib.alert(req.message);
                             return false;
                         }
                     }
 
                     if(Array.isArray(object[req.name])) {
                         if (req.min && object[req.name].length < req.min.length) {
-                            reject(new Error(`${req.min.message}`));
+                            this.jd.lib.alert(`${req.min.message}`);
                             return false;
                         }
                         if (req.max && object[req.name].length > req.max.length) {
-                            reject(new Error(`${req.max.message}`));
+                            this.jd.lib.alert(`${req.max.message}`);
                             return false;
                         }
                     }
@@ -176,11 +176,11 @@ class JayDreamLib {
                                     }
                                     resolve(jsonResponse);
                                 } catch (error) {
-                                    reject(error); // This will propagate to apiDownload's catch
+                                    _this.jd.lib.alert(error); // This will propagate to apiDownload's catch
                                 }
                             };
                             reader.onerror = function() {
-                                reject(new Error("xhr 파일 변환 실패"));
+                                _this.jd.lib.alert("xhr 파일 변환 실패");
                             };
                             reader.readAsText(xhr.response);
                             return; // Stop further processing
@@ -208,20 +208,20 @@ class JayDreamLib {
                                     message += `${res.file_2} : ${res.line_2} Line\n`;
                                 }
                             }
-                            reject(new Error(message));
+                            _this.jd.lib.alert(message);
                         }
                     }
                     _this.log(res,options.component_name,method);
                     resolve(res);
 
                 } else {
-                    reject(new Error("xhr Status 200 아님"));
+                    _this.jd.lib.alert("xhr Status 200 아님");
                     console.log(xhr.statusText);
                 }
             };
 
             xhr.onerror = function () {
-                reject(new Error("xhr on error 발생"));
+                _this.jd.lib.alert("xhr on error 발생");
             };
 
             xhr.send(form);
@@ -370,16 +370,17 @@ class JayDreamLib {
         }
     }
 
-    createModalObject(id = "",class_1 = "",class_2 = "") {
-        return {
-            id : id, // modal의 id값을 설정합니다 빈값이라면 고유값을 랜덤으로 생성해 지정합니다
-            class_1: class_1, // modal fade 부분에 클래스를 추가합니다 ex) "one_class two_class"
-            class_2: class_2, // modal-dialog 부분에 클래스를 추가합니다
+    createModalObject(...args) {
+        return this.args({
+            id: "",
+            class_1: "",
+            class_2: "",
             status: false,
-            table : "",
-            primary : "",
-            row : null,
-        };
+            table: "",
+            primary: "",
+            row: null,
+            width : "",
+        }, ...args);
     }
 
     args(defaults, ...args) {
