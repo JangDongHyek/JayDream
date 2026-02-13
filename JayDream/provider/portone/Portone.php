@@ -60,4 +60,52 @@ class Portone {
 
         return $payment;
     }
+
+    public static function parseOrder($payment) {
+        return [
+            "status"            => $payment['status'] ?? '',
+            "id"                => $payment['id'] ?? '',
+            "transaction_id"    => $payment['transactionId'] ?? '',
+            "merchant_id"       => $payment['merchantId'] ?? '',
+            "store_id"          => $payment['storeId'] ?? '',
+            "method"            => isset($payment['method']) ? json_encode($payment['method'], JSON_UNESCAPED_UNICODE) : null,
+            "channel"           => isset($payment['channel']) ? json_encode($payment['channel'], JSON_UNESCAPED_UNICODE) : null,
+            "version"           => isset($payment['version']) ? json_encode($payment['version'], JSON_UNESCAPED_UNICODE) : null,
+            "webhooks"          => isset($payment['webhooks']) ? json_encode($payment['webhooks'], JSON_UNESCAPED_UNICODE) : null,
+            "customer"          => isset($payment['customer']) ? json_encode($payment['customer'], JSON_UNESCAPED_UNICODE) : null,
+            "requested_at"      => self::toDatetime($payment['requestedAt'] ?? null),
+            "updated_at"        => self::toDatetime($payment['updatedAt'] ?? null),
+            "status_changed_at" => self::toDatetime($payment['statusChangedAt'] ?? null),
+            "order_name"        => $payment['orderName'] ?? null,
+            "product"           => null, // 호출 시 별도 세팅
+            "amount_total"              => $payment['amount']['total'] ?? 0,
+            "amount_tax_free"           => $payment['amount']['taxFree'] ?? null,
+            "amount_vat"                => $payment['amount']['vat'] ?? null,
+            "amount_supply"             => $payment['amount']['supply'] ?? null,
+            "amount_discount"           => $payment['amount']['discount'] ?? null,
+            "amount_paid"               => $payment['amount']['paid'] ?? null,
+            "amount_cancelled"          => $payment['amount']['cancelled'] ?? null,
+            "amount_cancelled_tax_free" => $payment['amount']['cancelledTaxFree'] ?? null,
+            "currency"          => $payment['currency'] ?? null,
+            "promotion_id"      => $payment['promotionId'] ?? null,
+            "is_cultural_expense" => isset($payment['isCulturalExpense'])
+                ? ($payment['isCulturalExpense'] ? 1 : 0) : null,
+            "paid_at"           => self::toDatetime($payment['paidAt'] ?? null),
+            "pg_tx_id"          => $payment['pgTxId'] ?? null,
+            "pg_response"       => $payment['pgResponse'] ?? null,
+            "receipt_url"       => $payment['receiptUrl'] ?? null,
+            "cancellations"     => !empty($payment['cancellations'])
+                ? json_encode($payment['cancellations'], JSON_UNESCAPED_UNICODE) : null,
+            "cancelled_at"      => self::toDatetime($payment['cancelledAt'] ?? null),
+        ];
+    }
+
+    private static function toDatetime($iso) {
+        if (!$iso) return null;
+        try {
+            return (new \DateTime($iso))->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 }
