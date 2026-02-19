@@ -108,6 +108,86 @@ class JayDreamFilterBase {
         return this;
     }
 
+    field(expression) {
+        if (!this.filter.fields) this.filter.fields = [];
+        this.filter.fields.push(expression);
+        return this;
+    }
+
+    groupBy(...columns) {
+        if (!this.filter.group_bys) {
+            this.filter.group_bys = {
+                by: [],
+                selects: [],
+            };
+        }
+
+        // groupBy("payment.idx", "payment.code") 식으로 여러개 가능
+        columns.forEach(col => {
+            if (!this.filter.group_bys.by.includes(col)) {
+                this.filter.group_bys.by.push(col);
+            }
+        });
+
+        return this;
+    }
+
+    groupBySelect(...args) {
+        if (!this.filter.group_bys) {
+            this.filter.group_bys = { by: [], selects: [] };
+        }
+
+        const opts = this.jd.lib.args({
+            type: "SUM",   // SUM, COUNT, AVG, MAX, MIN
+            column: "",
+            as: "",
+        }, ...args);
+
+        if (!opts.column || !opts.as) return this;
+
+        let existing = this.filter.group_bys.selects.find(s => s.as === opts.as);
+        if (existing) {
+            existing.type = opts.type;
+            existing.column = opts.column;
+        } else {
+            this.filter.group_bys.selects.push({
+                type: opts.type,
+                column: opts.column,
+                as: opts.as,
+            });
+        }
+
+        return this;
+    }
+
+    having(...args) {
+        if (!this.filter.group_bys) return this;
+
+        if (!this.filter.group_bys.having) {
+            this.filter.group_bys.having = [];
+        }
+
+        const opts = this.jd.lib.args({
+            column: "",
+            value: "",
+            logical: "AND",
+            operator: "=",
+        }, ...args);
+
+        if (!opts.column) return this;
+
+        let existing = this.filter.group_bys.having.find(h => h.column === opts.column);
+        if (existing) {
+            existing.value = opts.value;
+            existing.logical = opts.logical;
+            existing.operator = opts.operator;
+        } else {
+            this.filter.group_bys.having.push(opts);
+        }
+
+        return this;
+    }
+
     // 🔥 blockStart 추가
     async blockStart(keyword, logical = "AND") {
         if (this.currentBlock) {
@@ -138,17 +218,35 @@ class JayDreamFilterBase {
         return this;
     }
 
-    join(table, base, options = {}) {
+    join(...args) {
+        const opts = this.jd.lib.args({
+            table: "",
+            base: "",
+            foreign: "",
+            type: "LEFT",
+            select_column: "*",
+            as: "",
+            on: undefined,
+        }, ...args);
+
+        // "* 아닐경우 문자열을 배열로 치환 'nick,age' < ['nick','age']"
+        if (opts.select_column !== "*") {
+            if (!Array.isArray(opts.select_column)) {
+                opts.select_column = opts.select_column.split(",").map(s => s.trim());
+            }
+        }
+
         let obj = {
-            table: table,
-            base: base,
-            foreign: options.foreign || "",
-            type: options.type || "LEFT",
-            select_column: options.select_column || "*",
-            as: options.as || "",
+            table: opts.table,
+            base: opts.base,
+            foreign: opts.foreign,
+            type: opts.type,
+            select_column: opts.select_column,
+            as: opts.as,
         };
 
-        if (options.on) obj.on = options.on;
+        if (opts.on) obj.on = opts.on;
+
         this.filter.joins.push(obj);
         return this;
     }

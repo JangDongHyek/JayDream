@@ -70,7 +70,7 @@ $componentName = str_replace(".php", "", basename(__FILE__));
                 }
             },
             computed: {
-                count() { return this.table.filter.paging.count ?? 0 },
+                count() { return this.table?.filter.paging.count ?? 0 },
                 limit() { return this.table.filter.paging.limit },
                 filter() { return this.table.filter },
             }

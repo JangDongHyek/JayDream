@@ -326,15 +326,23 @@ class Model {
         $this->group_bys = $object;
     }
 
-    function orderBy($column,$value) {
+    function orderBy($column, $value) {
         if (strpos($column, '.') !== false) {
-            list($table, $column) = explode('.', $column);
+            list($table, $col) = explode('.', $column);
         } else {
             $table = $this->table;
+            $col = $column;
         }
 
-        if($this->sql_order_by) $this->sql_order_by .= ",";
-        $this->sql_order_by .= " {$table}.{$column} {$value}";
+        // 테이블 스키마에 해당 컬럼이 없으면 table 없이 컬럼만
+        if (isset($this->schema[$table]['columns']) && !in_array($col, $this->schema[$table]['columns'])) {
+            $order = " {$col} {$value}";
+        } else {
+            $order = " {$table}.{$col} {$value}";
+        }
+
+        if ($this->sql_order_by) $this->sql_order_by .= ",";
+        $this->sql_order_by .= $order;
 
         return $this;
     }
