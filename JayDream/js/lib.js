@@ -380,6 +380,7 @@ class JayDreamLib {
             primary: "",
             row: null,
             width : "",
+            modal_body_style : "",
         }, ...args);
     }
 

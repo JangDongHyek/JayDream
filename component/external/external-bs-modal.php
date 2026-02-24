@@ -8,7 +8,7 @@
                         <div class="modal-header" v-if="$slots.header">
                             <slot name="header"></slot>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body" :style="modelValue.body_style">
                             <slot></slot>
                         </div>
                         <div class="modal-footer" v-if="$slots.footer">
