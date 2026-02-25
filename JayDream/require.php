@@ -7,6 +7,7 @@ require_once __DIR__ . '/Service.php';
 require_once __DIR__ . '/File.php';
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Http.php';
+require_once __DIR__ . '/Mail.php';
 require_once __DIR__ . '/lib/jwt/JWT.php';
 require_once __DIR__ . '/lib/jwt/ExpiredException.php';
 require_once __DIR__ . '/lib/jwt/BeforeValidException.php';
