@@ -549,4 +549,85 @@ class Lib {
         return $scheme . $host . $port . $path . $query;
     }
 
+    public static function issue_ssl(string $domain, string $webroot = '/var/www/html/sub'): array
+    {
+        // certbot 존재 여부 체크
+        exec('which certbot 2>&1', $which_output, $which_code);
+        if ($which_code !== 0) {
+            return [
+                'success' => false,
+                'output'  => 'certbot 미설치',
+            ];
+        }
+
+        // sudo cp 권한 체크
+        exec("sudo -n cp --version 2>&1", $cp_output, $cp_code);
+        if ($cp_code !== 0) {
+            return [
+                'success' => false,
+                'output'  => 'cp sudo 권한 없음',
+            ];
+        }
+
+        // sudo chmod 권한 체크
+        exec("sudo -n chmod --version 2>&1", $chmod_output, $chmod_code);
+        if ($chmod_code !== 0) {
+            return [
+                'success' => false,
+                'output'  => 'chmod sudo 권한 없음',
+            ];
+        }
+
+        $certbot = trim($which_output[0]);
+
+        // sudo 권한 체크
+        exec("sudo -n $certbot --version 2>&1", $perm_output, $perm_code);
+        if ($perm_code !== 0) {
+            return [
+                'success' => false,
+                'output'  => 'certbot sudo 권한 없음: ' . implode("\n", $perm_output),
+            ];
+        }
+
+        // webroot 경로 존재 여부 체크
+        if (!is_dir($webroot)) {
+            return [
+                'success' => false,
+                'output'  => "webroot 경로 없음: $webroot",
+            ];
+        }
+
+        $command = sprintf(
+            'sudo %s certonly --webroot -w %s -d %s --non-interactive --agree-tos -m jangdonghyek@gmail.com',
+            escapeshellarg($certbot),
+            escapeshellarg($webroot),
+            escapeshellarg($domain)
+        );
+
+        // 테스트 시 활성화
+        $command .= ' --staging';
+
+        // 강제 발급 시 활성화
+        $command .= ' --force-renewal';
+
+        $command .= ' 2>&1';
+
+        exec($command, $output, $return_code);
+
+        if ($return_code === 0) {
+            $tmp_full = "/tmp/fullchain_{$domain}.pem";
+            $tmp_priv = "/tmp/privkey_{$domain}.pem";
+            exec("sudo cp /etc/letsencrypt/live/{$domain}/fullchain.pem {$tmp_full}");
+            exec("sudo cp /etc/letsencrypt/live/{$domain}/privkey.pem {$tmp_priv}");
+            exec("sudo chmod 644 {$tmp_full} {$tmp_priv}");
+        }
+
+        return [
+            'success' => $return_code === 0,
+            'output'  => implode("\n", $output),
+            'fullchain' => $return_code === 0 ? $tmp_full : null,
+            'privkey'   => $return_code === 0 ? $tmp_priv : null,
+        ];
+    }
+
 }

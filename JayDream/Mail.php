@@ -20,6 +20,7 @@ class Mail
     private $cc = array();
     private $bcc = array();
     private $is_html = false;
+    private $attachments = array();
 
     private $error;
 
@@ -95,6 +96,30 @@ class Mail
         return $instance;
     }
 
+    /**
+     * 첨부파일 추가
+     * @param string $filepath 파일 실제 경로
+     * @param string $filename 메일에 표시될 파일명 (생략 시 basename 사용)
+     */
+    public static function attach($filepath, $filename = '')
+    {
+        $instance = self::getInstance();
+
+        if (!file_exists($filepath)) {
+            $instance->error = "첨부파일 없음: $filepath";
+            return $instance;
+        }
+
+        $instance->attachments[] = array(
+            'path'     => $filepath,
+            'filename' => $filename ?: basename($filepath),
+            'mime'     => mime_content_type($filepath) ?: 'application/octet-stream',
+            'data'     => base64_encode(file_get_contents($filepath)),
+        );
+
+        return $instance;
+    }
+
     /* -------- execution -------- */
     public static function send()
     {
@@ -109,10 +134,7 @@ class Mail
         // 필수 값 체크
         if (!$this->from_email || !$this->to_email || !$this->title || !$this->content) {
             $this->error = '필수 항목이 누락되었습니다 (from, to, title, content)';
-            return array(
-                'success' => false,
-                'error' => $this->error
-            );
+            return array('success' => false, 'error' => $this->error);
         }
 
         // SMTP 연결
@@ -174,12 +196,7 @@ class Mail
         }
 
         // RCPT TO
-        $recipients = array_merge(
-            array($this->to_email),
-            $this->cc,
-            $this->bcc
-        );
-
+        $recipients = array_merge(array($this->to_email), $this->cc, $this->bcc);
         foreach ($recipients as $recipient) {
             fputs($socket, 'RCPT TO: <' . trim($recipient) . ">\r\n");
             $response = $this->readResponse($socket);
@@ -199,11 +216,10 @@ class Mail
             return array('success' => false, 'error' => $this->error);
         }
 
-        // 헤더 구성
-        $headers = $this->buildHeaders();
-        $body = $headers . "\r\n" . $this->content . "\r\n.";
+        // 헤더 + 바디 전송
+        $message = $this->buildMessage();
+        fputs($socket, $message . "\r\n.\r\n");
 
-        fputs($socket, $body . "\r\n");
         $response = $this->readResponse($socket);
         if (substr($response, 0, 3) != '250') {
             fclose($socket);
@@ -218,8 +234,10 @@ class Mail
         return array('success' => true);
     }
 
-    private function buildHeaders()
+    private function buildMessage()
     {
+        $boundary = '----=_Boundary_' . md5(uniqid(time()));
+
         $headers = array();
 
         // From
@@ -246,15 +264,41 @@ class Mail
         // MIME
         $headers[] = 'MIME-Version: 1.0';
 
-        if ($this->is_html) {
-            $headers[] = 'Content-Type: text/html; charset=UTF-8';
+        if (!empty($this->attachments)) {
+            // 첨부파일 있으면 multipart/mixed
+            $headers[] = 'Content-Type: multipart/mixed; boundary="' . $boundary . '"';
+
+            $body = implode("\r\n", $headers) . "\r\n\r\n";
+
+            // 본문 파트
+            $content_type = $this->is_html ? 'text/html' : 'text/plain';
+            $body .= '--' . $boundary . "\r\n";
+            $body .= 'Content-Type: ' . $content_type . '; charset=UTF-8' . "\r\n";
+            $body .= 'Content-Transfer-Encoding: 8bit' . "\r\n\r\n";
+            $body .= $this->content . "\r\n\r\n";
+
+            // 첨부파일 파트
+            foreach ($this->attachments as $attachment) {
+                $body .= '--' . $boundary . "\r\n";
+                $body .= 'Content-Type: ' . $attachment['mime'] . '; name="' . $this->encodeHeader($attachment['filename']) . '"' . "\r\n";
+                $body .= 'Content-Transfer-Encoding: base64' . "\r\n";
+                $body .= 'Content-Disposition: attachment; filename="' . $this->encodeHeader($attachment['filename']) . '"' . "\r\n\r\n";
+                $body .= chunk_split($attachment['data'], 76, "\r\n");
+                $body .= "\r\n";
+            }
+
+            $body .= '--' . $boundary . '--';
+
         } else {
-            $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+            // 첨부파일 없으면 기존 방식
+            $content_type = $this->is_html ? 'text/html' : 'text/plain';
+            $headers[] = 'Content-Type: ' . $content_type . '; charset=UTF-8';
+            $headers[] = 'Content-Transfer-Encoding: 8bit';
+
+            $body = implode("\r\n", $headers) . "\r\n\r\n" . $this->content;
         }
 
-        $headers[] = 'Content-Transfer-Encoding: 8bit';
-
-        return implode("\r\n", $headers);
+        return $body;
     }
 
     private function encodeHeader($text)
@@ -262,15 +306,11 @@ class Mail
         return '=?UTF-8?B?' . base64_encode($text) . '?=';
     }
 
-    /**
-     * SMTP 멀티라인 응답 완전히 읽기
-     */
     private function readResponse($socket)
     {
         $response = '';
         while ($line = fgets($socket, 515)) {
             $response .= $line;
-            // 4번째 문자가 공백이면 마지막 라인
             if (isset($line[3]) && $line[3] == ' ') {
                 break;
             }
@@ -280,16 +320,17 @@ class Mail
 
     private function reset()
     {
-        $this->from_email = null;
-        $this->from_name = null;
-        $this->to_email = null;
-        $this->title = null;
-        $this->content = null;
-        $this->cc = array();
-        $this->bcc = array();
-        $this->is_html = false;
-        $this->error = null;
-        self::$instance = null;
+        $this->from_email  = null;
+        $this->from_name   = null;
+        $this->to_email    = null;
+        $this->title       = null;
+        $this->content     = null;
+        $this->cc          = array();
+        $this->bcc         = array();
+        $this->is_html     = false;
+        $this->attachments = array();
+        $this->error       = null;
+        self::$instance    = null;
     }
 
     public static function getError()
@@ -298,5 +339,3 @@ class Mail
         return $instance->error;
     }
 }
-
-?>
