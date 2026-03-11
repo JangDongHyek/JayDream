@@ -123,7 +123,10 @@ class Lib {
         $logContent .= "\n" . str_repeat("-", 80) . "\n";
 
         // 로그 파일에 추가
-        file_put_contents($logFile, $logContent, FILE_APPEND);
+        $result = file_put_contents($logFile, $logContent, FILE_APPEND);
+        if ($result === false) {
+            Lib::error("writeLog failed: {$logFile}");
+        }
 
         return $logFile; // 로그 파일 경로 반환
     }
@@ -134,7 +137,11 @@ class Lib {
             $jwt = JWT::decode($token, Config::$PASSWORD, array('HS256'));
 
             // 슬래시 제거하고 비교
-            if (rtrim($jwt->iss, '/') !== rtrim(Config::$URL, '/')) {
+            $normalize = function($url) {
+                return rtrim(preg_replace('#^https?://#', '', $url), '/');
+            };
+
+            if ($normalize($jwt->iss) !== $normalize(Config::$URL)) {
                 setcookie("jd_jwt_token", "", time() - (Config::$COOKIE_TIME +100), "/");
                 Lib::error("JWT 발급자가 동일하지않습니다.\n새로고침을 해주세요.");
             }
