@@ -13,22 +13,65 @@ class Lib {
     public static function error($msg) {
         $trace = debug_backtrace();
         $trace = array_reverse($trace);
+
         $er = array(
             "success" => false,
             "message" => $msg
         );
 
-        if(Config::$DEV) {
-            foreach($trace as $index => $t) {
-                $er['file_'.$index] = $t['file'];
-                $er['line_'.$index] = $t['line'];
+        if (Config::$DEV) {
+            foreach ($trace as $index => $t) {
+                $er['file_' . $index] = isset($t['file']) ? $t['file'] : '';
+                $er['line_' . $index] = isset($t['line']) ? $t['line'] : '';
             }
         }
+
+        // DB 에러 로그 저장
+        try {
+            if (Config::$connect) {
+                if (!Config::existsTable("jd_error_log")) {
+                    $schema = require __DIR__ . '/schema/jd_error_log.php';
+                    Config::createTableFromSchema("jd_error_log", $schema);
+                }
+
+                $original_trace = debug_backtrace();
+                $caller_file = isset($original_trace[0]['file']) ? $original_trace[0]['file'] : '';
+                $caller_line = isset($original_trace[0]['line']) ? $original_trace[0]['line'] : 0;
+
+                $url = '';
+                if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
+                    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                        . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                }
+
+                // Session::getAll() 사용
+                $session_data = null;
+                try {
+                    $session_all = Session::getAll();
+                    if ($session_all) {
+                        $session_data = json_encode($session_all, JSON_UNESCAPED_UNICODE);
+                    }
+                } catch (\Exception $e) {}
+
+                $log_model = new Model("jd_error_log");
+                $log_model->insert(array(
+                    'message'    => $msg,
+                    'file'       => $caller_file,
+                    'line'       => $caller_line,
+                    'url'        => $url,
+                    'ip'         => self::getClientIp(),
+                    'session'    => $session_data,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ));
+            }
+        } catch (\Exception $e) {
+            // 로그 저장 실패해도 원래 에러는 출력
+        }
+
         header('Content-Type: application/json; charset=UTF-8');
-        if(Config::$DEV) echo self::jsonEncode($er);
+        if (Config::$DEV) echo self::jsonEncode($er);
         else echo self::jsonEncode(self::encryptAPI($er));
         die();
-        //throw new \Exception($msg);
     }
 
     public static function alert($message, $redirect = null)
@@ -605,10 +648,11 @@ class Lib {
         }
 
         $command = sprintf(
-            'sudo %s certonly --webroot -w %s -d %s --non-interactive --agree-tos -m jangdonghyek@gmail.com',
+            'sudo %s certonly --webroot -w %s -d %s -d %s --non-interactive --agree-tos -m jangdonghyek@gmail.com',
             escapeshellarg($certbot),
             escapeshellarg($webroot),
-            escapeshellarg($domain)
+            escapeshellarg($domain),
+            escapeshellarg('www.' . $domain)
         );
 
         // 테스트 시 활성화

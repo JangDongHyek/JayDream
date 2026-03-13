@@ -15,4 +15,6 @@ return [
 
     "Cloudflare_image_server" => false,  // cloudflare 이미지 저장소 api를 사용한다면 true ? 파일 저장로직에 이미지들이 자동으로 cloudflare에 저장된다
     "JS_image_resizing" => false, // true 이면 image 업로드할때 vue.js/resizeWithPica() 함수 실행됌
+
+    "Mail_Driver" => "server", // 'server' = 자체 SMTP (기존 동작) 'google' = Gmail OAuth2
 ];
