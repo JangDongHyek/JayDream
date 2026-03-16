@@ -8,6 +8,12 @@ use JayDream\Lib;
  * 접속: https://isweb.co.kr/JayDream/provider/google/oauth2.php
  */
 
+//폴더 권한체크 없으면 json 저장안됌
+$token_dir = __DIR__;
+if (!is_writable($token_dir)) {
+    Lib::error("token.json 저장 실패: {$token_dir} 폴더 쓰기 권한 없음. chmod 777 로 변경해주세요.");
+}
+
 $config = require __DIR__ . '/config.php';
 
 define('GOOGLE_CLIENT_ID',     $config['client_id']);

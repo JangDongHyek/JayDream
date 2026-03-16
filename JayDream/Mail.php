@@ -124,6 +124,9 @@ class Mail
         }
 
         $instance->reset();
+
+        if (!$result['success']) Lib::error($result['error']);
+
         return $result;
     }
 

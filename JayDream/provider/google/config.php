@@ -36,5 +36,5 @@ return [
 
     "client_id"     => "",
     "client_secret" => "",
-    "redirect_uri"  => "",
+    "redirect_uri"  => "https://도메인/JayDream/provider/google/oauth2.php",
 ];
