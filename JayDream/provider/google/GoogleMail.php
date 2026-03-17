@@ -8,7 +8,24 @@ namespace JayDream;
  */
 class GoogleMail
 {
-    private static $token_file = __DIR__ . '/token.json';
+    private static $token_file = null;
+    private static $config     = null;
+
+    private static function getConfig()
+    {
+        if (self::$config === null) {
+            self::$config = require __DIR__ . '/config.php';
+        }
+        return self::$config;
+    }
+
+    private static function getTokenFile()
+    {
+        if (self::$token_file === null) {
+            self::$token_file = __DIR__ . '/token.json';
+        }
+        return self::$token_file;
+    }
 
     /**
      * Mail 인스턴스로부터 데이터를 받아 발송
@@ -18,6 +35,7 @@ class GoogleMail
         $data = $mail_instance->getData();
 
         $token_result = self::getAccessToken();
+
         if (!$token_result['success']) {
             return array('success' => false, 'error' => $token_result['error']);
         }
@@ -47,7 +65,7 @@ class GoogleMail
 
     private static function buildRawMail($data)
     {
-        $boundary = '----=_Part_' . md5(uniqid());
+        $boundary       = '----=_Part_' . md5(uniqid());
         $has_attachment = !empty($data['attachments']);
 
         $from = $data['from_name']
@@ -93,21 +111,25 @@ class GoogleMail
 
     private static function getAccessToken()
     {
-        if (!file_exists(self::$token_file)) {
+        $token_file = self::getTokenFile();
+
+        if (!file_exists($token_file)) {
             return array('success' => false, 'error' => 'token.json 없음. /JayDream/provider/google/oauth2.php 먼저 접속하세요.');
         }
 
-        $token   = json_decode(file_get_contents(self::$token_file), true);
+        $token   = json_decode(file_get_contents($token_file), true);
         $expired = !isset($token['access_token']) ||
             (isset($token['created_at']) && (time() - $token['created_at']) > 3500);
 
         if ($expired) {
+            $config = self::getConfig();
+
             $ch = curl_init('https://oauth2.googleapis.com/token');
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
-                'client_id'     => Config::$MAIL_GOOGLE_CLIENT_ID,
-                'client_secret' => Config::$MAIL_GOOGLE_CLIENT_SECRET,
+                'client_id'     => $config['client_id'],
+                'client_secret' => $config['client_secret'],
                 'refresh_token' => $token['refresh_token'],
                 'grant_type'    => 'refresh_token',
             )));
@@ -120,7 +142,7 @@ class GoogleMail
 
             $token['access_token'] = $response['access_token'];
             $token['created_at']   = time();
-            file_put_contents(self::$token_file, json_encode($token));
+            file_put_contents($token_file, json_encode($token));
         }
 
         return array('success' => true, 'access_token' => $token['access_token']);
