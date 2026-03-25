@@ -29,40 +29,55 @@ class Lib {
         // DB 에러 로그 저장
         try {
             if (Config::$connect) {
-                if (!Config::existsTable("jd_error_log")) {
-                    $schema = require __DIR__ . '/schema/jd_error_log.php';
-                    Config::createTableFromSchema("jd_error_log", $schema);
-                }
 
-                $original_trace = debug_backtrace();
-                $caller_file = isset($original_trace[0]['file']) ? $original_trace[0]['file'] : '';
-                $caller_line = isset($original_trace[0]['line']) ? $original_trace[0]['line'] : 0;
+                $skip_messages = [
+                    'JWT 만료됐습니다',
+                    'jwt 토큰이 존재하지않습니다.',
+                ];
 
-                $url = '';
-                if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
-                    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-                        . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-                }
-
-                // Session::getAll() 사용
-                $session_data = null;
-                try {
-                    $session_all = Session::getAll();
-                    if ($session_all) {
-                        $session_data = json_encode($session_all, JSON_UNESCAPED_UNICODE);
+                $is_skip = false;
+                foreach ($skip_messages as $keyword) {
+                    if (strpos($msg, $keyword) !== false) {
+                        $is_skip = true;
+                        break;
                     }
-                } catch (\Exception $e) {}
+                }
 
-                $log_model = new Model("jd_error_log");
-                $log_model->insert(array(
-                    'message'    => $msg,
-                    'file'       => $caller_file,
-                    'line'       => $caller_line,
-                    'url'        => $url,
-                    'ip'         => self::getClientIp(),
-                    'session'    => $session_data,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ));
+                if (!$is_skip) {
+                    if (!Config::existsTable("jd_error_log")) {
+                        $schema = require __DIR__ . '/schema/jd_error_log.php';
+                        Config::createTableFromSchema("jd_error_log", $schema);
+                    }
+
+                    $original_trace = debug_backtrace();
+                    $caller_file = isset($original_trace[0]['file']) ? $original_trace[0]['file'] : '';
+                    $caller_line = isset($original_trace[0]['line']) ? $original_trace[0]['line'] : 0;
+
+                    $url = '';
+                    if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
+                        $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+                            . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                    }
+
+                    $session_data = null;
+                    try {
+                        $session_all = Session::getAll();
+                        if ($session_all) {
+                            $session_data = json_encode($session_all, JSON_UNESCAPED_UNICODE);
+                        }
+                    } catch (\Exception $e) {}
+
+                    $log_model = new Model("jd_error_log");
+                    $log_model->insert(array(
+                        'message'    => $msg,
+                        'file'       => $caller_file,
+                        'line'       => $caller_line,
+                        'url'        => $url,
+                        'ip'         => self::getClientIp(),
+                        'session'    => $session_data,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ));
+                }
             }
         } catch (\Exception $e) {
             // 로그 저장 실패해도 원래 에러는 출력
@@ -646,6 +661,9 @@ class Lib {
                 'output'  => "webroot 경로 없음: $webroot",
             ];
         }
+
+        // 기존 cert 삭제 (실패 무시)
+        exec("sudo -n {$certbot} delete --cert-name " . escapeshellarg($domain) . " --non-interactive 2>&1");
 
         $command = sprintf(
             'sudo %s certonly --webroot -w %s -d %s -d %s --non-interactive --agree-tos -m jangdonghyek@gmail.com',
