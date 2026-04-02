@@ -183,6 +183,29 @@ function vueLoad(app_name) {
 
     app.mixin(protectMixin);
     app.mixin(apiContextMixin);
+
+    const cdnMixin = {
+        mounted() {
+            if (!this.injectUrls || !this.injectUrls.length) return;
+            this.injectUrls.forEach(url => {
+                const ext = url.split('?')[0].split('.').pop().toLowerCase();
+                if (ext === 'css') {
+                    if (document.querySelector(`link[href="${url}"]`)) return;
+                    const el = document.createElement('link');
+                    el.rel  = 'stylesheet';
+                    el.href = url;
+                    document.head.appendChild(el);
+                } else if (ext === 'js') {
+                    if (document.querySelector(`script[src="${url}"]`)) return;
+                    const el = document.createElement('script');
+                    el.src   = url;
+                    document.head.appendChild(el);
+                }
+            });
+        }
+    };
+    app.mixin(cdnMixin);
+
     app.mount(`#${app_name}`); // 특정 DOM에 마운트
     JayDream_vue.push({ app_name, app }); // 배열에 앱 인스턴스 저장
 }

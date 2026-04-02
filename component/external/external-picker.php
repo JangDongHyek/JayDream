@@ -1,8 +1,6 @@
 <?php
 $componentName = str_replace(".php","",basename(__FILE__));
 ?>
-<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/>
 <script type="text/x-template" id="<?=$componentName?>-template">
     <div ref="picker"></div>
 </script>
@@ -18,6 +16,10 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     load : false,
                     component_name : "<?=$componentName?>",
                     component_idx: "",
+                    injectUrls : [
+                        "https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js",
+                        "https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"
+                    ],
 
                     picker : null,
                     color : "",

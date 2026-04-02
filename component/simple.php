@@ -20,6 +20,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     load : false,
                     component_name : "<?=$componentName?>",
                     component_idx: "",
+                    injectUrls : [],
 
                     table : null,
                     row: {},

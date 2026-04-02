@@ -22,6 +22,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     load : false,
                     component_name : "<?=$componentName?>",
                     component_idx: "",
+                    injectUrls : [
+                        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
+                        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"
+                    ],
+
                     isDarkMode: false,
                 };
             },
