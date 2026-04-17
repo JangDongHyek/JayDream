@@ -29,6 +29,17 @@
  *    (최초 1회만 하면 이후 자동 갱신)
  *
  * ================================================================
+ *
+ * [Cloud Translation API 설정]
+ *
+ * 1. API 및 서비스 → 라이브러리 → "Cloud Translation API" 검색 → 사용 클릭
+ *
+ * 2. API 및 서비스 → 사용자 인증 정보 → 사용자 인증 정보 만들기
+ *    → API 키
+ *    - 생성된 키를 translate_api_key에 입력
+ *    - (권장) API 키 제한 → Cloud Translation API 만 허용
+ *
+ * ================================================================
  */
 
 return [
@@ -37,4 +48,7 @@ return [
     "client_id"     => "",
     "client_secret" => "",
     "redirect_uri"  => "https://도메인/JayDream/provider/google/oauth2.php",
+
+    // Cloud Translation API
+    "translate_api_key" => "",
 ];

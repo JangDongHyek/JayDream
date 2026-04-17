@@ -674,7 +674,7 @@ class Lib {
         );
 
         // 테스트 시 활성화
-        $command .= ' --staging';
+        //$command .= ' --staging';
 
         // 강제 발급 시 활성화
         $command .= ' --force-renewal';

@@ -16,10 +16,10 @@
                     <!-- 탭 -->
                     <div class="external-svg-tabs">
                         <button
-                            v-for="tab in tabs" :key="tab.key"
-                            class="external-svg-tab-btn"
-                            :class="{'external-svg-tab-btn-active': currentTab === tab.key}"
-                            @click="selectTab(tab.key)"
+                                v-for="tab in tabs" :key="tab.key"
+                                class="external-svg-tab-btn"
+                                :class="{'external-svg-tab-btn-active': currentTab === tab.key}"
+                                @click="selectTab(tab.key)"
                         >{{ tab.label }}</button>
                     </div>
 
@@ -27,11 +27,11 @@
                     <div class="external-svg-toolbar">
                         <div class="external-svg-search-wrap">
                             <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                v-model="search"
-                                placeholder="검색어를 입력해 주세요."
-                                @input="onSearch"
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    v-model="search"
+                                    placeholder="검색어를 입력해 주세요."
+                                    @input="onSearch"
                             >
                             <i class="glyphicon glyphicon-search external-svg-search-icon"></i>
                         </div>
@@ -47,11 +47,11 @@
                     <!-- 아이콘 그리드 -->
                     <div class="external-svg-grid">
                         <div
-                            v-for="icon in pagedIcons" :key="icon.library + ':' + icon.name"
-                            class="external-svg-grid-item"
-                            :class="{'external-svg-grid-item-active': selectedIcon && selectedIcon.library === icon.library && selectedIcon.name === icon.name}"
-                            @click="selectIcon(icon)"
-                            :title="icon.name"
+                                v-for="icon in pagedIcons" :key="icon.library + ':' + icon.name"
+                                class="external-svg-grid-item"
+                                :class="{'external-svg-grid-item-active': selectedIcon && selectedIcon.library === icon.library && selectedIcon.name === icon.name}"
+                                @click="selectIcon(icon)"
+                                :title="icon.name"
                         >
                             <span v-if="icon.library === 'feather'" v-html="renderFeather(icon.name)"></span>
                             <i v-else-if="icon.library === 'bootstrap'" :class="'bi bi-' + icon.name" :style="{color: iconColor, fontSize: iconSize + 'px'}"></i>
@@ -113,6 +113,13 @@
 
                     page   : 1,
                     perPage: 80,
+
+                    injectUrls: [
+                        'https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css',
+                        'https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css',
+                        'https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css',
+                        'https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js',
+                    ],
                 };
             },
             async created() {
