@@ -71,9 +71,15 @@ class File {
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
         $isImage = in_array(strtolower($ext), $imageExtensions);
 
-        if(Config::$Cloudflare_image_server && $isImage) {
+        $savePosition = isset($obj['save_position']) ? strtolower((string) $obj['save_position']) : '';
+
+        if($savePosition === 'local') {
+            $save_info = self::local_save($file,$ext,$table,$primary);
+        } else if($savePosition === 'cloudflare' && $isImage) {
             $save_info = self::cloudflare_save($file);
-        }else {
+        } else if(Config::$Cloudflare_image_server && $isImage) {
+            $save_info = self::cloudflare_save($file);
+        } else {
             $save_info = self::local_save($file,$ext,$table,$primary);
         }
 

@@ -58,6 +58,13 @@ class Model {
         if(!$this->primary) Lib::error("해당 테이블에 Primary 값이 존재하지않습니다.");
         if($primary_type == "int" && !$this->autoincrement) Lib::error("Primary 타입이 int인데 autoincrement가 설정되어있지않습니다..");
 
+        // sql_mode 체크
+        $sql_mode_result = mysqli_query(Config::$connect, "SELECT @@sql_mode as sql_mode");
+        $sql_mode_row = mysqli_fetch_assoc($sql_mode_result);
+        if(strpos($sql_mode_row['sql_mode'], 'NO_ZERO_DATE') !== false) {
+            Lib::error("MySQL sql_mode에 NO_ZERO_DATE가 활성화되어 있습니다.\n/etc/mysql/mysql.conf.d/mysqld.cnf 에서 sql_mode 설정을 확인하세요.");
+        }
+
         // 테이블 스키마 정보 조회
         $this->schema[$this->table]['columns'] = $this->getColumns($this->table);
         $this->schema[$this->table]['columns_info'] = $this->getColumnsInfo($this->table);

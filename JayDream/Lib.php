@@ -26,6 +26,10 @@ class Lib {
             }
         }
 
+        header('Content-Type: application/json; charset=UTF-8');
+        if (Config::$DEV) echo self::jsonEncode($er);
+        else echo self::jsonEncode(self::encryptAPI($er));
+
         // DB 에러 로그 저장
         try {
             if (Config::$connect) {
@@ -83,9 +87,6 @@ class Lib {
             // 로그 저장 실패해도 원래 에러는 출력
         }
 
-        header('Content-Type: application/json; charset=UTF-8');
-        if (Config::$DEV) echo self::jsonEncode($er);
-        else echo self::jsonEncode(self::encryptAPI($er));
         die();
     }
 

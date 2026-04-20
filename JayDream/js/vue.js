@@ -86,6 +86,11 @@ class JayDreamVue {
     async commonFile(files, obj, key, options = {}) {
         const { permission = [], callback = null, resize = true } = options;
 
+        if (!files || files.length === 0) {
+            this.jd.lib.console(`업로드 파일 선택 취소`);
+            return false;
+        }
+
         if (files.length > 1 && !Array.isArray(obj[key])) {
             obj[key] = [];
         }
@@ -206,11 +211,6 @@ class JayDreamVue {
                     if(callback) {
                         callback();
                     }
-                }
-            } else {
-                obj[key] = '';
-                if(callback) {
-                    callback();
                 }
             }
         }
