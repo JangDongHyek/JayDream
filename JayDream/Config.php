@@ -57,7 +57,7 @@ class Config
         self::initConnect();
 
         self::$ROOT = dirname(__DIR__);
-        $http = 'http' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 's' : '') . '://';
+        $http = self::isHttpsRequest() ? 'https://' : 'http://';
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
         if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
             $host = preg_replace('/:[0-9]+$/', '', $host);
@@ -85,6 +85,33 @@ class Config
     public static function resourcePath()
     {
         return self::$ROOT . '/JayDream/resource';
+    }
+
+    private static function isHttpsRequest()
+    {
+        if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+            return true;
+        }
+
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $forwarded_proto = strtolower(trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]));
+            if ($forwarded_proto === 'https') {
+                return true;
+            }
+        }
+
+        if (!empty($_SERVER['REQUEST_SCHEME']) && strtolower($_SERVER['REQUEST_SCHEME']) === 'https') {
+            return true;
+        }
+
+        if (!empty($_SERVER['HTTP_CF_VISITOR'])) {
+            $cf_visitor = json_decode($_SERVER['HTTP_CF_VISITOR'], true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($cf_visitor['scheme']) && strtolower($cf_visitor['scheme']) === 'https') {
+                return true;
+            }
+        }
+
+        return !empty($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443';
     }
 
     private static function initConnect()

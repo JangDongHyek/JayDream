@@ -4,6 +4,107 @@ function vueLoad(app_name) {
         return false;
     }
 
+    const injectAssetStore = window.JAYDREAM_INJECT_ASSETS || (window.JAYDREAM_INJECT_ASSETS = {});
+
+    const normalizeInjectUrl = (url) => {
+        try {
+            return new URL(url, window.location.href).href;
+        } catch (error) {
+            return url;
+        }
+    };
+
+    const getInjectAssetType = (url) => {
+        try {
+            const pathname = new URL(url, window.location.href).pathname.toLowerCase();
+            if (pathname.endsWith('.css')) return 'css';
+            if (pathname.endsWith('.js')) return 'js';
+        } catch (error) {
+            return '';
+        }
+
+        return '';
+    };
+
+    const loadInjectUrl = (url) => {
+        if (!url) return Promise.resolve(null);
+
+        const normalizedUrl = normalizeInjectUrl(url);
+
+        if (injectAssetStore[normalizedUrl]) {
+            return injectAssetStore[normalizedUrl];
+        }
+
+        const assetType = getInjectAssetType(normalizedUrl);
+        if (!assetType) {
+            return Promise.reject(new Error(`[JayDream] injectUrls는 css 또는 js 파일만 지원합니다. (${url})`));
+        }
+
+        if (assetType === 'css') {
+            const existingLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+                .find(link => link.href === normalizedUrl);
+
+            if (existingLink) {
+                injectAssetStore[normalizedUrl] = Promise.resolve(existingLink);
+                return injectAssetStore[normalizedUrl];
+            }
+
+            injectAssetStore[normalizedUrl] = new Promise((resolve, reject) => {
+                const el = document.createElement('link');
+                el.rel = 'stylesheet';
+                el.href = normalizedUrl;
+                el.onload = () => resolve(el);
+                el.onerror = () => {
+                    delete injectAssetStore[normalizedUrl];
+                    reject(new Error(`[JayDream] CSS 로드 실패: ${normalizedUrl}`));
+                };
+                document.head.appendChild(el);
+            });
+
+            return injectAssetStore[normalizedUrl];
+        }
+
+        const existingScript = Array.from(document.scripts)
+            .find(script => script.src === normalizedUrl);
+
+        if (existingScript) {
+            if (existingScript.dataset.jdLoaded === 'true' || existingScript.readyState === 'complete') {
+                injectAssetStore[normalizedUrl] = Promise.resolve(existingScript);
+                return injectAssetStore[normalizedUrl];
+            }
+
+            injectAssetStore[normalizedUrl] = new Promise((resolve, reject) => {
+                existingScript.addEventListener('load', () => {
+                    existingScript.dataset.jdLoaded = 'true';
+                    resolve(existingScript);
+                }, { once: true });
+                existingScript.addEventListener('error', () => {
+                    delete injectAssetStore[normalizedUrl];
+                    reject(new Error(`[JayDream] Script 로드 실패: ${normalizedUrl}`));
+                }, { once: true });
+            });
+
+            return injectAssetStore[normalizedUrl];
+        }
+
+        injectAssetStore[normalizedUrl] = new Promise((resolve, reject) => {
+            const el = document.createElement('script');
+            el.src = normalizedUrl;
+            el.async = false;
+            el.onload = () => {
+                el.dataset.jdLoaded = 'true';
+                resolve(el);
+            };
+            el.onerror = () => {
+                delete injectAssetStore[normalizedUrl];
+                reject(new Error(`[JayDream] Script 로드 실패: ${normalizedUrl}`));
+            };
+            document.head.appendChild(el);
+        });
+
+        return injectAssetStore[normalizedUrl];
+    };
+
     const app = Vue.createApp({
         data() {
             return JayDream_data;
@@ -25,7 +126,42 @@ function vueLoad(app_name) {
         app.component("draggable", window.vuedraggable);
     }
 
+    app.config.globalProperties.$loadInjectUrls = function (urls = []) {
+        if (!Array.isArray(urls) || !urls.length) {
+            return Promise.resolve([]);
+        }
+
+        return Promise.all(urls.map(loadInjectUrl));
+    };
+
+    app.config.globalProperties.$waitForInjectUrls = function () {
+        return this.__injectUrlsPromise || Promise.resolve([]);
+    };
+
     for (const component of JayDream_components) {
+        if (!component.object.__jdInjectWrapped) {
+            const originalCreated = component.object.created;
+            const originalMounted = component.object.mounted;
+
+            component.object.created = function (...args) {
+                this.__injectUrlsPromise = this.$loadInjectUrls(this.injectUrls);
+
+                if (originalCreated) {
+                    return originalCreated.apply(this, args);
+                }
+            };
+
+            component.object.mounted = async function (...args) {
+                await this.$waitForInjectUrls();
+
+                if (originalMounted) {
+                    return await originalMounted.apply(this, args);
+                }
+            };
+
+            component.object.__jdInjectWrapped = true;
+        }
+
         app.component(component.name,component.object)
     }
 
@@ -186,22 +322,7 @@ function vueLoad(app_name) {
 
     const cdnMixin = {
         mounted() {
-            if (!this.injectUrls || !this.injectUrls.length) return;
-            this.injectUrls.forEach(url => {
-                const ext = url.split('?')[0].split('.').pop().toLowerCase();
-                if (ext === 'css') {
-                    if (document.querySelector(`link[href="${url}"]`)) return;
-                    const el = document.createElement('link');
-                    el.rel  = 'stylesheet';
-                    el.href = url;
-                    document.head.appendChild(el);
-                } else if (ext === 'js') {
-                    if (document.querySelector(`script[src="${url}"]`)) return;
-                    const el = document.createElement('script');
-                    el.src   = url;
-                    document.head.appendChild(el);
-                }
-            });
+            return;
         }
     };
     app.mixin(cdnMixin);
