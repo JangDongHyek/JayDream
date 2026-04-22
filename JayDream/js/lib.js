@@ -3,8 +3,22 @@ class JayDreamLib {
         this.jd = jd;
     }
 
-    isMobile() {
-        return /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    isMobile(mode = "default", breakpoint = 768) {
+        const deviceMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const bodyMobile = !!(document.body && document.body.classList.contains('_mbv'));
+        const viewportMobile = typeof window.matchMedia === "function"
+            ? window.matchMedia(`(max-width: ${breakpoint}px)`).matches
+            : window.innerWidth <= breakpoint;
+
+        if(mode === "device") {
+            return deviceMobile;
+        }
+
+        if(mode === "viewport") {
+            return bodyMobile || viewportMobile;
+        }
+
+        return bodyMobile || viewportMobile || deviceMobile;
     }
 
     async alert(message, options = {}) {
