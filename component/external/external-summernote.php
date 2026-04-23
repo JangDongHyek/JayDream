@@ -22,16 +22,11 @@ $componentName = str_replace(".php","",basename(__FILE__));
                     load : false,
                     component_name : "<?=$componentName?>",
                     component_idx: "",
-                    injectUrls : [
-                        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css",
-                        "https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"
-                    ],
-
-                    isDarkMode: false,
                 };
             },
             async created() {
                 this.component_idx = this.lib.generateUniqueId();
+                this._isDarkMode = false;
             },
             async mounted() {
                 let component = this;
@@ -41,16 +36,17 @@ $componentName = str_replace(".php","",basename(__FILE__));
                 this.$nextTick(() => {
                     $(document).ready(function() {
                         $(`#${component.component_idx}`).summernote({
-                            height: 400,
+                            height: 50,
                             lang: 'ko-KR',
                             toolbar: [
+                                ['fontname', ['fontname']],
                                 ['style', ['style']],
                                 ['font', ['bold', 'underline', 'clear']],
                                 ['fontsize', ['fontsize']],
                                 ['color', ['color']],
                                 ['para', ['paragraph']],
-                                ['insert', ['picture', 'link']],
-                                ['view'],
+                                //['insert', ['picture', 'link']],
+                                ['view',['codeview']],
                                 ['custom', ['bgColorButton', 'darkModeButton', 'customButton']],
                             ],
                             buttons : {
@@ -126,19 +122,28 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                         tooltip: '다크 모드',
                                         container: 'body',
                                         className: 'external-summernote-btn-darkmode',
-                                        click: function() {
-                                            component.isDarkMode = !component.isDarkMode;
+                                        click: function(e) {
+                                            if (e) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }
 
-                                            // note-editor에 다크모드 클래스 토글
-                                            const $editor = $(`#${component.component_idx}`).next('.note-editor');
-                                            $editor.toggleClass('external-summernote-dark');
+                                            const $editor = component.getSummernoteEditor();
+                                            if (!$editor.length) return false;
 
-                                            // 버튼 아이콘 업데이트
-                                            if (component.isDarkMode) {
+                                            component._isDarkMode = !component._isDarkMode;
+                                            $editor.toggleClass('external-summernote-dark', component._isDarkMode);
+
+                                            // note-editor 다크모드와 버튼 상태를 직접 토글
+                                            $(this).toggleClass('active', component._isDarkMode);
+
+                                            if (component._isDarkMode) {
                                                 $(this).html('<i class="fas fa-sun"></i>');
                                             } else {
                                                 $(this).html('<i class="fas fa-moon"></i>');
                                             }
+
+                                            return false;
                                         }
                                     });
 
@@ -151,7 +156,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
                                     var button = ui.button({
                                         contents: '<i class="fas fa-save"></i> 저장',
-                                        tooltip: '내용 저장',
+                                        tooltip: '에디터 저장',
                                         container: 'body',
                                         className: 'external-summernote-btn-save-custom',
                                         click: async function() {
@@ -162,6 +167,7 @@ $componentName = str_replace(".php","",basename(__FILE__));
                                     return button.render();
                                 }
                             },
+                            fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', '맑은 고딕', '궁서', '굴림체', '돋움체', '바탕체'],
                             fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '22', '24', '28', '30', '36', '50', '72'],
                             placeholder: '내용을 입력해 주세요',
                             popover: {
@@ -192,6 +198,9 @@ $componentName = str_replace(".php","",basename(__FILE__));
 
             },
             methods: {
+                getSummernoteEditor() {
+                    return $(`#${this.component_idx}`).next('.note-editor');
+                },
                 async uploadImage(file,editor) {
                     let method = "file_save";
                     let data = {
