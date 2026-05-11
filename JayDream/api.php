@@ -1,4 +1,28 @@
 <?php
+function jd_api_reject($status_code, $message)
+{
+    http_response_code($status_code);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(array(
+        'success' => false,
+        'message' => $message
+    ));
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    jd_api_reject(405, '허용되지 않는 요청입니다.');
+}
+
+if (empty($_POST['_method'])) {
+    jd_api_reject(400, '_method가 존재하지않습니다.');
+}
+
+if (empty($_COOKIE['jd_jwt_token'])) {
+    jd_api_reject(401, "jwt 토큰이 존재하지않습니다.\n새로고침을 해주세요.");
+}
+
+
 require_once __DIR__ . '/require.php';
 
 use JayDream\Lib;

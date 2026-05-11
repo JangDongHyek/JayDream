@@ -5,6 +5,15 @@ use JayDream\Config;
 use JayDream\Lib;
 
 class Model {
+    private static $schema_cache = array(
+        "database" => "",
+        "tables" => null,
+        "primary" => array(),
+        "columns" => array(),
+        "columns_info" => array(),
+        "sql_mode_checked" => false
+    );
+
     public $schema;
     private $table;
 
@@ -31,7 +40,7 @@ class Model {
 
         $this->schema = array(
             "columns" => array(),
-            "tables" => array(),
+            "tables" => self::getTables(),
             "join_columns" => array()
         );
 
@@ -39,14 +48,6 @@ class Model {
         $this->table =$object["table"];
 
         // 테이블 확인
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".Config::$DATABASE."'";
-        $result = @mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect));
-
-        while($row = mysqli_fetch_assoc($result)){
-            array_push($this->schema['tables'], $row['TABLE_NAME']);
-        }
-
         if(!$this->isTable()) Lib::error("Model construct() : 테이블을 찾을수 없습니다.");
 
         // Primary Key 확인
@@ -59,10 +60,13 @@ class Model {
         if($primary_type == "int" && !$this->autoincrement) Lib::error("Primary 타입이 int인데 autoincrement가 설정되어있지않습니다..");
 
         // sql_mode 체크
-        $sql_mode_result = mysqli_query(Config::$connect, "SELECT @@sql_mode as sql_mode");
-        $sql_mode_row = mysqli_fetch_assoc($sql_mode_result);
-        if(strpos($sql_mode_row['sql_mode'], 'NO_ZERO_DATE') !== false) {
-            Lib::error("MySQL sql_mode에 NO_ZERO_DATE가 활성화되어 있습니다.\n/etc/mysql/mysql.conf.d/mysqld.cnf 에서 sql_mode 설정을 확인하세요.");
+        if (!self::$schema_cache['sql_mode_checked']) {
+            $sql_mode_result = mysqli_query(Config::$connect, "SELECT @@sql_mode as sql_mode");
+            $sql_mode_row = mysqli_fetch_assoc($sql_mode_result);
+            if(strpos($sql_mode_row['sql_mode'], 'NO_ZERO_DATE') !== false) {
+                Lib::error("MySQL sql_mode에 NO_ZERO_DATE가 활성화되어 있습니다.\n/etc/mysql/mysql.conf.d/mysqld.cnf 에서 sql_mode 설정을 확인하세요.");
+            }
+            self::$schema_cache['sql_mode_checked'] = true;
         }
 
         // 테이블 스키마 정보 조회
@@ -772,21 +776,69 @@ class Model {
         return array("sql" => $sql);
     }
 
+    private static function prepareSchemaCache() {
+        if (self::$schema_cache["database"] === Config::$DATABASE) return;
+
+        self::$schema_cache = array(
+            "database" => Config::$DATABASE,
+            "tables" => null,
+            "primary" => array(),
+            "columns" => array(),
+            "columns_info" => array(),
+            "sql_mode_checked" => false
+        );
+    }
+
+    private static function getTables() {
+        self::prepareSchemaCache();
+
+        if (self::$schema_cache["tables"] !== null) {
+            return self::$schema_cache["tables"];
+        }
+
+        $sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='".Config::$DATABASE."'";
+        $result = @mysqli_query(Config::$connect, $sql);
+        if(!$result) Lib::error(mysqli_error(Config::$connect));
+
+        $tables = array();
+        while($row = mysqli_fetch_assoc($result)){
+            array_push($tables, $row['TABLE_NAME']);
+        }
+
+        self::$schema_cache["tables"] = $tables;
+
+        return $tables;
+    }
+
     function isTable() {
         return in_array($this->table,$this->schema['tables']);
     }
 
     function getPrimary($table) {
+        self::prepareSchemaCache();
+
+        if (isset(self::$schema_cache["primary"][$table])) {
+            return self::$schema_cache["primary"][$table];
+        }
+
         $sql = "SELECT COLUMN_NAME, EXTRA,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".Config::$DATABASE."' AND TABLE_NAME = '{$table}' AND COLUMN_KEY = 'PRI';";
         $result = @mysqli_query(Config::$connect, $sql);
         if(!$result) Lib::error(mysqli_error(Config::$connect));
 
         if(!$row = mysqli_fetch_assoc($result)) Lib::error("Model getPrimary($table) : Primary 값이 존재하지않습니다 Primary설정을 확인해주세요.");
 
+        self::$schema_cache["primary"][$table] = $row;
+
         return $row;
     }
 
     function getColumnsInfo($table) {
+        self::prepareSchemaCache();
+
+        if (isset(self::$schema_cache["columns_info"][$table])) {
+            return self::$schema_cache["columns_info"][$table];
+        }
+
         $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::$DATABASE."' ";
         $array = array();
 
@@ -796,21 +848,21 @@ class Model {
         while($row = mysqli_fetch_assoc($result)){
             $array[$row['COLUMN_NAME']] = $row;
         }
-
+        self::$schema_cache["columns_info"][$table] = $array;
 
         return $array;
     }
 
     function getColumns($table) {
-        $sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$table}' AND TABLE_SCHEMA='".Config::$DATABASE."' ";
-        $array = array();
+        self::prepareSchemaCache();
 
-        $result = @mysqli_query(Config::$connect, $sql);
-        if(!$result) Lib::error(mysqli_error(Config::$connect));
-
-        while($row = mysqli_fetch_assoc($result)){
-            array_push($array, $row['COLUMN_NAME']);
+        if (isset(self::$schema_cache["columns"][$table])) {
+            return self::$schema_cache["columns"][$table];
         }
+
+        $array = array_keys($this->getColumnsInfo($table));
+
+        self::$schema_cache["columns"][$table] = $array;
 
         return $array;
     }

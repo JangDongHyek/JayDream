@@ -59,8 +59,7 @@ class Config
         self::$ROOT = dirname(__DIR__);
         $http = self::isHttpsRequest() ? 'https://' : 'http://';
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-        if (isset($_SERVER['HTTP_HOST']) && preg_match('/:[0-9]+$/', $host))
-            $host = preg_replace('/:[0-9]+$/', '', $host);
+        
         self::$URL = $http . $host . '/';
 
         // 도메인 구하기
