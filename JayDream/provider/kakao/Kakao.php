@@ -12,7 +12,7 @@ class Kakao {
 
         if(!$config['client_id']) Lib::error("client_id 값이 없습니다.");
         self::$client_id = $config['client_id'];
-        self::$code = $_GET['code'];
+        self::$code = isset($_GET['code']) ? $_GET['code'] : '';
     }
 
     public static function getInfo() {
@@ -23,9 +23,12 @@ class Kakao {
         return Lib::normalizeUrl(Config::$URL . "/JayDream/provider/kakao/oauth/index.php");
     }
 
-    public static function createUri() {
+    public static function createUri($state = '') {
         $url = "https://kauth.kakao.com/oauth/authorize?client_id=" . self::$client_id . "&redirect_uri=" . self::redirectUri();
         $url .= "&response_type=code";
+        if($state !== '') {
+            $url .= "&state=" . rawurlencode($state);
+        }
 
         return $url;
     }

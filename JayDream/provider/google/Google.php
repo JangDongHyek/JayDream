@@ -4,10 +4,11 @@ namespace JayDream;
 use JayDream\Config;
 use JayDream\Lib;
 
-class Naver {
+class Google {
     private static $client_id;
     private static $client_secret;
     private static $code;
+
     public static function init() {
         $config = require __DIR__ . '/config.php';
 
@@ -27,21 +28,25 @@ class Naver {
     }
 
     public static function redirectUri() {
-        return Lib::normalizeUrl(Config::$URL . "/JayDream/provider/naver/oauth/index.php");
+        return Lib::normalizeUrl(Config::$URL . "/JayDream/provider/google/oauth/index.php");
     }
 
     public static function createUri($state = '') {
-        $url = "https://nid.naver.com/oauth2.0/authorize?client_id=" . self::$client_id . "&redirect_uri=" . self::redirectUri();
-        $url .= "&response_type=code";
+        $query = array(
+            "client_id" => self::$client_id,
+            "redirect_uri" => self::redirectUri(),
+            "response_type" => "code",
+            "scope" => "openid email profile",
+        );
         if($state !== '') {
-            $url .= "&state=" . rawurlencode($state);
+            $query['state'] = $state;
         }
 
-        return $url;
+        return "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query($query);
     }
 
     public static function getToken() {
-        if(!self::$code) Lib::error("code 가 존재하지않습니다.");
+        if(!self::$code) Lib::error("code가 존재하지않습니다.");
 
         $data = array(
             "grant_type" => "authorization_code",
@@ -55,18 +60,21 @@ class Naver {
             "data" => $data,
             "http_build" => true,
             "content_type" => "content-type: application/x-www-form-urlencoded",
-
         );
 
-        return Lib::curlRequest("https://nid.naver.com/oauth2.0/token","POST",$options);
+        return Lib::curlRequest("https://oauth2.googleapis.com/token", "POST", $options);
     }
 
     public static function getUser($token) {
+        if(!isset($token['access_token']) || !$token['access_token']) {
+            Lib::error("access_token 값이 없습니다.");
+        }
+
         $options = array(
             "content_type" => "content-type: application/x-www-form-urlencoded",
             "authorization" => "Authorization: Bearer {$token['access_token']}"
         );
 
-        return Lib::curlRequest("https://openapi.naver.com/v1/nid/me","GET",$options);
+        return Lib::curlRequest("https://openidconnect.googleapis.com/v1/userinfo", "GET", $options);
     }
 }
